@@ -1,1 +1,34 @@
- 
+/**
+ * This is SIVF file :) 
+ * 
+ */
+
+{
+    "sizes_wh": ["500", "500"],
+    "color_scheme": "rgb",
+
+    "image": {
+        "layer1": {
+            "circle": {
+                "xy": ["0%", "0%"],
+                "r": "50%",
+                "color": "#ff00aaff"
+            },
+            "square1": {
+                "xy": ["25%", "0"],
+                "side": "25%",
+                "color": "#ff000000"
+            },
+            "square2": {
+                "xy": ["-25%", "0"],
+                "side": "25%",
+                "color": "#ff000000"
+            },
+            "square3": {
+                "xy": ["0", "-25%"],
+                "side": "10%",
+                "color": "#ff000000"
+            }
+        }
+    }
+} 
