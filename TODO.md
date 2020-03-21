@@ -1,6 +1,6 @@
 # TODO:
 
-- atialiasing
+- antialiasing
 
 - add objects:
   - ellipse
