@@ -1,4 +1,6 @@
-#TODO:
+# TODO:
+
+- atialiasing
 
 - add objects:
   - ellipse
