@@ -27,32 +27,38 @@ import utils
 
 
 
-class LayersOverlapType (Enum):
+class ColorsBlendingType (Enum):
     default = 0   # default is overlap
     overlap = 0
-    add_rgb = 1
-    add_argb = 2
-    avg_rgb = 3
-    avg_argb = 4
+    add = 1
+    avg = 2
+
+class AlphaBlendingType (Enum):
+    default = 0   # default is overlap
+    overlap = 0
+    add = 1
+    avg = 2
 
 
 
 
 
 def render_object (pixels: 'nparray2d', color: '(a, r, g, b)', check_func: 'function', obj_n: int,
-        layers_overlap_type: 'LayersOverlapType' = LayersOverlapType.default) -> None:
+        colors_blending_type: 'ColorsBlendingType' = ColorsBlendingType.default,
+        alpha_blending_type: 'AlphaBlendingType' = AlphaBlendingType.default) -> None:
     global canvas_w, canvas_h
-    #print(f'  {canvas_w=}, {canvas_h=}')
 
     a, r, g, b = color[0], color[1], color[2], color[3]
 
-    if layers_overlap_type == LayersOverlapType.default:
+    if colors_blending_type == ColorsBlendingType.overlap and alpha_blending_type == AlphaBlendingType.overlap:
         for x in range(canvas_w):
             for y in range(canvas_h):
                 if check_func(x, y):
                     pixels[y, x] = (r, g, b, a)
+                #print(pixels[y, x], end=' ')
+            #print('\n\n\n')
 
-    elif layers_overlap_type == LayersOverlapType.add_rgb:
+    elif colors_blending_type == ColorsBlendingType.add and alpha_blending_type == AlphaBlendingType.overlap:
         for x in range(canvas_w):
             for y in range(canvas_h):
                 if check_func(x, y):
@@ -65,7 +71,7 @@ def render_object (pixels: 'nparray2d', color: '(a, r, g, b)', check_func: 'func
                 #print(pixels[y, x], end=' ')
             #print('\n\n\n')
 
-    elif layers_overlap_type == LayersOverlapType.add_argb:
+    elif colors_blending_type == ColorsBlendingType.add and alpha_blending_type == AlphaBlendingType.add:
         for x in range(canvas_w):
             for y in range(canvas_h):
                 if check_func(x, y):
@@ -78,7 +84,7 @@ def render_object (pixels: 'nparray2d', color: '(a, r, g, b)', check_func: 'func
                 #print(pixels[y, x], end=' ')
             #print('\n\n\n')
     
-    elif layers_overlap_type == LayersOverlapType.avg_rgb:
+    elif colors_blending_type == ColorsBlendingType.avg and alpha_blending_type == AlphaBlendingType.overlap:
         for x in range(canvas_w):
             for y in range(canvas_h):
                 if check_func(x, y):
@@ -86,12 +92,12 @@ def render_object (pixels: 'nparray2d', color: '(a, r, g, b)', check_func: 'func
                         (pixels[y, x][0]*obj_n+r)//(obj_n+1),
                         (pixels[y, x][1]*obj_n+g)//(obj_n+1),
                         (pixels[y, x][2]*obj_n+b)//(obj_n+1),
-                        a   #255   #(pixels[y, x][0]*layer_n+a)//(layer_n+1)
+                        a
                     )
                 #print(pixels[y, x], end=' ')
             #print('\n\n\n')
 
-    elif layers_overlap_type == LayersOverlapType.avg_argb:
+    elif colors_blending_type == ColorsBlendingType.avg and alpha_blending_type == AlphaBlendingType.avg:
         for x in range(canvas_w):
             for y in range(canvas_h):
                 if check_func(x, y):
@@ -104,7 +110,10 @@ def render_object (pixels: 'nparray2d', color: '(a, r, g, b)', check_func: 'func
                 #print(pixels[y, x], end=' ')
             #print('\n\n\n')
 
-    # end of render_shape
+    else:
+        raise Exception(f'This blending type is unsupported for now: {colors_blending_type = }, {alpha_blending_type = }')
+
+    # end of render_object 
 
 
 
@@ -130,7 +139,8 @@ def prepare_render_object (pixels: 'nparray2d', obj_name: str, obj: dict, obj_nu
             (a, r, g, b),
             lambda x, y: ( (x+tx)**2 + (y+ty)**2 < radius2 ) ^ inverse,
             obj_number,
-            LayersOverlapType.overlap
+            ColorsBlendingType.overlap,
+            AlphaBlendingType.overlap
         )
     
     elif obj_name.startswith('square'):
@@ -145,7 +155,8 @@ def prepare_render_object (pixels: 'nparray2d', obj_name: str, obj: dict, obj_nu
             (a, r, g, b),
             lambda x, y: ( tx_min <= x-canvas_w/2 <= tx_max and ty_min <= y-canvas_h/2 <= ty_max ) ^ inverse,
             obj_number,
-            LayersOverlapType.overlap
+            ColorsBlendingType.overlap,
+            AlphaBlendingType.overlap
         )
 
     #print()
