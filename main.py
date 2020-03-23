@@ -1,5 +1,7 @@
 '''
-This is main file
+SIVF-renderer   v0.2
+
+This is main file of SIVF-renderer
 ''' 
 
 
