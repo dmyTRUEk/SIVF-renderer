@@ -4,6 +4,7 @@ Here my usefull utils
 
 
 
+import time
 import random
 
 
@@ -42,17 +43,17 @@ def min_dist2 (np_point, np_points):
 
 
 
-def time_begin ():
-    global time_begin_0
-    time_begin_0 = time.time()
+def timer_begin ():
+    global timer_begin_0
+    timer_begin_0 = time.time()
 
 
 
-def time_end ():
-    global time_end_0
-    time_end_0 = time.time()
-    print(f'Time elapsed from BEGIN..END = {time_end_0-time_begin_0}')
-    sys.exit(0)
+def timer_end ():
+    global timer_end_0
+    timer_end_0 = time.time()
+    print(f'Time elapsed from BEGIN..END = {timer_end_0-timer_begin_0}')
+    #sys.exit(0)
 
 
 

@@ -15,55 +15,169 @@ import json
 import numpy as np
 from PIL import Image
 
-
-
-from utils import print_all_about
-
+from enum import Enum
 
 
 
+import utils
 
-def render_from_image_code (image_sizes: '(w, h)', color_scheme: str, image_code: dict):
+
+
+
+
+class LayersOverlapType (Enum):
+    default = 0   # default is overlap
+    overlap = 0
+    add_rgb = 1
+    add_argb = 2
+    avg_rgb = 3
+    avg_argb = 4
+
+
+
+
+
+def render_object (pixels: 'nparray2d', color: '(a, r, g, b)', check_func: 'function', obj_n: int,
+        layers_overlap_type: 'LayersOverlapType' = LayersOverlapType.default) -> None:
+    global canvas_w, canvas_h
+    #print(f'  {canvas_w=}, {canvas_h=}')
+
+    a, r, g, b = color[0], color[1], color[2], color[3]
+
+    if layers_overlap_type == LayersOverlapType.default:
+        for x in range(canvas_w):
+            for y in range(canvas_h):
+                if check_func(x, y):
+                    pixels[y, x] = (r, g, b, a)
+
+    elif layers_overlap_type == LayersOverlapType.add_rgb:
+        for x in range(canvas_w):
+            for y in range(canvas_h):
+                if check_func(x, y):
+                    pixels[y, x] = (
+                        pixels[y, x][0] + r,
+                        pixels[y, x][1] + g,
+                        pixels[y, x][2] + b,
+                        a
+                    )
+                #print(pixels[y, x], end=' ')
+            #print('\n\n\n')
+
+    elif layers_overlap_type == LayersOverlapType.add_argb:
+        for x in range(canvas_w):
+            for y in range(canvas_h):
+                if check_func(x, y):
+                    pixels[y, x] = (
+                        pixels[y, x][0] + r,
+                        pixels[y, x][1] + g,
+                        pixels[y, x][2] + b,
+                        pixels[y, x][3] + a,
+                    )
+                #print(pixels[y, x], end=' ')
+            #print('\n\n\n')
+    
+    elif layers_overlap_type == LayersOverlapType.avg_rgb:
+        for x in range(canvas_w):
+            for y in range(canvas_h):
+                if check_func(x, y):
+                    pixels[y, x] = (
+                        (pixels[y, x][0]*obj_n+r)//(obj_n+1),
+                        (pixels[y, x][1]*obj_n+g)//(obj_n+1),
+                        (pixels[y, x][2]*obj_n+b)//(obj_n+1),
+                        a   #255   #(pixels[y, x][0]*layer_n+a)//(layer_n+1)
+                    )
+                #print(pixels[y, x], end=' ')
+            #print('\n\n\n')
+
+    elif layers_overlap_type == LayersOverlapType.avg_argb:
+        for x in range(canvas_w):
+            for y in range(canvas_h):
+                if check_func(x, y):
+                    pixels[y, x] = (
+                        (pixels[y, x][0]*obj_n+r)//(obj_n+1),
+                        (pixels[y, x][1]*obj_n+g)//(obj_n+1),
+                        (pixels[y, x][2]*obj_n+b)//(obj_n+1),
+                        (pixels[y, x][3]*obj_n+a)//(obj_n+1)
+                    )
+                #print(pixels[y, x], end=' ')
+            #print('\n\n\n')
+
+    # end of render_shape
+
+
+
+def prepare_render_object (pixels: 'nparray2d', obj_name: str, obj: dict, obj_number: int) -> None:
+    print(1*'    '+f'rendering {obj_name}:')
+
+    inverse = (obj['inverse'] == 'true') if 'inverse' in obj else False
+    print(2*'    '+f'{inverse = }')
+
+    a, r, g, b = cctargb(obj['color'][1:])
+    print(2*'    '+f'{a=}, {r=}, {g=}, {b=}')
+
+    if obj_name.startswith('circle'):
+        circle_x = cetu(obj['xy'][0])
+        circle_y = -cetu(obj['xy'][1])   # MINUS because pixel grid is growing down, but math coords grows to up
+        radius = cetu(obj['r'])
+
+        tx = -canvas_w/2 - circle_x + 1/2
+        ty = -canvas_h/2 - circle_y + 1/2
+        radius2 = radius**2
+        render_object(
+            pixels,
+            (a, r, g, b),
+            lambda x, y: ( (x+tx)**2 + (y+ty)**2 < radius2 ) ^ inverse,
+            obj_number,
+            LayersOverlapType.overlap
+        )
+    
+    elif obj_name.startswith('square'):
+        square_x = cetu(obj['xy'][0])
+        square_y = -cetu(obj['xy'][1])   # MINUS because pixel grid is growing down, but math coords grows to up
+        side = cetu(obj['side'])
+
+        tx_min = square_x - side/2;   tx_max = square_x + side/2
+        ty_min = square_y - side/2;   ty_max = square_y + side/2
+        render_object(
+            pixels,
+            (a, r, g, b),
+            lambda x, y: ( tx_min <= x-canvas_w/2 <= tx_max and ty_min <= y-canvas_h/2 <= ty_max ) ^ inverse,
+            obj_number,
+            LayersOverlapType.overlap
+        )
+
+    #print()
+
+
+
+def render_from_image_code (image_sizes: '(w, h)', color_scheme: str, image_code: dict) -> None:
     global canvas_w, canvas_h
     canvas_w, canvas_h = image_sizes
 
     pixels = np.zeros((canvas_h, canvas_w, 4), dtype=np.uint8)   # create np array
 
     # unneccesary, because np.zeros already do this :)
-    #pixels[:, :] = (0, 0, 0, 0)   # set default value is all tranparent
+    #pixels[:, :] = (0, 0, 0, 0)   # set default value as tranparent
+
+    obj_number = 0
+
+    utils.timer_begin()
 
     for layer_name in image_code:
-        print(f'rendering {layer_name}')
+        print(f'rendering {layer_name}:')
         layer = image_code[layer_name]
+
         for obj_name in image_code[layer_name]:
-            print(f'  rendering {obj_name}')
+            obj_number += 1
+
             obj = layer[obj_name]
-            if obj_name.startswith('circle'):
-                circle_x = cetu(obj['xy'][0])
-                circle_y = -cetu(obj['xy'][1])   # MINUS because pixel grid is growing down, but math coords grows to up
-                radius = cetu(obj['r'])
-                a, r, g, b = cctargb(obj['color'][1:])
 
-                tx = -canvas_w/2 - circle_x + 1/2
-                ty = -canvas_h/2 - circle_y + 1/2
-                radius2 = radius**2
-                for x in range(canvas_w):
-                    for y in range(canvas_h):
-                        if (x+tx)**2 + (y+ty)**2 < radius2:
-                            pixels[y, x] = (r, g, b, a)
-            
-            elif obj_name.startswith('square'):
-                square_x = cetu(obj['xy'][0])
-                square_y = -cetu(obj['xy'][1])   # MINUS because pixel grid is growing down, but math coords grows to up
-                side = cetu(obj['side'])
-                a, r, g, b = bytes.fromhex(obj['color'][1:])
+            prepare_render_object(pixels, obj_name, obj, obj_number)
+        print()
 
-                tx_min = square_x - side/2;   tx_max = square_x + side/2
-                ty_min = square_y - side/2;   ty_max = square_y + side/2
-                for x in range(canvas_w):
-                    for y in range(canvas_h):
-                        if tx_min <= x-canvas_w/2 <= tx_max and ty_min <= y-canvas_h/2 <= ty_max:
-                            pixels[y, x] = (r, g, b, a)
+    print()
+
+    utils.timer_end()
 
 
     #print(pixels)
@@ -74,10 +188,10 @@ def render_from_image_code (image_sizes: '(w, h)', color_scheme: str, image_code
 
 
 
-def cctargb (color: str):
+def cctargb (color: str) -> '(a, r, g, b)':
     return convert_color_to_argb(color)
 
-def convert_color_to_argb (color: str):
+def convert_color_to_argb (color: str) -> '(a, r, g, b)':
     a, r, g, b = 255, 0, 255, 0
     if len(color) == 8:
         a, r, g, b = bytes.fromhex(color)
@@ -105,6 +219,9 @@ def convert_expression_to_units (value: str):
     elif value.endswith('m'):
         # find if it is m of dm or cm or mm ot nm or other
         raise Exception('m, cm, mm, etc is not supported for now')
+
+    else:
+        raise Exception(f'Unknown dimension in \'{value = }\'')
 
 
 
@@ -252,4 +369,29 @@ if __name__ == '__main__':
 
 
 
+''' SOME OLD CODE PIECES:
 
+for x in range(canvas_w):
+    for y in range(canvas_h):
+        if (x+tx)**2 + (y+ty)**2 < radius2:
+            pixels[y, x] = (r, g, b, a)
+
+
+
+for x in range(canvas_w):
+    for y in range(canvas_h):
+        if tx_min <= x-canvas_w/2 <= tx_max and ty_min <= y-canvas_h/2 <= ty_max:
+            pixels[y, x] = (r, g, b, a)
+
+
+
+
+
+
+
+
+
+
+
+
+'''
