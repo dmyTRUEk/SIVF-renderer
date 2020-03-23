@@ -1,8 +1,6 @@
 # TODO:
 
-- better colors and alpha blending == blending types
-
-- comments in all files
+- write comments in all files: *.py *.md
 
 - antialiasing
 
