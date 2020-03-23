@@ -2,6 +2,8 @@
 
 - better colors and alpha blending == blending types
 
+- comments in all files
+
 - antialiasing
 
 - vars in .sivf
