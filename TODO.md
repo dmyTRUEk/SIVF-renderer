@@ -1,7 +1,5 @@
 # TODO:
 
-- write pros and cons in README.md
-
 - write comments in all files: *.py *.md
 
 - antialiasing
