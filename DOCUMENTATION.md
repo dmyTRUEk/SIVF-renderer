@@ -1,5 +1,84 @@
 # Documentation
 
+
+
+## Entities:
+Entity - layer or shape or other special object
+- l = layer -> container for any entities
+  ```
+  "layer": {
+      <entities separated by comma>
+  }
+  ```
+  or shorter:
+  ```
+  "l": {
+      <entities separated by comma>
+  }
+  ```
+
+- o = object -> container for any figures (group of figures)
+  ```
+  "object": {
+      <figures separated by comma>
+  }
+  ```
+  or shorter:
+  ```
+  "o": {
+      <figures separated by comma>
+  }
+  ```
+
+### Figures:
+Figure - any final entity, which means it cant have children
+- c = circle ->
+  ```
+  "circle": {
+      "xy": ["<x>", "<y>"],
+      "r": "<radius>",
+      "color": "<hex color>"
+  }
+  ```
+  or shorter:
+  ```
+  "c": {
+      "xy": ["<x>", "<y>"],
+      "r": "<radius>",
+      "color": "<hex color>"
+  }
+  ```
+
+- s = square ->
+  ```
+  "square": {
+      "xy": ["<x>", "<y>"],
+      "side": "<side>",
+      "color": "<hex color>"
+  }
+  ```
+  or shorter:
+  ```
+  "square": {
+      "xy": ["<x>", "<y>"],
+      "side": "<side>",
+      "color": "<hex color>"
+  }
+  ```
+
+### Special Entities:
+Special Objects - some very specific and kinda tricky objects with paranormal behavior
+- (soon) r = recursion ->
+  ```
+  "recursion": {
+      "layer": {
+          <>
+      }
+  }
+  ```
+
+
+
 ## Value types:
 - pixels -> `42`
 
