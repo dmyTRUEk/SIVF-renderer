@@ -1,9 +1,5 @@
 # TODO:
 
-- write comments in all files: *.py *.md
-
-- antialiasing
-
 - vars in .sivf
 
 - support nested layers by 'render_entity()' func (entity is layer or object),
@@ -11,7 +7,12 @@
   or 'prepare_render_object()' if it is object
   - rename 'prepare_render_object()' -> 'render_entity()'
 
+- write comments in all files: *.py *.md
+
+- antialiasing
+
 - add entities:
+  - nested layers
   - ellipse
   - rectange
   - line
