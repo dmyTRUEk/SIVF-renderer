@@ -2,7 +2,7 @@
 
 - write pros and cons in README.md
 
-- comments in all files
+- write comments in all files: *.py *.md
 
 - antialiasing
 
