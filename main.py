@@ -28,7 +28,7 @@ from value_converting_funcs import *
 
 
 
-tab = '    '   # using for fancy logs
+tab = '    '   # for fancy logs
 
 
 
