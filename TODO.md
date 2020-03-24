@@ -1,6 +1,6 @@
 # TODO:
 
-- better colors and alpha blending == blending types
+- write pros and cons in README.md
 
 - comments in all files
 
