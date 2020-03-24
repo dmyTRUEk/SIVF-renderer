@@ -5,6 +5,45 @@ SIVF-renderer - open source program for rendering new open source file format: S
 
 
 
+## Pros and Cons: 
+
+### Pros:
+
+- created to be **simple** and **open source**
+
+- while all raster and vector formats uses XML, SIVF uses **JSON**.
+  why? because it is much more readable.
+  look ![here](https://json.org/example.html) for more
+
+- every coordinates (x and y) are **measuring from centre** of the plane,
+  and this is very pleasurably for any scenarios,
+  so, to place circle in centre of the plane all you need is:
+  `"xy": ["0", "0"]`
+
+- support for three main units:
+  - pixels (obviously)
+  - (soon) metrics (m, dm, cm, mm, even nm xD)
+  - and percentage (%) (wow, so gracefully)
+
+- forcely tranparing object, so you can **easely crop** circle (example 2)
+
+- (soon) not only numbers but also **formulas**: 
+  instead of 
+  `"xy": ["70.711%", "2.535cm"]`
+  here you can use
+  `"xy": ["sqrt(2)*50%", "log10(7)*3cm"]`
+  which have benefits of calculating as many digits, as you need
+
+- (soon) custom **antialiasing** (msaa, fxaa, taa, etc.)
+
+### Cons:
+
+- as i developing it for myself, it is very slow growing
+
+- it is very hard to became famous, so big graphics editors will support it not soon...
+
+
+
 ## Example 1: Not smiley face
 ![alt text](https://raw.githubusercontent.com/dmytruek/sivf-renderer/master/image_example_1.png)
 
