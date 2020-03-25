@@ -1,5 +1,5 @@
 '''
-SIVF-renderer   v0.3
+SIVF-renderer   v0.3.1
 
 This is main file of SIVF-renderer
 ''' 
@@ -39,11 +39,35 @@ class ColorBlendingType (Enum):
     add = 1
     avg = 2
 
+    def from_str (s: str) -> 'ColorBlendingType':
+        if s == 'default':
+            return ColorBlendingType.default
+        elif s == 'overlap':
+            return ColorBlendingType.overlap
+        elif s == 'add':
+            return ColorBlendingType.add
+        elif s == 'avg':
+            return ColorBlendingType.avg
+        else:
+            raise Exception(f'Error: Unsupported ColorBlendingType: {s}')
+
 class AlphaBlendingType (Enum):
     default = 0   # default is overlap
     overlap = 0
     add = 1
     avg = 2
+
+    def from_str (s: str) -> 'AlphaBlendingType':
+        if s == 'default':
+            return AlphaBlendingType.default
+        elif s == 'overlap':
+            return AlphaBlendingType.overlap
+        elif s == 'add':
+            return AlphaBlendingType.add
+        elif s == 'avg':
+            return AlphaBlendingType.avg
+        else:
+            raise Exception(f'Error: Unsupported AlphaBlendingType: {s}')
 
 
 
@@ -52,21 +76,23 @@ class AlphaBlendingType (Enum):
 def render_shape (pixels: 'nparray2d', color: '(a, r, g, b)', check_func: 'function', shape_n: int,
         color_blending_type: ColorBlendingType = ColorBlendingType.default,
         alpha_blending_type: AlphaBlendingType = AlphaBlendingType.default) -> None:
-    global canvas_w, canvas_h
+    global canvas_w, canvas_h, tab, tabs
 
     a, r, g, b = color[0], color[1], color[2], color[3]
 
     if color_blending_type == ColorBlendingType.overlap and alpha_blending_type == AlphaBlendingType.overlap:
-        for x in range(canvas_w):
-            for y in range(canvas_h):
+        for y in range(canvas_h):
+            for x in range(canvas_w):
                 if check_func(x, y):
                     pixels[y, x] = (r, g, b, a)
                 #print(pixels[y, x], end=' ')
+            if y % (per_steps := 100) == 0:
+                print((tabs+3)*tab+f'{100*y//canvas_h}%')
             #print('\n\n\n')
 
     elif color_blending_type == ColorBlendingType.add and alpha_blending_type == AlphaBlendingType.overlap:
-        for x in range(canvas_w):
-            for y in range(canvas_h):
+        for y in range(canvas_h):
+            for x in range(canvas_w):
                 if check_func(x, y):
                     pixels[y, x] = (
                         pixels[y, x][0] + r,
@@ -75,11 +101,13 @@ def render_shape (pixels: 'nparray2d', color: '(a, r, g, b)', check_func: 'funct
                         a
                     )
                 #print(pixels[y, x], end=' ')
+            if y % (per_steps := 100) == 0:
+                print((tabs+3)*tab+f'{100*y//canvas_h}%')
             #print('\n\n\n')
 
     elif color_blending_type == ColorBlendingType.add and alpha_blending_type == AlphaBlendingType.add:
-        for x in range(canvas_w):
-            for y in range(canvas_h):
+        for y in range(canvas_h):
+            for x in range(canvas_w):
                 if check_func(x, y):
                     pixels[y, x] = (
                         pixels[y, x][0] + r,
@@ -88,11 +116,29 @@ def render_shape (pixels: 'nparray2d', color: '(a, r, g, b)', check_func: 'funct
                         pixels[y, x][3] + a,
                     )
                 #print(pixels[y, x], end=' ')
+            if y % (per_steps := 100) == 0:
+                print((tabs+3)*tab+f'{100*y//canvas_h}%')
             #print('\n\n\n')
+
+    elif color_blending_type == ColorBlendingType.overlap and alpha_blending_type == AlphaBlendingType.add:
+        for y in range(canvas_h):
+            for x in range(canvas_w):
+                if check_func(x, y):
+                    pixels[y, x] = (
+                        r,
+                        g,
+                        b,
+                        pixels[y, x][3] + a,
+                    )
+                #print(pixels[y, x], end=' ')
+            if y % (per_steps := 100) == 0:
+                print((tabs+3)*tab+f'{100*y//canvas_h}%')
+            #print('\n\n\n')
+
     
     elif color_blending_type == ColorBlendingType.avg and alpha_blending_type == AlphaBlendingType.overlap:
-        for x in range(canvas_w):
-            for y in range(canvas_h):
+        for y in range(canvas_h):
+            for x in range(canvas_w):
                 if check_func(x, y):
                     pixels[y, x] = (
                         (pixels[y, x][0]*shape_n+r)//(shape_n+1),
@@ -101,11 +147,13 @@ def render_shape (pixels: 'nparray2d', color: '(a, r, g, b)', check_func: 'funct
                         a
                     )
                 #print(pixels[y, x], end=' ')
+            if y % (per_steps := 100) == 0:
+                print((tabs+3)*tab+f'{100*y//canvas_h}%')
             #print('\n\n\n')
 
     elif color_blending_type == ColorBlendingType.avg and alpha_blending_type == AlphaBlendingType.avg:
-        for x in range(canvas_w):
-            for y in range(canvas_h):
+        for y in range(canvas_h):
+            for x in range(canvas_w):
                 if check_func(x, y):
                     pixels[y, x] = (
                         (pixels[y, x][0]*shape_n+r)//(shape_n+1),
@@ -114,10 +162,12 @@ def render_shape (pixels: 'nparray2d', color: '(a, r, g, b)', check_func: 'funct
                         (pixels[y, x][3]*shape_n+a)//(shape_n+1)
                     )
                 #print(pixels[y, x], end=' ')
+            if y % (per_steps := 100) == 0:
+                print((tabs+3)*tab+f'{100*y//canvas_h}%')
             #print('\n\n\n')
 
     else:
-        raise Exception(f'This blending type is unsupported for now: {color_blending_type = }, {alpha_blending_type = }')
+        raise Exception(f'Error: This Blending Type Combination is unsupported for now: {color_blending_type = }, {alpha_blending_type = }')
 
     # end of render_object 
 
@@ -125,7 +175,8 @@ def render_shape (pixels: 'nparray2d', color: '(a, r, g, b)', check_func: 'funct
 
 def parse_shape (pixels: 'nparray2d', shape: dict, shape_name: str,
         color_blending_type: ColorBlendingType = ColorBlendingType.default,
-        alpha_blending_type: AlphaBlendingType = AlphaBlendingType.default) -> None:
+        alpha_blending_type: AlphaBlendingType = AlphaBlendingType.default,
+        delta_xy: '(delta_x, delta_y)' = (0, 0)) -> None:
     print((1+tabs)*tab+f'rendering {shape_name}:')
 
     inverse = (shape['inverse'] == 'true') if 'inverse' in shape else False
@@ -134,11 +185,15 @@ def parse_shape (pixels: 'nparray2d', shape: dict, shape_name: str,
     a, r, g, b = cctargb(shape['color'][1:])
     print((2+tabs)*tab+f'{a=}, {r=}, {g=}, {b=}')
 
+    print((2+tabs)*tab+f'{delta_xy = }')
+
     global canvas_wh, shape_number, var
 
-    if shape_name.startswith('circle'):
-        circle_x = cetu(shape['xy'][0], canvas_wh, var)
-        circle_y = -cetu(shape['xy'][1], canvas_wh, var)   # MINUS because pixel grid is growing down, but math coords grows to up
+    # on every Y MINUS because pixel grid is growing down, but math coords grows to up
+
+    if shape_name.startswith('c'):   # circle
+        circle_x = cetu(shape['xy'][0], canvas_wh, var) + delta_xy[0]
+        circle_y = -cetu(shape['xy'][1], canvas_wh, var) + delta_xy[1]
         radius = cetu(shape['r'], canvas_wh, var)
 
         tx = -canvas_w/2 - circle_x + 1/2
@@ -153,9 +208,9 @@ def parse_shape (pixels: 'nparray2d', shape: dict, shape_name: str,
             alpha_blending_type,
         )
     
-    elif shape_name.startswith('square'):
-        square_x = cetu(shape['xy'][0], canvas_wh, var)
-        square_y = -cetu(shape['xy'][1], canvas_wh, var)   # MINUS because pixel grid is growing down, but math coords grows to up
+    elif shape_name.startswith('s'):   # square
+        square_x = cetu(shape['xy'][0], canvas_wh, var) + delta_xy[0]
+        square_y = -cetu(shape['xy'][1], canvas_wh, var) + delta_xy[1]
         side = cetu(shape['side'], canvas_wh, var)
 
         tx_min = square_x - side/2;   tx_max = square_x + side/2
@@ -169,48 +224,59 @@ def parse_shape (pixels: 'nparray2d', shape: dict, shape_name: str,
             alpha_blending_type,
         )
 
+    elif shape_name.startswith('t'):   # triangle
+        def triangle_sign (x1: float, y1: float, x2: float, y2: float, x3: float, y3: float) -> float:
+            return (x1-x3)*(y2-y3) - (x2-x3)*(y1-y3)
+
+        def is_inside_triangle (x: float, y: float, x1: float, y1: float, x2: float, y2: float, x3: float, y3: float) -> bool:
+            d1 = triangle_sign(x, y, x1, y1, x2, y2)
+            d2 = triangle_sign(x, y, x2, y2, x3, y3)
+            d3 = triangle_sign(x, y, x3, y3, x1, y1)
+            #has_neg = (d1 < 0) or (d2 < 0) or (d3 < 0)
+            #has_pos = (d1 > 0) or (d2 > 0) or (d3 > 0)
+            #return not (has_neg and has_pos)
+            return not ( ((d1 < 0) or (d2 < 0) or (d3 < 0)) and ((d1 > 0) or (d2 > 0) or (d3 > 0)) )
+
+        x1 = cetu(shape['xy'][0], canvas_wh, var) + delta_xy[0]
+        y1 = -cetu(shape['xy'][1], canvas_wh, var) + delta_xy[1]
+        x2 = cetu(shape['xy'][2], canvas_wh, var) + delta_xy[0]
+        y2 = -cetu(shape['xy'][3], canvas_wh, var) + delta_xy[1]
+        x3 = cetu(shape['xy'][4], canvas_wh, var) + delta_xy[0]
+        y3 = -cetu(shape['xy'][5], canvas_wh, var) + delta_xy[1]
+
+        tx = -canvas_w/2
+        ty = -canvas_h/2
+
+        render_shape(
+            pixels,
+            (a, r, g, b),
+            lambda x, y: is_inside_triangle(x+tx, y+ty, x1, y1, x2, y2, x3, y3) ^ inverse,
+            shape_number,
+            color_blending_type,
+            alpha_blending_type
+        )
+
     else:
-        raise Exception(f'Unknown shape: {shape = }')
+        raise Exception(f'Unknown shape: {shape = }, {shape_name = }')
 
     # end of parse_shape()
 
 
 
-def parse_entity (pixels: 'nparray2d', entity: dict, entity_name: str = '') -> None:
+def parse_entity (pixels: 'nparray2d', entity: dict, entity_name: str = '', 
+        delta_xy: '(delta_x, delta_y)' = (0, 0)) -> None:
     global tab, tabs, var
 
     for subentity_name in entity:
-        print((tabs)*tab+f'parsing {subentity_name}')
+        print((tabs)*tab+f'parsing {subentity_name}:')
         subentity = entity[subentity_name]
 
         color_blending_type = ColorBlendingType.default
         alpha_blending_type = AlphaBlendingType.default
 
-        if (entity_name == '' or entity_name.startswith('l')) and 'blending' in entity:
-            color_blending_type = entity['blending'][0]
-            alpha_blending_type = entity['blending'][1]
-
-            if color_blending_type == 'default':
-                color_blending_type = ColorBlendingType.default
-            elif color_blending_type == 'overlap':
-                color_blending_type = ColorBlendingType.overlap
-            elif color_blending_type == 'add':
-                color_blending_type = ColorBlendingType.add
-            elif color_blending_type == 'avg':
-                color_blending_type = ColorBlendingType.avg
-            else:
-                raise Exception(f'Unsupported ColorBlendingType: {color_blending_type = }')
-
-            if alpha_blending_type == 'default':
-                alpha_blending_type = AlphaBlendingType.default
-            elif alpha_blending_type == 'overlap':
-                alpha_blending_type = AlphaBlendingType.overlap
-            elif alpha_blending_type == 'add':
-                alpha_blending_type = AlphaBlendingType.add
-            elif alpha_blending_type == 'avg':
-                alpha_blending_type = AlphaBlendingType.avg
-            else:
-                raise Exception(f'Unsupported AlphaBlendingType: {alpha_blending_type = }')
+        if (entity_name == 'image' or entity_name.startswith('l')) and 'blending' in entity:
+            color_blending_type = ColorBlendingType.from_str(entity['blending'][0])
+            alpha_blending_type = AlphaBlendingType.from_str(entity['blending'][1])
 
 
         if subentity_name.startswith('b'):   # blending
@@ -225,6 +291,35 @@ def parse_entity (pixels: 'nparray2d', entity: dict, entity_name: str = '') -> N
             )
             tabs -=1
 
+        elif subentity_name.startswith('m'):   # mesh
+            repeated_layer = subentity['layer']
+            n_xleft_ydown_xright_yup = subentity['n_xleft_ydown_xright_yup']
+            nxyxy = n_xleft_ydown_xright_yup   # for shortenes
+            nxyxy = (
+                int(cetu(nxyxy[0], canvas_wh, var)),
+                int(cetu(nxyxy[1], canvas_wh, var)),
+                int(cetu(nxyxy[2], canvas_wh, var)),
+                int(cetu(nxyxy[3], canvas_wh, var))
+            )
+            delta_xy_str = subentity['delta_xy']
+
+            delta_x = cetu(delta_xy_str[0], canvas_wh, var)
+            delta_y = cetu(delta_xy_str[1], canvas_wh, var)
+
+            tabs += 1
+            for h in range(-nxyxy[1], nxyxy[3]+1):
+                for w in range(-nxyxy[0], nxyxy[2]+1):
+                    print((tabs)*tab+f'parsing mesh[{w}][{h}]:')
+                    tabs += 1
+                    parse_entity(
+                        pixels,
+                        repeated_layer,
+                        'layer',
+                        (w*delta_x, h*delta_y)
+                    )
+                    tabs -= 1
+            tabs -= 1
+
         #elif ...: object or other special entities
 
         else:   # shape
@@ -233,7 +328,8 @@ def parse_entity (pixels: 'nparray2d', entity: dict, entity_name: str = '') -> N
                 subentity,
                 subentity_name,
                 color_blending_type,
-                alpha_blending_type
+                alpha_blending_type,
+                delta_xy
             )
 
         print()
@@ -243,7 +339,7 @@ def parse_entity (pixels: 'nparray2d', entity: dict, entity_name: str = '') -> N
 
 
 
-def render_from_content (content: dict):
+def render_from_content (content: dict) -> None:
     # delete all comments   /* blahblahblah */
     content = re.sub(re.compile('/\*.*?\*/', re.DOTALL), '', content)
 
@@ -297,7 +393,7 @@ def render_from_content (content: dict):
 
 
 
-def render_from_file (file_name: str):
+def render_from_file (file_name: str) -> None:
     print(f'Starting Render \'{file_name}\'\n')
 
     file = open(file_name, 'r')
@@ -312,7 +408,7 @@ def render_from_file (file_name: str):
 
 
 
-def main ():
+def main () -> None:
     argv = sys.argv
     argv.pop(0)
 

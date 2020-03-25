@@ -1,0 +1,36 @@
+/**
+ * This is SIVF file :) 
+ * Example 6
+ */
+
+{
+    "sizes_wh": ["1000", "1000"],
+    "color_scheme": "rgb",
+
+    "vars": {
+        "size": "60%",
+        "n": "3",
+        "offset": "5%"
+    },
+
+    "image": {
+        "layer1": {
+
+            "mesh": {
+                "layer": {
+                    "blending": ["add", "add"],
+                    "triangle": {
+                        "inverse": "true",
+                        "xy": ["-0.5*size", "-0.5*size",
+                            "0", "0.5*size",
+                            "0.5*size", "-0.5*size"],
+                        "color": "#20ff3000"
+                    }
+                },
+                "n_xleft_ydown_xright_yup": ["n", "n", "n", "n"],
+                "delta_xy": ["offset", "offset"]
+            }
+
+        }
+    }
+}

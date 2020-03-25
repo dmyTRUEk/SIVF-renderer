@@ -1,13 +1,7 @@
 # TODO:
 
-- support vars in .sivf
-
-- write comments in all files: *.py *.md
-
-- antialiasing
-
 - add entities:
-  - nested layers
+  - gradient
   - ellipse
   - rectange
   - line
@@ -15,10 +9,14 @@
   - Bezier curve
   - recursion (but specify steps amount)
 
-- objects rotating
+- entities rotating
+
+- write comments in all files: *.py *.md
+
+- antialiasing
 
 - faster rendering
-  - by numpy?
+  - ? by numpy
   - by render function written on C/C++/Rust
 
 

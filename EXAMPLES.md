@@ -1,54 +1,4 @@
-# SIVF-renderer
-SIVF - SImple Vector Format
-
-SIVF-renderer - open source program for rendering new open source file format: SIVF
-
-
-
-## Pros and Cons: 
-
-### Pros:
-
-- Created to be **simple** and **open source**.
-
-- SIVF uses JSON, while all raster and vector formats uses XML.
-  Why json? Because it is much more readable.
-  Look ![here](https://json.org/example.html) for more.
-
-- Every coordinates (x and y) are **measuring from centre** of the plane,
-  and this is very pleasurably for many scenarios,
-  so to place circle in centre of the plane all you need is:
-  ```
-  "circle": {
-      "xy": ["0", "0"],
-      "r": "50%",
-      "color": "#ff00aaff"
-  }
-  ```
-
-- Support for three main units:
-  - Pixels
-  - Percentage (%)
-  - (soon) Metrics (m, cm, mm)
-
-- Forcely transparent object, so you can **easely crop** a circle (example 2, last circle).
-
-- **Vars**: declare vars, and the use it for shape's coords, sizes - etc (example 4).
-
-- **Formulas** and numbers: 
-  Instead of 
-  `"xy": ["70.711%", "2.535cm"]`
-  Here you can use
-  `"xy": ["sqrt(2)*50%", "log10(7)*3cm"]`
-  Which have benefits of calculating as many digits, as you need.
-
-- (soon) Custom **antialiasing** (msaa, fxaa, taa - etc.)
-
-### Cons:
-
-- As I develop the project by myself, so it grows slow.
-
-- It is hard to became popular, so big graphic editors may not support it soon...
+# Examples:
 
 
 
@@ -285,6 +235,90 @@ SIVF file content:
 
 
 
-## More examples ![here](https://raw.githubusercontent.com/dmytruek/sivf-renderer/dev/EXAMPLES.md)
+## Example 5: Overlaping Circles
+![Image example 5](https://raw.githubusercontent.com/dmytruek/sivf-renderer/dev/examples/image_example_5.png)
 
+This strange effect creates because circles are overlaping many times, and color and alpha is adding.
+
+SIVF file content:
+```
+{
+    "sizes_wh": ["1000", "1000"],
+    "color_scheme": "rgb",
+
+    "vars": {
+        "size": "30%",
+        "n": "3",
+        "offset": "10%"
+    },
+
+    "image": {
+        "layer1": {
+
+            "mesh": {
+                "layer": {
+                    "blending": ["add", "add"],
+                    "circle1": {
+                        "xy": ["0", "0"],
+                        "r": "0.5*size",
+                        "color": "#5040ff00"
+                    }
+                    //"triangle": {
+                    //    "inverse": "true",
+                    //    "xy": ["-0.5*_size", "-0.5*_size",
+                    //        "0", "0.5*_size",
+                    //        "0.5*_size", "-0.5*_size"],
+                    //    "color": "#20ff3000"
+                    //}
+                },
+                "n_xleft_ydown_xright_yup": ["n", "n", "n", "n"],
+                "delta_xy": ["offset", "offset"]
+            }
+
+        }
+    }
+}
+```
+
+
+
+## Example 6: Overlaping Triangles
+![Image example 6](https://raw.githubusercontent.com/dmytruek/sivf-renderer/dev/examples/image_example_6.png)
+
+This strange effect creates because circles are overlaping many times, and color and alpha is adding.
+
+SIVF file content:
+```
+{
+    "sizes_wh": ["1000", "1000"],
+    "color_scheme": "rgb",
+
+    "vars": {
+        "size": "60%",
+        "n": "3",
+        "offset": "5%"
+    },
+
+    "image": {
+        "layer1": {
+
+            "mesh": {
+                "layer": {
+                    "blending": ["add", "add"],
+                    "triangle": {
+                        "inverse": "true",
+                        "xy": ["-0.5*size", "-0.5*size",
+                            "0", "0.5*size",
+                            "0.5*size", "-0.5*size"],
+                        "color": "#20ff3000"
+                    }
+                },
+                "n_xleft_ydown_xright_yup": ["n", "n", "n", "n"],
+                "delta_xy": ["offset", "offset"]
+            }
+
+        }
+    }
+}
+```
 

@@ -59,16 +59,51 @@ Shape - any final entity, which means it cant have children
   ```
   or shorter:
   ```
-  "square": {
+  "s": {
       "xy": ["<x>", "<y>"],
       "side": "<side>",
       "color": "<hex color>"
   }
   ```
 
+- (soon) t = triangle ->
+  ```
+  "triangle": {
+      "xy": ["<x1>", "<y1>",
+          "<x2>", "<y2>",
+          "<x3>", "<y3>"],
+      "color": "<hex color>"
+  }
+  ```
+  or shorter:
+  ```
+  "t": {
+      "xy": ["<x1>", "<y1>",
+          "<x2>", "<y2>",
+          "<x3>", "<y3>"],
+      "color": "<hex color>"
+  }
+  ```
+
 ### Special Entities:
 Special Objects - some very specific and kinda tricky objects with paranormal behavior
-- (soon) r = recursion ->
+- (soon) m = mesh (grid) ->
+  ```
+  "mesh": {
+      "layer": {<entities to be repeated>},
+      "n_xleft_ydown_xright_yup": ["5", "5", "5", "5"],
+      "dist_xy": ["10%", "10%"]
+  }
+  ```
+
+- (soon) g = gradient ->
+  ```
+  "gradient": {
+      <smt?>
+  }
+  ```
+
+- (not soon) r = recursion ->
   ```
   "recursion": {
       "layer": {
