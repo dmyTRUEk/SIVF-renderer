@@ -9,42 +9,48 @@ SIVF-renderer - open source program for rendering new open source file format: S
 
 ### Pros:
 
-- created to be **simple** and **open source**
+- Created to be **simple** and **open source**.
 
-- while all raster and vector formats uses XML, SIVF uses **JSON**.
-  why? because it is much more readable.
-  look ![here](https://json.org/example.html) for more
+- SIVF uses JSON, while all raster and vector formats uses XML.
+  Why? Because it is much more readable.
+  Look ![here](https://json.org/example.html) for more.
 
-- every coordinates (x and y) are **measuring from centre** of the plane,
-  and this is very pleasurably for any scenarios,
+- Every coordinates (x and y) are **measuring from centre** of the plane,
+  and this is very pleasurably for many scenarios,
   so, to place circle in centre of the plane all you need is:
-  `"xy": ["0", "0"]`
+  ```
+  "circle": {
+      "xy": ["0%", "0%"],
+      "r": "50%",
+      "color": "#ff00aaff"
+  }
+  ```
 
-- support for three main units:
-  - pixels (obviously)
-  - (soon) metrics (m, dm, cm, mm, even nm xD)
-  - and percentage (%) (wow, so gracefully)
+- Support for three main units:
+  - Pixels
+  - Percentage (%)
+  - (soon) Metrics (m, cm, mm)
 
-- forcely tranparing object, so you can **easely crop** circle (example 2)
+- Forcely transparent object, so you can **easely crop** a circle (example 2, last circle)
 
-- (soon) not only numbers but also **formulas**: 
-  instead of 
+- (soon) Not only numbers but also **formulas**: 
+  Instead of 
   `"xy": ["70.711%", "2.535cm"]`
-  here you can use
+  Here you can use
   `"xy": ["sqrt(2)*50%", "log10(7)*3cm"]`
-  which have benefits of calculating as many digits, as you need
+  Which have benefits of calculating as many digits, as you need.
 
-- (soon) custom **antialiasing** (msaa, fxaa, taa, etc.)
+- (soon) Custom **antialiasing** (msaa, fxaa, taa - etc.)
 
 ### Cons:
 
-- as i developing it for myself, it is very slow growing
+- As I develop the ptoject by myself, so it grows slow
 
-- it is very hard to became famous, so big graphics editors will support it not soon...
+- it is hard to became popular, so big graphic editors may not support it soon...
 
 
 
-## Example 1: Not smiley face
+## Example 1: Not a smiley face
 ![alt text](https://raw.githubusercontent.com/dmytruek/sivf-renderer/master/image_example_1.png)
 
 SIVF file content:
