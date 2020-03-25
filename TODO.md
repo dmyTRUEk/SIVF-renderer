@@ -1,7 +1,5 @@
 # TODO:
 
-- support blending type 'from sivf' instead of 'from code'
-
 - support vars in .sivf
 
 - support nested layers by 'render_entity()' func (entity is layer or object),
