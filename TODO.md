@@ -1,7 +1,5 @@
 # TODO:
 
-- support vars in .sivf
-
 - write comments in all files: *.py *.md
 
 - antialiasing
