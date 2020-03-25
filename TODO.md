@@ -10,11 +10,11 @@
   - Bezier curve
   - recursion (but specify steps amount)
 
+- entities rotating
+
 - write comments in all files: *.py *.md
 
 - antialiasing
-
-- entities rotating
 
 - faster rendering
   - ? by numpy
