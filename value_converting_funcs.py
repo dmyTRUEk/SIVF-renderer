@@ -40,7 +40,7 @@ def convert_expression_to_units (expression: str, canvas_wh: '(canvas_w, canvas_
 
     if expression[-1].isdigit():
         value = eval(expression)
-        return float(expression)
+        return float(value)
     
     elif expression.endswith('%'):
         canvas_w = canvas_wh[0]

@@ -1,7 +1,6 @@
 # TODO:
 
 - add entities:
-  - mesh (grid)
   - gradient
   - ellipse
   - rectange
