@@ -2,9 +2,9 @@
 
 - use `process_entity()` instead of `render_from_image_code()`
 
-- support blending type from sivf instead of code
+- support blending type 'from sivf' instead of 'from code'
 
-- vars in .sivf
+- support vars in .sivf
 
 - support nested layers by 'render_entity()' func (entity is layer or object),
   which recursively calls 'render_entity()' if it is layer, 
