@@ -20,7 +20,7 @@ SIVF-renderer - open source program for rendering new open source file format: S
   so, to place circle in centre of the plane all you need is:
   ```
   "circle": {
-      "xy": ["0%", "0%"],
+      "xy": ["0", "0"],
       "r": "50%",
       "color": "#ff00aaff"
   }
