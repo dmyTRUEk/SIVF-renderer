@@ -238,6 +238,8 @@ SIVF file content:
 ## Example 5: Overlaping Circles
 ![Image example 5](https://raw.githubusercontent.com/dmytruek/sivf-renderer/dev/examples/image_example_5.png)
 
+This strange effect creates because circles are overlaping many times, and color and alpha is adding.
+
 SIVF file content:
 ```
 {
@@ -277,3 +279,46 @@ SIVF file content:
     }
 }
 ```
+
+
+
+## Example 6: Overlaping Triangles
+![Image example 6](https://raw.githubusercontent.com/dmytruek/sivf-renderer/dev/examples/image_example_6.png)
+
+This strange effect creates because circles are overlaping many times, and color and alpha is adding.
+
+SIVF file content:
+```
+{
+    "sizes_wh": ["1000", "1000"],
+    "color_scheme": "rgb",
+
+    "vars": {
+        "size": "60%",
+        "n": "3",
+        "offset": "5%"
+    },
+
+    "image": {
+        "layer1": {
+
+            "mesh": {
+                "layer": {
+                    "blending": ["add", "add"],
+                    "triangle": {
+                        "inverse": "true",
+                        "xy": ["-0.5*size", "-0.5*size",
+                            "0", "0.5*size",
+                            "0.5*size", "-0.5*size"],
+                        "color": "#20ff3000"
+                    }
+                },
+                "n_xleft_ydown_xright_yup": ["n", "n", "n", "n"],
+                "delta_xy": ["offset", "offset"]
+            }
+
+        }
+    }
+}
+```
+
