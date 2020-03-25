@@ -1,5 +1,5 @@
 '''
-SIVF-renderer   v0.2
+SIVF-renderer   v0.3
 
 This is main file of SIVF-renderer
 ''' 
