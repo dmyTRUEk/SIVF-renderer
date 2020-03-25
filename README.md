@@ -99,6 +99,7 @@ SIVF file content:
 
     "image": {
         "layer1": {
+            "blending": ["add", "overlap"],
             "circle1": {
                 "xy": ["-25.981%", "-15%"],
                 "r": "43.589%",
