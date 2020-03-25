@@ -75,6 +75,15 @@ Shape - any final entity, which means it cant have children
       "color": "<hex color>"
   }
   ```
+  or shorter:
+  ```
+  "t": {
+      "xy": ["<x1>", "<y1>",
+          "<x2>", "<y2>",
+          "<x3>", "<y3>"],
+      "color": "<hex color>"
+  }
+  ```
 
 ### Special Entities:
 Special Objects - some very specific and kinda tricky objects with paranormal behavior
