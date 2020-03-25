@@ -1,11 +1,8 @@
 # TODO:
 
-- write comments in all files: *.py *.md
-
-- antialiasing
-
 - add entities:
   - mesh (grid)
+  - gradient
   - ellipse
   - rectange
   - line
@@ -13,10 +10,14 @@
   - Bezier curve
   - recursion (but specify steps amount)
 
-- objects rotating
+- write comments in all files: *.py *.md
+
+- antialiasing
+
+- entities rotating
 
 - faster rendering
-  - by numpy?
+  - ? by numpy
   - by render function written on C/C++/Rust
 
 
