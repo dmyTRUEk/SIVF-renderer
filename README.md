@@ -51,7 +51,7 @@ SIVF-renderer - open source program for rendering new open source file format: S
 
 
 ## Example 1: Not a smiley face
-![alt text](https://raw.githubusercontent.com/dmytruek/sivf-renderer/master/image_example_1.png)
+![Image example 1](https://raw.githubusercontent.com/dmytruek/sivf-renderer/master/examples/image_example_1.png)
 
 SIVF file content:
 ```
@@ -89,7 +89,7 @@ SIVF file content:
 
 
 ## Example 2: RGB logo
-![alt text](https://raw.githubusercontent.com/dmytruek/sivf-renderer/master/image_example_2.png)
+![Image example 2](https://raw.githubusercontent.com/dmytruek/sivf-renderer/master/examples/image_example_2.png)
 
 SIVF file content:
 ```
@@ -129,7 +129,7 @@ SIVF file content:
 
 
 ## Example 3: Handmade recursion of circles and squares
-![alt text](https://raw.githubusercontent.com/dmytruek/sivf-renderer/master/image_example_3.png)
+![Image example 3](https://raw.githubusercontent.com/dmytruek/sivf-renderer/master/examples/image_example_3.png)
 
 SIVF file content:
 ```
