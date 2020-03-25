@@ -1,5 +1,5 @@
 '''
-SIVF-renderer   v0.2
+SIVF-renderer   v0.3
 
 This is main file of SIVF-renderer
 ''' 
@@ -22,37 +22,49 @@ from enum import Enum
 
 
 import utils
+from value_converting_funcs import *
 
 
 
 
 
-class LayersOverlapType (Enum):
+tab = '    '   # for fancy logs
+tabs = 0
+
+
+
+class ColorBlendingType (Enum):
     default = 0   # default is overlap
     overlap = 0
-    add_rgb = 1
-    add_argb = 2
-    avg_rgb = 3
-    avg_argb = 4
+    add = 1
+    avg = 2
+
+class AlphaBlendingType (Enum):
+    default = 0   # default is overlap
+    overlap = 0
+    add = 1
+    avg = 2
 
 
 
 
 
-def render_object (pixels: 'nparray2d', color: '(a, r, g, b)', check_func: 'function', obj_n: int,
-        layers_overlap_type: 'LayersOverlapType' = LayersOverlapType.default) -> None:
+def render_shape (pixels: 'nparray2d', color: '(a, r, g, b)', check_func: 'function', shape_n: int,
+        color_blending_type: ColorBlendingType = ColorBlendingType.default,
+        alpha_blending_type: AlphaBlendingType = AlphaBlendingType.default) -> None:
     global canvas_w, canvas_h
-    #print(f'  {canvas_w=}, {canvas_h=}')
 
     a, r, g, b = color[0], color[1], color[2], color[3]
 
-    if layers_overlap_type == LayersOverlapType.default:
+    if color_blending_type == ColorBlendingType.overlap and alpha_blending_type == AlphaBlendingType.overlap:
         for x in range(canvas_w):
             for y in range(canvas_h):
                 if check_func(x, y):
                     pixels[y, x] = (r, g, b, a)
+                #print(pixels[y, x], end=' ')
+            #print('\n\n\n')
 
-    elif layers_overlap_type == LayersOverlapType.add_rgb:
+    elif color_blending_type == ColorBlendingType.add and alpha_blending_type == AlphaBlendingType.overlap:
         for x in range(canvas_w):
             for y in range(canvas_h):
                 if check_func(x, y):
@@ -65,7 +77,7 @@ def render_object (pixels: 'nparray2d', color: '(a, r, g, b)', check_func: 'func
                 #print(pixels[y, x], end=' ')
             #print('\n\n\n')
 
-    elif layers_overlap_type == LayersOverlapType.add_argb:
+    elif color_blending_type == ColorBlendingType.add and alpha_blending_type == AlphaBlendingType.add:
         for x in range(canvas_w):
             for y in range(canvas_h):
                 if check_func(x, y):
@@ -78,152 +90,151 @@ def render_object (pixels: 'nparray2d', color: '(a, r, g, b)', check_func: 'func
                 #print(pixels[y, x], end=' ')
             #print('\n\n\n')
     
-    elif layers_overlap_type == LayersOverlapType.avg_rgb:
+    elif color_blending_type == ColorBlendingType.avg and alpha_blending_type == AlphaBlendingType.overlap:
         for x in range(canvas_w):
             for y in range(canvas_h):
                 if check_func(x, y):
                     pixels[y, x] = (
-                        (pixels[y, x][0]*obj_n+r)//(obj_n+1),
-                        (pixels[y, x][1]*obj_n+g)//(obj_n+1),
-                        (pixels[y, x][2]*obj_n+b)//(obj_n+1),
-                        a   #255   #(pixels[y, x][0]*layer_n+a)//(layer_n+1)
+                        (pixels[y, x][0]*shape_n+r)//(shape_n+1),
+                        (pixels[y, x][1]*shape_n+g)//(shape_n+1),
+                        (pixels[y, x][2]*shape_n+b)//(shape_n+1),
+                        a
                     )
                 #print(pixels[y, x], end=' ')
             #print('\n\n\n')
 
-    elif layers_overlap_type == LayersOverlapType.avg_argb:
+    elif color_blending_type == ColorBlendingType.avg and alpha_blending_type == AlphaBlendingType.avg:
         for x in range(canvas_w):
             for y in range(canvas_h):
                 if check_func(x, y):
                     pixels[y, x] = (
-                        (pixels[y, x][0]*obj_n+r)//(obj_n+1),
-                        (pixels[y, x][1]*obj_n+g)//(obj_n+1),
-                        (pixels[y, x][2]*obj_n+b)//(obj_n+1),
-                        (pixels[y, x][3]*obj_n+a)//(obj_n+1)
+                        (pixels[y, x][0]*shape_n+r)//(shape_n+1),
+                        (pixels[y, x][1]*shape_n+g)//(shape_n+1),
+                        (pixels[y, x][2]*shape_n+b)//(shape_n+1),
+                        (pixels[y, x][3]*shape_n+a)//(shape_n+1)
                     )
                 #print(pixels[y, x], end=' ')
             #print('\n\n\n')
 
-    # end of render_shape
+    else:
+        raise Exception(f'This blending type is unsupported for now: {color_blending_type = }, {alpha_blending_type = }')
+
+    # end of render_object 
 
 
 
-def prepare_render_object (pixels: 'nparray2d', obj_name: str, obj: dict, obj_number: int) -> None:
-    print(1*'    '+f'rendering {obj_name}:')
+def parse_shape (pixels: 'nparray2d', shape: dict, shape_name: str,
+        color_blending_type: ColorBlendingType = ColorBlendingType.default,
+        alpha_blending_type: AlphaBlendingType = AlphaBlendingType.default) -> None:
+    print((1+tabs)*tab+f'rendering {shape_name}:')
 
-    inverse = (obj['inverse'] == 'true') if 'inverse' in obj else False
-    print(2*'    '+f'{inverse = }')
+    inverse = (shape['inverse'] == 'true') if 'inverse' in shape else False
+    print((2+tabs)*tab+f'{inverse = }')
 
-    a, r, g, b = cctargb(obj['color'][1:])
-    print(2*'    '+f'{a=}, {r=}, {g=}, {b=}')
+    a, r, g, b = cctargb(shape['color'][1:])
+    print((2+tabs)*tab+f'{a=}, {r=}, {g=}, {b=}')
 
-    if obj_name.startswith('circle'):
-        circle_x = cetu(obj['xy'][0])
-        circle_y = -cetu(obj['xy'][1])   # MINUS because pixel grid is growing down, but math coords grows to up
-        radius = cetu(obj['r'])
+    global canvas_wh, shape_number
+
+    if shape_name.startswith('circle'):
+        circle_x = cetu(shape['xy'][0], canvas_wh)
+        circle_y = -cetu(shape['xy'][1], canvas_wh)   # MINUS because pixel grid is growing down, but math coords grows to up
+        radius = cetu(shape['r'], canvas_wh)
 
         tx = -canvas_w/2 - circle_x + 1/2
         ty = -canvas_h/2 - circle_y + 1/2
         radius2 = radius**2
-        render_object(
+        render_shape(
             pixels,
             (a, r, g, b),
             lambda x, y: ( (x+tx)**2 + (y+ty)**2 < radius2 ) ^ inverse,
-            obj_number,
-            LayersOverlapType.overlap
+            shape_number,
+            color_blending_type,
+            alpha_blending_type,
         )
     
-    elif obj_name.startswith('square'):
-        square_x = cetu(obj['xy'][0])
-        square_y = -cetu(obj['xy'][1])   # MINUS because pixel grid is growing down, but math coords grows to up
-        side = cetu(obj['side'])
+    elif shape_name.startswith('square'):
+        square_x = cetu(shape['xy'][0], canvas_wh)
+        square_y = -cetu(shape['xy'][1], canvas_wh)   # MINUS because pixel grid is growing down, but math coords grows to up
+        side = cetu(shape['side'], canvas_wh)
 
         tx_min = square_x - side/2;   tx_max = square_x + side/2
         ty_min = square_y - side/2;   ty_max = square_y + side/2
-        render_object(
+        render_shape(
             pixels,
             (a, r, g, b),
             lambda x, y: ( tx_min <= x-canvas_w/2 <= tx_max and ty_min <= y-canvas_h/2 <= ty_max ) ^ inverse,
-            obj_number,
-            LayersOverlapType.overlap
+            shape_number,
+            color_blending_type,
+            alpha_blending_type,
         )
 
-    #print()
+    # end of parse_shape()
 
 
 
-def render_from_image_code (image_sizes: '(w, h)', color_scheme: str, image_code: dict) -> None:
-    global canvas_w, canvas_h
-    canvas_w, canvas_h = image_sizes
+def parse_entity (pixels: 'nparray2d', entity: dict, entity_name: str = '') -> None:
+    global tab, tabs
+    for subentity_name in entity:
+        print((tabs)*tab+f'parsing {subentity_name}')
+        subentity = entity[subentity_name]
 
-    pixels = np.zeros((canvas_h, canvas_w, 4), dtype=np.uint8)   # create np array
+        color_blending_type = ColorBlendingType.default
+        alpha_blending_type = AlphaBlendingType.default
 
-    # unneccesary, because np.zeros already do this :)
-    #pixels[:, :] = (0, 0, 0, 0)   # set default value as tranparent
+        if (entity_name == '' or entity_name.startswith('l')) and 'blending' in entity:
+            color_blending_type = entity['blending'][0]
+            alpha_blending_type = entity['blending'][1]
 
-    obj_number = 0
+            if color_blending_type == 'default':
+                color_blending_type = ColorBlendingType.default
+            elif color_blending_type == 'overlap':
+                color_blending_type = ColorBlendingType.overlap
+            elif color_blending_type == 'add':
+                color_blending_type = ColorBlendingType.add
+            elif color_blending_type == 'avg':
+                color_blending_type = ColorBlendingType.avg
+            else:
+                raise Exception(f'Unsupported ColorBlendingType: {color_blending_type = }')
 
-    utils.timer_begin()
+            if alpha_blending_type == 'default':
+                alpha_blending_type = AlphaBlendingType.default
+            elif alpha_blending_type == 'overlap':
+                alpha_blending_type = AlphaBlendingType.overlap
+            elif alpha_blending_type == 'add':
+                alpha_blending_type = AlphaBlendingType.add
+            elif alpha_blending_type == 'avg':
+                alpha_blending_type = AlphaBlendingType.avg
+            else:
+                raise Exception(f'Unsupported AlphaBlendingType: {alpha_blending_type = }')
 
-    for layer_name in image_code:
-        print(f'rendering {layer_name}:')
-        layer = image_code[layer_name]
+        if subentity_name.startswith('b'):   # blending
+            pass
 
-        for obj_name in image_code[layer_name]:
-            obj_number += 1
+        elif subentity_name.startswith('l'):   # layer
+            tabs += 1
+            parse_entity(
+                pixels,
+                subentity,
+                subentity_name
+            )
+            tabs -=1
 
-            obj = layer[obj_name]
+        #elif ...: object or other special entities
 
-            prepare_render_object(pixels, obj_name, obj, obj_number)
+        else:   # shape
+            parse_shape(
+                pixels,
+                subentity,
+                subentity_name,
+                color_blending_type,
+                alpha_blending_type
+            )
+
         print()
 
-    print()
+    # end of parse_entity()
 
-    utils.timer_end()
-
-
-    #print(pixels)
-
-    result_image = Image.fromarray(pixels, 'RGBA')
-    result_image.save('image.png')
-    result_image.show()
-
-
-
-def cctargb (color: str) -> '(a, r, g, b)':
-    return convert_color_to_argb(color)
-
-def convert_color_to_argb (color: str) -> '(a, r, g, b)':
-    a, r, g, b = 255, 0, 255, 0
-    if len(color) == 8:
-        a, r, g, b = bytes.fromhex(color)
-
-    return a, r, g, b
-
-
-
-def cetu (value: str):
-    return convert_expression_to_units(value)
-
-def convert_expression_to_units (value: str):
-    '''value could be:
-    - units == pixels (145px)
-    - precents (34%)
-    - m, dm, cm, mm, nm ;)
-    '''
-    if value[-1].isdigit():
-        return float(value)
-    
-    elif value.endswith('%'):
-        global canvas_w, canvas_h
-        return canvas_w * float(value[:-1]) / 100
-
-    elif value.endswith('m'):
-        # find if it is m of dm or cm or mm ot nm or other
-        raise Exception('m, cm, mm, etc is not supported for now')
-
-    else:
-        raise Exception(f'Unknown dimension in \'{value = }\'')
 
 
 
@@ -256,7 +267,28 @@ def render_from_content (content: dict):
 
     #print(f'{image_dict = }\n')
 
-    render_from_image_code(image_sizes, color_scheme, image_dict)
+    global canvas_wh, canvas_w, canvas_h, shape_number
+    canvas_wh = image_sizes
+    canvas_w, canvas_h = canvas_wh
+
+    #render_from_image_code(color_scheme, image_dict)
+
+    pixels = np.zeros((canvas_h, canvas_w, 4), dtype=np.uint8)   # create np array
+
+    # unneccesary, because np.zeros already do this :)
+    #pixels[:, :] = (0, 0, 0, 0)   # set default value as tranparent
+
+    shape_number = 0
+
+    utils.timer_begin()
+    parse_entity(pixels, image_dict)
+    utils.timer_end()
+
+    #print(pixels)
+    result_image = Image.fromarray(pixels, 'RGBA')
+    result_image.save('image.png')
+    result_image.show()
+
 
 
 
@@ -275,40 +307,6 @@ def render_from_file (file_name: str):
 
 
 
-def render_from_random (seed=None):
-    if seed:
-        random.seed(seed)
-
-    content_dict = {
-        'sizes_wh': ['1000', '1000'],
-        'color_scheme': 'rgb'
-    }
-
-    image_dict = {}
-    for i in range(100):
-        image_dict['layer1']
-
-
-
-
-def run_custom ():
-    print('Choose type:\nr) Random\ns) Random with Seed\nb) Back\n')
-    while inputed_text := input():   # input until int and in range 1..max_number
-        if inputed_text == 'r':   # random
-            render_from_random()
-            break
-        elif inputed_text == 's':   # random with seed
-            seed = int(input('Input seed: '))
-            render_from_random(seed)
-            break
-        elif inputed_text == 'b':   # back
-            print()
-            return 'back'
-        else:
-            print('Please choose type:\nr) Random\nrs) Random with Seed\nb) Back\n')
-    
-
-
 def main ():
     argv = sys.argv
     argv.pop(0)
@@ -320,8 +318,7 @@ def main ():
         #print(f'I will open \'{file_to_open}\'')
         render_from_file(file_to_open)
 
-    else:
-        # ask what file you want to open
+    else:   # ask what file you want to open
         path_to_here = '.'
         all_files = [f for f in listdir(path_to_here) if isfile(join(path_to_here, f))]
         all_sivf_files = [f_sivf for f_sivf in all_files if f_sivf.endswith('.sivf')]
@@ -342,10 +339,6 @@ def main ():
                 #print(f'I will open \'{file_to_open}\'')
                 render_from_file(file_to_open)
                 break
-            elif inputed_text == 'c':
-                print()
-                if run_custom() == None:
-                    break
             else:
                 print(f'Please input number in 1..{max_number} to choose file')
         print()
@@ -371,7 +364,14 @@ if __name__ == '__main__':
 
 
 
+
+
+
+
+
 ''' SOME OLD CODE PIECES:
+
+
 
 for x in range(canvas_w):
     for y in range(canvas_h):
@@ -384,6 +384,80 @@ for x in range(canvas_w):
     for y in range(canvas_h):
         if tx_min <= x-canvas_w/2 <= tx_max and ty_min <= y-canvas_h/2 <= ty_max:
             pixels[y, x] = (r, g, b, a)
+
+
+
+def render_from_random (seed=None):
+    if seed:
+        random.seed(seed)
+
+    content_dict = {
+        'sizes_wh': ['1000', '1000'],
+        'color_scheme': 'rgb'
+    }
+
+    image_dict = {}
+    for i in range(100):
+        image_dict['layer1']
+
+def run_custom ():
+    print('Choose type:\nr) Random\ns) Random with Seed\nb) Back\n')
+    while inputed_text := input():   # input until int and in range 1..max_number
+        if inputed_text == 'r':   # random
+            render_from_random()
+            break
+        elif inputed_text == 's':   # random with seed
+            seed = int(input('Input seed: '))
+            render_from_random(seed)
+            break
+        elif inputed_text == 'b':   # back
+            print()
+            return 'back'
+        else:
+            print('Please choose type:\nr) Random\nrs) Random with Seed\nb) Back\n')
+    
+
+
+def render_from_image_code (color_scheme: str, image_code: dict) -> None:
+    global canvas_w, canvas_h
+    pixels = np.zeros((canvas_h, canvas_w, 4), dtype=np.uint8)   # create np array
+
+    # unneccesary, because np.zeros already do this :)
+    #pixels[:, :] = (0, 0, 0, 0)   # set default value as tranparent
+
+    obj_number = 0
+
+    utils.timer_begin()
+
+    for layer_name in image_code:
+        print(f'rendering {layer_name}:')
+        layer = image_code[layer_name]
+
+        for obj_name in image_code[layer_name]:
+            obj_number += 1
+
+            obj = layer[obj_name]
+
+            process_shape(pixels, obj_name, obj, obj_number)
+        print()
+
+    print()
+
+    utils.timer_end()
+
+    #print(pixels)
+
+    result_image = Image.fromarray(pixels, 'RGBA')
+    result_image.save('image.png')
+    result_image.show()
+
+
+
+
+
+
+
+
 
 
 

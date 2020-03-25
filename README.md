@@ -5,7 +5,52 @@ SIVF-renderer - open source program for rendering new open source file format: S
 
 
 
-## Example 1: Not smiley face
+## Pros and Cons: 
+
+### Pros:
+
+- Created to be **simple** and **open source**.
+
+- SIVF uses JSON, while all raster and vector formats uses XML.
+  Why? Because it is much more readable.
+  Look ![here](https://json.org/example.html) for more.
+
+- Every coordinates (x and y) are **measuring from centre** of the plane,
+  and this is very pleasurably for many scenarios,
+  so, to place circle in centre of the plane all you need is:
+  ```
+  "circle": {
+      "xy": ["0", "0"],
+      "r": "50%",
+      "color": "#ff00aaff"
+  }
+  ```
+
+- Support for three main units:
+  - Pixels
+  - Percentage (%)
+  - (soon) Metrics (m, cm, mm)
+
+- Forcely transparent object, so you can **easely crop** a circle (example 2, last circle)
+
+- (soon) Not only numbers but also **formulas**: 
+  Instead of 
+  `"xy": ["70.711%", "2.535cm"]`
+  Here you can use
+  `"xy": ["sqrt(2)*50%", "log10(7)*3cm"]`
+  Which have benefits of calculating as many digits, as you need.
+
+- (soon) Custom **antialiasing** (msaa, fxaa, taa - etc.)
+
+### Cons:
+
+- As I develop the ptoject by myself, so it grows slow
+
+- it is hard to became popular, so big graphic editors may not support it soon...
+
+
+
+## Example 1: Not a smiley face
 ![alt text](https://raw.githubusercontent.com/dmytruek/sivf-renderer/master/image_example_1.png)
 
 SIVF file content:
@@ -54,6 +99,7 @@ SIVF file content:
 
     "image": {
         "layer1": {
+            "blending": ["add", "overlap"],
             "circle1": {
                 "xy": ["-25.981%", "-15%"],
                 "r": "43.589%",
