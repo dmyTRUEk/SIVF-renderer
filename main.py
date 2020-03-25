@@ -29,6 +29,7 @@ from value_converting_funcs import *
 
 
 tab = '    '   # for fancy logs
+tabs = 0
 
 
 
@@ -122,16 +123,16 @@ def render_shape (pixels: 'nparray2d', color: '(a, r, g, b)', check_func: 'funct
 
 
 
-def parse_shape (pixels: 'nparray2d', shape_name: str, shape: dict, shape_number: int) -> None:
-    print(1*tab+f'rendering {shape_name}:')
+def parse_shape (pixels: 'nparray2d', shape_name: str, shape: dict) -> None:
+    print((1+tabs)*tab+f'rendering {shape_name}:')
 
     inverse = (shape['inverse'] == 'true') if 'inverse' in shape else False
-    print(2*tab+f'{inverse = }')
+    print((2+tabs)*tab+f'{inverse = }')
 
     a, r, g, b = cctargb(shape['color'][1:])
-    print(2*tab+f'{a=}, {r=}, {g=}, {b=}')
+    print((2+tabs)*tab+f'{a=}, {r=}, {g=}, {b=}')
 
-    global canvas_wh
+    global canvas_wh, shape_number
 
     if shape_name.startswith('circle'):
         circle_x = cetu(shape['xy'][0], canvas_wh)
@@ -170,45 +171,22 @@ def parse_shape (pixels: 'nparray2d', shape_name: str, shape: dict, shape_number
 
 
 
-def process_entity (pixels: 'nparray2d', entity: 'entity') -> None:
-    pass
+def parse_entity (pixels: 'nparray2d', entity: 'dict, entity') -> None:
+    global tab, tabs
+    for subentity_name in entity:
+        print((tabs)*tab+f'parsing {subentity_name}')
+        subentity = entity[subentity_name]
 
+        if subentity_name.startswith('l'):   # layer
+            tabs += 1
+            parse_entity(pixels, subentity)
+            tabs -=1
 
+        else:   # shape
+            parse_shape(pixels, subentity_name, subentity)
 
-def render_from_image_code (color_scheme: str, image_code: dict) -> None:
-    global canvas_w, canvas_h
-
-    pixels = np.zeros((canvas_h, canvas_w, 4), dtype=np.uint8)   # create np array
-
-    # unneccesary, because np.zeros already do this :)
-    #pixels[:, :] = (0, 0, 0, 0)   # set default value as tranparent
-
-    obj_number = 0
-
-    utils.timer_begin()
-
-    for layer_name in image_code:
-        print(f'rendering {layer_name}:')
-        layer = image_code[layer_name]
-
-        for obj_name in image_code[layer_name]:
-            obj_number += 1
-
-            obj = layer[obj_name]
-
-            parse_shape(pixels, obj_name, obj, obj_number)
         print()
 
-    print()
-
-    utils.timer_end()
-
-
-    #print(pixels)
-
-    result_image = Image.fromarray(pixels, 'RGBA')
-    result_image.save('image.png')
-    result_image.show()
 
 
 
@@ -241,11 +219,28 @@ def render_from_content (content: dict):
 
     #print(f'{image_dict = }\n')
 
-    global canvas_wh, canvas_w, canvas_h
+    global canvas_wh, canvas_w, canvas_h, shape_number
     canvas_wh = image_sizes
     canvas_w, canvas_h = canvas_wh
 
-    render_from_image_code(color_scheme, image_dict)
+    #render_from_image_code(color_scheme, image_dict)
+
+    pixels = np.zeros((canvas_h, canvas_w, 4), dtype=np.uint8)   # create np array
+
+    # unneccesary, because np.zeros already do this :)
+    #pixels[:, :] = (0, 0, 0, 0)   # set default value as tranparent
+
+    shape_number = 0
+
+    utils.timer_begin()
+    parse_entity(pixels, image_dict)
+    utils.timer_end()
+
+    #print(pixels)
+    result_image = Image.fromarray(pixels, 'RGBA')
+    result_image.save('image.png')
+    result_image.show()
+
 
 
 
@@ -373,6 +368,50 @@ def run_custom ():
         else:
             print('Please choose type:\nr) Random\nrs) Random with Seed\nb) Back\n')
     
+
+
+def render_from_image_code (color_scheme: str, image_code: dict) -> None:
+    global canvas_w, canvas_h
+    pixels = np.zeros((canvas_h, canvas_w, 4), dtype=np.uint8)   # create np array
+
+    # unneccesary, because np.zeros already do this :)
+    #pixels[:, :] = (0, 0, 0, 0)   # set default value as tranparent
+
+    obj_number = 0
+
+    utils.timer_begin()
+
+    for layer_name in image_code:
+        print(f'rendering {layer_name}:')
+        layer = image_code[layer_name]
+
+        for obj_name in image_code[layer_name]:
+            obj_number += 1
+
+            obj = layer[obj_name]
+
+            process_shape(pixels, obj_name, obj, obj_number)
+        print()
+
+    print()
+
+    utils.timer_end()
+
+    #print(pixels)
+
+    result_image = Image.fromarray(pixels, 'RGBA')
+    result_image.save('image.png')
+    result_image.show()
+
+
+
+
+
+
+
+
+
+
 
 
 
