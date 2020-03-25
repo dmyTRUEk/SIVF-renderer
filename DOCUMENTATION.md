@@ -4,7 +4,7 @@
 
 ## Entities:
 Entity - layer or shape or other special object
-- l = layer -> container for any entities
+- l = layer -> container for any entities (even layer)
   ```
   "layer": {
       <entities separated by comma>
@@ -17,7 +17,7 @@ Entity - layer or shape or other special object
   }
   ```
 
-- o = object -> container for any figures (group of figures)
+- o = object -> container for any shapes (group of shapes)
   ```
   "object": {
       <figures separated by comma>
@@ -30,8 +30,8 @@ Entity - layer or shape or other special object
   }
   ```
 
-### Figures:
-Figure - any final entity, which means it cant have children
+### Shape:
+Shape - any final entity, which means it cant have children
 - c = circle ->
   ```
   "circle": {
@@ -72,7 +72,12 @@ Special Objects - some very specific and kinda tricky objects with paranormal be
   ```
   "recursion": {
       "layer": {
-          <>
+          <objects to be recursed>
+      },
+      "depth": "<times it be repeated>",
+      "delta_scale": "<delta scale on every step>",
+      "changing_vars": {
+          <here is vars, that will be changed, for example color, x, y>
       }
   }
   ```
