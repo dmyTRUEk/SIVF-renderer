@@ -8,9 +8,9 @@
     "color_scheme": "rgb",
 
     "vars": {
-        "size": "30%",
+        "size": "60%",
         "n": "3",
-        "offset": "10%"
+        "offset": "5%"
     },
 
     "image": {
@@ -19,10 +19,12 @@
             "mesh": {
                 "layer": {
                     "blending": ["add", "add"],
-                    "circle1": {
-                        "xy": ["0", "0"],
-                        "r": "0.5*size",
-                        "color": "#5040ff00"
+                    "triangle": {
+                        "inverse": "true",
+                        "xy": ["-0.5*size", "-0.5*size",
+                            "0", "0.5*size",
+                            "0.5*size", "-0.5*size"],
+                        "color": "#20ff3000"
                     }
                 },
                 "n_xleft_ydown_xright_yup": ["n", "n", "n", "n"],
