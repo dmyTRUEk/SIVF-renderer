@@ -33,7 +33,9 @@ SIVF-renderer - open source program for rendering new open source file format: S
 
 - Forcely transparent object, so you can **easely crop** a circle (example 2, last circle)
 
-- (soon) Not only numbers but also **formulas**: 
+- Vars: declare vars, and the use it for shape's coords, sizes - etc (example 4)
+
+- **Formulas** and numbers: 
   Instead of 
   `"xy": ["70.711%", "2.535cm"]`
   Here you can use
@@ -204,4 +206,79 @@ SIVF file content:
         "layer3": {
             ...
         }
+```
+
+
+
+## Example 4: Vars in Action
+![Image example 4](https://raw.githubusercontent.com/dmytruek/sivf-renderer/master/examples/image_example_4.png)
+
+So: 
+- changing `shape_pos` affects on all shapes' distances from centre,
+- and changing `shape_size` affects on all shapes' size (square->side, circle->radius)
+- and changing `circle_zoom` affects on how much every circle bigger then square
+
+SIVF file content:
+```
+{
+    "sizes_wh": ["600", "600"],
+    "color_scheme": "rgb",
+
+    "vars": {
+        "shape_pos": "18",
+        "shape_size": "30",
+
+        "circle_zoom": "0.8"
+    },
+
+    "image": {
+        "layer1": {
+            "blending": ["overlap", "overlap"],
+
+            "square1": {
+                "xy": ["shape_pos %", "shape_pos %"],
+                "side": "shape_size %",
+                "color": "#ff000000"
+            },
+            "circle1": {
+                "xy": ["shape_pos %", "shape_pos %"],
+                "r": "circle_zoom*shape_size/2 %",
+                "color": "#ffffffff"
+            },
+
+            "square2": {
+                "xy": ["-shape_pos %", "shape_pos %"],
+                "side": "shape_size %",
+                "color": "#ff000000"
+            },
+            "circle2": {
+                "xy": ["-shape_pos %", "shape_pos %"],
+                "r": "circle_zoom*shape_size/2 %",
+                "color": "#ffffffff"
+            },
+
+            "square3": {
+                "xy": ["-shape_pos %", "-shape_pos %"],
+                "side": "shape_size %",
+                "color": "#ff000000"
+            },
+            "circle3": {
+                "xy": ["-shape_pos %", "-shape_pos %"],
+                "r": "circle_zoom*shape_size/2 %",
+                "color": "#ffffffff"
+            },
+
+            "square4": {
+                "xy": ["shape_pos %", "-shape_pos %"],
+                "side": "shape_size %",
+                "color": "#ff000000"
+            },
+            "circle4": {
+                "xy": ["shape_pos %", "-shape_pos %"],
+                "r": "circle_zoom*shape_size/2 %",
+                "color": "#ffffffff"
+            }
+        }
+    }
+}
 ```
