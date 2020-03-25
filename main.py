@@ -1,5 +1,5 @@
 '''
-SIVF-renderer   v0.3.1file:///home/myshko/Dropbox/Code/python3/SIVF-renderer/file_6.sivf
+SIVF-renderer   v0.3.1
 
 This is main file of SIVF-renderer
 ''' 
