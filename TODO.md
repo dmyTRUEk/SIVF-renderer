@@ -5,7 +5,7 @@
 - antialiasing
 
 - add entities:
-  - nested layers
+  - grid
   - ellipse
   - rectange
   - line
