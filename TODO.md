@@ -5,7 +5,7 @@
 - antialiasing
 
 - add entities:
-  - grid
+  - mesh (grid)
   - ellipse
   - rectange
   - line
