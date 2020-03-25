@@ -134,12 +134,12 @@ def parse_shape (pixels: 'nparray2d', shape: dict, shape_name: str,
     a, r, g, b = cctargb(shape['color'][1:])
     print((2+tabs)*tab+f'{a=}, {r=}, {g=}, {b=}')
 
-    global canvas_wh, shape_number
+    global canvas_wh, shape_number, var
 
     if shape_name.startswith('circle'):
-        circle_x = cetu(shape['xy'][0], canvas_wh)
-        circle_y = -cetu(shape['xy'][1], canvas_wh)   # MINUS because pixel grid is growing down, but math coords grows to up
-        radius = cetu(shape['r'], canvas_wh)
+        circle_x = cetu(shape['xy'][0], canvas_wh, var)
+        circle_y = -cetu(shape['xy'][1], canvas_wh, var)   # MINUS because pixel grid is growing down, but math coords grows to up
+        radius = cetu(shape['r'], canvas_wh, var)
 
         tx = -canvas_w/2 - circle_x + 1/2
         ty = -canvas_h/2 - circle_y + 1/2
@@ -154,9 +154,9 @@ def parse_shape (pixels: 'nparray2d', shape: dict, shape_name: str,
         )
     
     elif shape_name.startswith('square'):
-        square_x = cetu(shape['xy'][0], canvas_wh)
-        square_y = -cetu(shape['xy'][1], canvas_wh)   # MINUS because pixel grid is growing down, but math coords grows to up
-        side = cetu(shape['side'], canvas_wh)
+        square_x = cetu(shape['xy'][0], canvas_wh, var)
+        square_y = -cetu(shape['xy'][1], canvas_wh, var)   # MINUS because pixel grid is growing down, but math coords grows to up
+        side = cetu(shape['side'], canvas_wh, var)
 
         tx_min = square_x - side/2;   tx_max = square_x + side/2
         ty_min = square_y - side/2;   ty_max = square_y + side/2
@@ -169,12 +169,16 @@ def parse_shape (pixels: 'nparray2d', shape: dict, shape_name: str,
             alpha_blending_type,
         )
 
+    else:
+        raise Exception(f'Unknown shape: {shape = }')
+
     # end of parse_shape()
 
 
 
 def parse_entity (pixels: 'nparray2d', entity: dict, entity_name: str = '') -> None:
-    global tab, tabs
+    global tab, tabs, var
+
     for subentity_name in entity:
         print((tabs)*tab+f'parsing {subentity_name}')
         subentity = entity[subentity_name]
@@ -207,6 +211,7 @@ def parse_entity (pixels: 'nparray2d', entity: dict, entity_name: str = '') -> N
                 alpha_blending_type = AlphaBlendingType.avg
             else:
                 raise Exception(f'Unsupported AlphaBlendingType: {alpha_blending_type = }')
+
 
         if subentity_name.startswith('b'):   # blending
             pass
@@ -267,11 +272,11 @@ def render_from_content (content: dict):
 
     #print(f'{image_dict = }\n')
 
-    global canvas_wh, canvas_w, canvas_h, shape_number
+    global canvas_wh, canvas_w, canvas_h, shape_number, var
     canvas_wh = image_sizes
     canvas_w, canvas_h = canvas_wh
 
-    #render_from_image_code(color_scheme, image_dict)
+    var = content_dict['vars'] if 'vars' in content_dict else {}
 
     pixels = np.zeros((canvas_h, canvas_w, 4), dtype=np.uint8)   # create np array
 
@@ -281,7 +286,7 @@ def render_from_content (content: dict):
     shape_number = 0
 
     utils.timer_begin()
-    parse_entity(pixels, image_dict)
+    parse_entity(pixels, image_dict, '')
     utils.timer_end()
 
     #print(pixels)
@@ -417,6 +422,8 @@ def run_custom ():
             print('Please choose type:\nr) Random\nrs) Random with Seed\nb) Back\n')
     
 
+
+render_from_image_code(color_scheme, image_dict)
 
 def render_from_image_code (color_scheme: str, image_code: dict) -> None:
     global canvas_w, canvas_h

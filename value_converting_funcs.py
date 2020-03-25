@@ -4,6 +4,12 @@ This file contains all functions, responsible for value convertations
 
 
 
+from math import *
+
+
+
+
+
 def cctargb (color: str) -> '(a, r, g, b)':
     return convert_color_to_argb(color)
 
@@ -17,29 +23,37 @@ def convert_color_to_argb (color: str) -> '(a, r, g, b)':
 
 
 
-def cetu (value: str, canvas_wh: '(canvas_w, canvas_h)'):
-    return convert_expression_to_units(value, canvas_wh)
+def cetu (expression: str, canvas_wh: '(canvas_w, canvas_h)', var: dict = {}):
+    return convert_expression_to_units(expression, canvas_wh, var)
 
-def convert_expression_to_units (value: str, canvas_wh: '(canvas_w, canvas_h)'):
+def convert_expression_to_units (expression: str, canvas_wh: '(canvas_w, canvas_h)', var: dict = {}):
     '''value could be:
     - units == pixels (145px)
     - precents (34%)
     - m, dm, cm, mm, nm ;)
     '''
-    if value[-1].isdigit():
-        return float(value)
+    #print(f'{var = }')
+    #print(f'{expression = }')
+    for var_name in var:
+         expression = expression.replace(var_name, var[var_name])
+    #print(f'{expression = }\n')
+
+    if expression[-1].isdigit():
+        value = eval(expression)
+        return float(expression)
     
-    elif value.endswith('%'):
+    elif expression.endswith('%'):
         canvas_w = canvas_wh[0]
         canvas_h = canvas_wh[1]
-        return canvas_h * float(value[:-1]) / 100
+        value = eval(expression[:-1])
+        return canvas_h * float(value) / 100
 
-    elif value.endswith('m'):
+    elif expression.endswith('m'):
         # find if it is m of dm or cm or mm ot nm or other
         raise Exception('m, cm, mm, etc is not supported for now')
 
     else:
-        raise Exception(f'Unknown dimension in \'{value = }\'')
+        raise Exception(f'Unknown dimension in {expression = }')
 
 
 
