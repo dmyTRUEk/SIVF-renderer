@@ -236,7 +236,7 @@ SIVF file content:
 
 
 ## Example 5: Overlaping Circles
-![Image example 5](https://raw.githubusercontent.com/dmytruek/sivf-renderer/tree/dev/examples/image_example_6.png)
+![Image example 5](https://raw.githubusercontent.com/dmytruek/sivf-renderer/dev/examples/image_example_5.png)
 
 SIVF file content:
 ```
