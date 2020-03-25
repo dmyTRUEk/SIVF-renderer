@@ -1,0 +1,66 @@
+/**
+ * This is SIVF file :) 
+ * Example 4
+ */
+
+{
+    "sizes_wh": ["600", "600"],
+    "color_scheme": "rgb",
+
+    "vars": {
+        "shape_pos": "18",
+        "shape_size": "30",
+
+        "circle_zoom": "0.8"
+    },
+
+    "image": {
+        "layer1": {
+            "blending": ["overlap", "overlap"],
+
+            "square1": {
+                "xy": ["shape_pos %", "shape_pos %"],
+                "side": "shape_size %",
+                "color": "#ff000000"
+            },
+            "circle1": {
+                "xy": ["shape_pos %", "shape_pos %"],
+                "r": "circle_zoom*shape_size/2 %",
+                "color": "#ffffffff"
+            },
+
+            "square2": {
+                "xy": ["-shape_pos %", "shape_pos %"],
+                "side": "shape_size %",
+                "color": "#ff000000"
+            },
+            "circle2": {
+                "xy": ["-shape_pos %", "shape_pos %"],
+                "r": "circle_zoom*shape_size/2 %",
+                "color": "#ffffffff"
+            },
+
+            "square3": {
+                "xy": ["-shape_pos %", "-shape_pos %"],
+                "side": "shape_size %",
+                "color": "#ff000000"
+            },
+            "circle3": {
+                "xy": ["-shape_pos %", "-shape_pos %"],
+                "r": "circle_zoom*shape_size/2 %",
+                "color": "#ffffffff"
+            },
+
+            "square4": {
+                "xy": ["shape_pos %", "-shape_pos %"],
+                "side": "shape_size %",
+                "color": "#ff000000"
+            },
+            "circle4": {
+                "xy": ["shape_pos %", "-shape_pos %"],
+                "r": "circle_zoom*shape_size/2 %",
+                "color": "#ffffffff"
+            }
+        }
+    }
+}
