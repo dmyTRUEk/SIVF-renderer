@@ -12,12 +12,12 @@ SIVF-renderer - open source program for rendering new open source file format: S
 - Created to be **simple** and **open source**.
 
 - SIVF uses JSON, while all raster and vector formats uses XML.
-  Why? Because it is much more readable.
+  Why json? Because it is much more readable.
   Look ![here](https://json.org/example.html) for more.
 
 - Every coordinates (x and y) are **measuring from centre** of the plane,
   and this is very pleasurably for many scenarios,
-  so, to place circle in centre of the plane all you need is:
+  so to place circle in centre of the plane all you need is:
   ```
   "circle": {
       "xy": ["0", "0"],
@@ -31,9 +31,9 @@ SIVF-renderer - open source program for rendering new open source file format: S
   - Percentage (%)
   - (soon) Metrics (m, cm, mm)
 
-- Forcely transparent object, so you can **easely crop** a circle (example 2, last circle)
+- Forcely transparent object, so you can **easely crop** a circle (example 2, last circle).
 
-- Vars: declare vars, and the use it for shape's coords, sizes - etc (example 4)
+- **Vars**: declare vars, and the use it for shape's coords, sizes - etc (example 4).
 
 - **Formulas** and numbers: 
   Instead of 
@@ -46,9 +46,9 @@ SIVF-renderer - open source program for rendering new open source file format: S
 
 ### Cons:
 
-- As I develop the ptoject by myself, so it grows slow
+- As I develop the project by myself, so it grows slow.
 
-- it is hard to became popular, so big graphic editors may not support it soon...
+- It is hard to became popular, so big graphic editors may not support it soon...
 
 
 
