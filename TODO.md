@@ -1,7 +1,5 @@
 # TODO:
 
-- use `process_entity()` instead of `render_from_image_code()`
-
 - support blending type 'from sivf' instead of 'from code'
 
 - support vars in .sivf

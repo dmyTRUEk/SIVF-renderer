@@ -50,8 +50,8 @@ class AlphaBlendingType (Enum):
 
 
 def render_shape (pixels: 'nparray2d', color: '(a, r, g, b)', check_func: 'function', shape_n: int,
-        color_blending_type: 'ColorBlendingType' = ColorBlendingType.default,
-        alpha_blending_type: 'AlphaBlendingType' = AlphaBlendingType.default) -> None:
+        color_blending_type: ColorBlendingType = ColorBlendingType.default,
+        alpha_blending_type: AlphaBlendingType = AlphaBlendingType.default) -> None:
     global canvas_w, canvas_h
 
     a, r, g, b = color[0], color[1], color[2], color[3]
@@ -123,7 +123,9 @@ def render_shape (pixels: 'nparray2d', color: '(a, r, g, b)', check_func: 'funct
 
 
 
-def parse_shape (pixels: 'nparray2d', shape_name: str, shape: dict) -> None:
+def parse_shape (pixels: 'nparray2d', shape: dict, shape_name: str,
+        color_blending_type: ColorBlendingType = ColorBlendingType.default,
+        alpha_blending_type: AlphaBlendingType = AlphaBlendingType.default) -> None:
     print((1+tabs)*tab+f'rendering {shape_name}:')
 
     inverse = (shape['inverse'] == 'true') if 'inverse' in shape else False
@@ -147,8 +149,8 @@ def parse_shape (pixels: 'nparray2d', shape_name: str, shape: dict) -> None:
             (a, r, g, b),
             lambda x, y: ( (x+tx)**2 + (y+ty)**2 < radius2 ) ^ inverse,
             shape_number,
-            ColorBlendingType.overlap,
-            AlphaBlendingType.overlap
+            color_blending_type,
+            alpha_blending_type,
         )
     
     elif shape_name.startswith('square'):
@@ -163,29 +165,75 @@ def parse_shape (pixels: 'nparray2d', shape_name: str, shape: dict) -> None:
             (a, r, g, b),
             lambda x, y: ( tx_min <= x-canvas_w/2 <= tx_max and ty_min <= y-canvas_h/2 <= ty_max ) ^ inverse,
             shape_number,
-            ColorBlendingType.overlap,
-            AlphaBlendingType.overlap
+            color_blending_type,
+            alpha_blending_type,
         )
 
-    #print()
+    # end of parse_shape()
 
 
 
-def parse_entity (pixels: 'nparray2d', entity: 'dict, entity') -> None:
+def parse_entity (pixels: 'nparray2d', entity: dict, entity_name: str = '') -> None:
     global tab, tabs
     for subentity_name in entity:
         print((tabs)*tab+f'parsing {subentity_name}')
         subentity = entity[subentity_name]
 
-        if subentity_name.startswith('l'):   # layer
+        color_blending_type = ColorBlendingType.default
+        alpha_blending_type = AlphaBlendingType.default
+
+        if (entity_name == '' or entity_name.startswith('l')) and 'blending' in entity:
+            color_blending_type = entity['blending'][0]
+            alpha_blending_type = entity['blending'][1]
+
+            if color_blending_type == 'default':
+                color_blending_type = ColorBlendingType.default
+            elif color_blending_type == 'overlap':
+                color_blending_type = ColorBlendingType.overlap
+            elif color_blending_type == 'add':
+                color_blending_type = ColorBlendingType.add
+            elif color_blending_type == 'avg':
+                color_blending_type = ColorBlendingType.avg
+            else:
+                raise Exception(f'Unsupported ColorBlendingType: {color_blending_type = }')
+
+            if alpha_blending_type == 'default':
+                alpha_blending_type = AlphaBlendingType.default
+            elif alpha_blending_type == 'overlap':
+                alpha_blending_type = AlphaBlendingType.overlap
+            elif alpha_blending_type == 'add':
+                alpha_blending_type = AlphaBlendingType.add
+            elif alpha_blending_type == 'avg':
+                alpha_blending_type = AlphaBlendingType.avg
+            else:
+                raise Exception(f'Unsupported AlphaBlendingType: {alpha_blending_type = }')
+
+        if subentity_name.startswith('b'):   # blending
+            pass
+
+        elif subentity_name.startswith('l'):   # layer
             tabs += 1
-            parse_entity(pixels, subentity)
+            parse_entity(
+                pixels,
+                subentity,
+                subentity_name
+            )
             tabs -=1
 
+        #elif ...: object or other special entities
+
         else:   # shape
-            parse_shape(pixels, subentity_name, subentity)
+            parse_shape(
+                pixels,
+                subentity,
+                subentity_name,
+                color_blending_type,
+                alpha_blending_type
+            )
 
         print()
+
+    # end of parse_entity()
 
 
 
