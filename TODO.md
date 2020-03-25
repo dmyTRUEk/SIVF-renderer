@@ -2,11 +2,6 @@
 
 - support vars in .sivf
 
-- support nested layers by 'render_entity()' func (entity is layer or object),
-  which recursively calls 'render_entity()' if it is layer, 
-  or 'prepare_render_object()' if it is object
-  - rename 'prepare_render_object()' -> 'render_entity()'
-
 - write comments in all files: *.py *.md
 
 - antialiasing
