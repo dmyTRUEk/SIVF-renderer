@@ -1,5 +1,9 @@
 # TODO:
 
+- in 'heavy_funcs_cy.pyx':
+  - pass np.ndarray with 'dtype=uint8'
+  - convert from np.ndarray to cython array
+
 - add entities:
   - gradient
   - ellipse

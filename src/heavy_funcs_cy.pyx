@@ -103,7 +103,8 @@ cdef bint is_in_triangle (double x, double y, tuple args):
 
 
 
-cpdef void parse_shape (np.ndarray[unsigned char, ndim=3, mode='c'] pixels, dict shape, str shape_name, int shape_number,
+#, dtype=np.uint8
+cpdef void parse_shape (np.ndarray[unsigned char, ndim=3] pixels, dict shape, str shape_name, int shape_number,
         tuple canvas_wh, str tab, int tabs, dict var, 
         alpha_blending_type: AlphaBlendingType = AlphaBlendingType.default,
         color_blending_type: ColorBlendingType = ColorBlendingType.default,
@@ -200,7 +201,7 @@ cpdef void parse_shape (np.ndarray[unsigned char, ndim=3, mode='c'] pixels, dict
 
 
 
-cdef void render_shape (np.ndarray[unsigned char, ndim=3, mode='c'] pixels, tuple color,
+cdef void render_shape (np.ndarray[unsigned char, ndim=3] pixels, tuple color,
         type_check_func check_func, tuple args,
         int shape_n, tuple canvas_wh, str tab, int tabs,
         alpha_blending_type: AlphaBlendingType = AlphaBlendingType.default,
@@ -213,7 +214,6 @@ cdef void render_shape (np.ndarray[unsigned char, ndim=3, mode='c'] pixels, tupl
     cdef int r = color[1]
     cdef int g = color[2]
     cdef int b = color[3]
-    cdef tuple rgba = (r, g, b, a)
 
     cdef int x, y
 
@@ -304,8 +304,7 @@ cdef void render_shape (np.ndarray[unsigned char, ndim=3, mode='c'] pixels, tupl
             #print('\n\n\n')
 
     else:
-        raise Exception(
-            f'Unsupported Feature: Blending Type Combination: alpha_blending_type={alpha_blending_type}, color_blending_type={color_blending_type}')
+        raise Exception(f'Unsupported Feature: Blending Type Combination: alpha_blending_type={alpha_blending_type}, color_blending_type={color_blending_type}')
 
     # end of render_object 
 
