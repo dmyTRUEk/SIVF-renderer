@@ -16,8 +16,9 @@
 - antialiasing
 
 - faster rendering
-  - ? by numpy
-  - by render function written on C/C++/Rust
+  - [x] Cython 
+  - [ ] ? by numpy
+  - [ ] by render function written on C/C++/Rust
 
 
 

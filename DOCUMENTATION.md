@@ -4,35 +4,23 @@
 
 ## Entities:
 Entity - layer or shape or other special object
-- l = layer -> container for any entities (even layer)
+- layer -> container for any entities (even layer)
   ```
   "layer": {
       <entities separated by comma>
   }
   ```
-  or shorter:
-  ```
-  "l": {
-      <entities separated by comma>
-  }
-  ```
 
-- o = object -> container for any shapes (group of shapes)
+- (soon) object -> container for any shapes (group of shapes)
   ```
   "object": {
-      <figures separated by comma>
-  }
-  ```
-  or shorter:
-  ```
-  "o": {
       <figures separated by comma>
   }
   ```
 
 ### Shape:
 Shape - any final entity, which means it cant have children
-- c = circle ->
+- circle ->
   ```
   "circle": {
       "xy": ["<x>", "<y>"],
@@ -40,16 +28,8 @@ Shape - any final entity, which means it cant have children
       "color": "<hex color>"
   }
   ```
-  or shorter:
-  ```
-  "c": {
-      "xy": ["<x>", "<y>"],
-      "r": "<radius>",
-      "color": "<hex color>"
-  }
-  ```
 
-- s = square ->
+- square ->
   ```
   "square": {
       "xy": ["<x>", "<y>"],
@@ -57,27 +37,10 @@ Shape - any final entity, which means it cant have children
       "color": "<hex color>"
   }
   ```
-  or shorter:
-  ```
-  "s": {
-      "xy": ["<x>", "<y>"],
-      "side": "<side>",
-      "color": "<hex color>"
-  }
-  ```
 
-- (soon) t = triangle ->
+- triangle ->
   ```
   "triangle": {
-      "xy": ["<x1>", "<y1>",
-          "<x2>", "<y2>",
-          "<x3>", "<y3>"],
-      "color": "<hex color>"
-  }
-  ```
-  or shorter:
-  ```
-  "t": {
       "xy": ["<x1>", "<y1>",
           "<x2>", "<y2>",
           "<x3>", "<y3>"],
@@ -87,7 +50,7 @@ Shape - any final entity, which means it cant have children
 
 ### Special Entities:
 Special Objects - some very specific and kinda tricky objects with paranormal behavior
-- (soon) m = mesh (grid) ->
+- mesh (grid) ->
   ```
   "mesh": {
       "layer": {<entities to be repeated>},
@@ -96,14 +59,14 @@ Special Objects - some very specific and kinda tricky objects with paranormal be
   }
   ```
 
-- (soon) g = gradient ->
+- (soon) gradient ->
   ```
   "gradient": {
       <smt?>
   }
   ```
 
-- (not soon) r = recursion ->
+- (not soon) recursion ->
   ```
   "recursion": {
       "layer": {
@@ -142,6 +105,39 @@ Special Objects - some very specific and kinda tricky objects with paranormal be
 
 
 ## Blending Types:
+
+### Alpha Blending Types:
+- default = 0
+
+  default is overlap
+
+- overlap = 0
+
+  `pixel[y, x] = color`
+
+- add = 1
+  
+  ```
+  pixels[y, x] = (
+      <r>,
+      <g>,
+      <b>,
+      pixels[y, x][3] + a,
+  )
+  ```
+
+- avg = 2
+  
+  ```
+  pixels[y, x] = (
+      <r>,
+      <g>,
+      <b>,
+      (pixels[y, x][3]*obj_n+a)//(obj_n+1)
+  )
+  ```
+
+  where obj_n is number of object adding to image
 
 ### Color Blending Types:
 - default = 0
@@ -183,38 +179,6 @@ Special Objects - some very specific and kinda tricky objects with paranormal be
 
   where obj_n is number of object adding to image
 
-### Alpha Blending Types:
-- default = 0
-
-  default is overlap
-
-- overlap = 0
-
-  `pixel[y, x] = color`
-
-- add = 1
-  
-  ```
-  pixels[y, x] = (
-      <r>,
-      <g>,
-      <b>,
-      pixels[y, x][3] + a,
-  )
-  ```
-
-- avg = 2
-  
-  ```
-  pixels[y, x] = (
-      <r>,
-      <g>,
-      <b>,
-      (pixels[y, x][3]*obj_n+a)//(obj_n+1)
-  )
-  ```
-
-  where obj_n is number of object adding to image
 
 
 
