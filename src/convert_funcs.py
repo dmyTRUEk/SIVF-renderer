@@ -14,7 +14,7 @@ def cctargb (color: str) -> '(a, r, g, b)':
     return convert_color_to_argb(color)
 
 def convert_color_to_argb (color: str) -> '(a, r, g, b)':
-    a, r, g, b = 255, 0, 255, 0
+    a, r, g, b = 0, 0, 0, 0
     if len(color) == 8:
         a, r, g, b = bytes.fromhex(color)
     else:
