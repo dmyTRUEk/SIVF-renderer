@@ -2,7 +2,8 @@
 
 - in 'heavy_funcs_cy.pyx':
   - pass np.ndarray with 'dtype=uint8'
-  - convert from np.ndarray to cython array
+
+- entities rotating
 
 - add entities:
   - gradient
@@ -12,8 +13,6 @@
   - segment (part of line)
   - Bezier curve
   - recursion (but specify steps amount)
-
-- entities rotating
 
 - write comments in all files: *.py *.md
 

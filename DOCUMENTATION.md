@@ -7,6 +7,7 @@ Entity - layer or shape or other special object
 - layer -> container for any entities (even layer)
   ```
   "layer": {
+      "blending": ["<alpha channel blending type>", "<color channel blending type>"], 
       <entities separated by comma>
   }
   ```
@@ -14,7 +15,7 @@ Entity - layer or shape or other special object
 - (soon) object -> container for any shapes (group of shapes)
   ```
   "object": {
-      <figures separated by comma>
+      <shapes separated by comma>
   }
   ```
 
@@ -112,11 +113,9 @@ Special Objects - some very specific and kinda tricky objects with paranormal be
   default is overlap
 
 - overlap = 0
-
   `pixel[y, x] = color`
 
 - add = 1
-  
   ```
   pixels[y, x] = (
       <r>,
@@ -127,7 +126,6 @@ Special Objects - some very specific and kinda tricky objects with paranormal be
   ```
 
 - avg = 2
-  
   ```
   pixels[y, x] = (
       <r>,
@@ -145,7 +143,6 @@ Special Objects - some very specific and kinda tricky objects with paranormal be
   default is overlap
 
 - overlap = 0
-
   ```
   pixels[y, x] = (
       r,
@@ -156,7 +153,6 @@ Special Objects - some very specific and kinda tricky objects with paranormal be
   ```
 
 - add = 1
-  
   ```
   pixels[y, x] = (
       pixels[y, x][0] + r,
@@ -167,7 +163,6 @@ Special Objects - some very specific and kinda tricky objects with paranormal be
   ```
 
 - avg = 2
-  
   ```
   pixels[y, x] = (
       (pixels[y, x][0]*obj_n+r)//(obj_n+1),
