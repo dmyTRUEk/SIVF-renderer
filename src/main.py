@@ -66,7 +66,7 @@ def parse_entity (pixels: 'nparray2d', entity: dict, entity_name: str = '',
                 subentity,
                 subentity_name
             )
-            tabs -=1
+            tabs -= 1
 
         elif subentity_name.startswith('mesh'):   # mesh
             repeated_layer = subentity['layer']
