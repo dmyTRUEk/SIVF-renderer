@@ -21,8 +21,8 @@ from PIL import Image
 
 import utils
 
-from alpha_blending import *
-from color_blending import *
+import alpha_blending as ab
+import color_blending as cb
 
 from convert_funcs import *
 
@@ -48,12 +48,12 @@ def parse_entity (pixels: 'nparray2d', entity: dict, entity_name: str = '',
         print((tabs)*tab+f'parsing {subentity_name}:')
         subentity = entity[subentity_name]
 
-        alpha_blending_type = AlphaBlendingType.default
-        color_blending_type = ColorBlendingType.default
+        alpha_blending_type = ab.AlphaBlendingType.default
+        color_blending_type = cb.ColorBlendingType.default
 
         if (entity_name == 'image' or entity_name.startswith('l')) and 'blending' in entity:
-            alpha_blending_type = AlphaBlendingType.from_str(entity['blending'][0])
-            color_blending_type = ColorBlendingType.from_str(entity['blending'][1])
+            alpha_blending_type = ab.AlphaBlendingType.from_str(entity['blending'][0])
+            color_blending_type = cb.ColorBlendingType.from_str(entity['blending'][1])
 
 
         if subentity_name.startswith('blending'):   # blending
@@ -97,7 +97,7 @@ def parse_entity (pixels: 'nparray2d', entity: dict, entity_name: str = '',
                     tabs -= 1
             tabs -= 1
 
-        #elif ...: object or other special entities
+        #elif ...:   # other special entities
 
         else:   # shape
             parse_shape(
@@ -150,9 +150,6 @@ def render_from_content (content: dict) -> None:
     var = content_dict['vars'] if 'vars' in content_dict else {}
 
     pixels = np.zeros((canvas_h, canvas_w, 4), dtype=np.uint8)   # create np array
-
-    # unneccesary, because np.zeros already do this :)
-    #pixels[:, :] = (0, 0, 0, 0)   # set default value as tranparent
 
     shape_number = 0
 

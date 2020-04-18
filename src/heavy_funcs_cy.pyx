@@ -15,8 +15,8 @@ cimport numpy as np
 
 
 
-import alpha_blending
-import color_blending
+import alpha_blending as ab
+import color_blending as cb
 
 
 
@@ -90,8 +90,8 @@ cdef bint is_in_square (double x, double y, tuple args):
 cdef double triangle_sign (double x1, double y1, double x2, double y2, double x3, double y3):
     return (x1-x3)*(y2-y3) - (x2-x3)*(y1-y3)
 
-#                                 x         y  0   1          2          3          4          5          6          7        8
-#cdef bint is_in_triangle (double x, double y, tx, ty, double x1, double y1, double x2, double y2, double x3, double y3, bint inverse):
+#              0   1          2          3          4          5          6          7        8
+#tuple args = (tx, ty, double x1, double y1, double x2, double y2, double x3, double y3, bint inverse):
 cdef bint is_in_triangle (double x, double y, tuple args): 
     cdef double d1 = triangle_sign(x+args[0], y+args[1], args[2], args[3], args[4], args[5])
     cdef double d2 = triangle_sign(x+args[0], y+args[1], args[4], args[5], args[6], args[7])
@@ -103,11 +103,10 @@ cdef bint is_in_triangle (double x, double y, tuple args):
 
 
 
-#, dtype=np.uint8
 cpdef void parse_shape (np.ndarray[unsigned char, ndim=3] pixels, dict shape, str shape_name, int shape_number,
         tuple canvas_wh, str tab, int tabs, dict var, 
-        alpha_blending_type: alpha_blending.AlphaBlendingType = alpha_blending.AlphaBlendingType.default,
-        color_blending_type: color_blending.ColorBlendingType = color_blending.ColorBlendingType.default,
+        alpha_blending_type: ab.AlphaBlendingType = ab.AlphaBlendingType.default,
+        color_blending_type: cb.ColorBlendingType = cb.ColorBlendingType.default,
         tuple delta_xy = (0, 0)):
 
     print((1+tabs)*tab+f'rendering {shape_name}:')
@@ -131,10 +130,6 @@ cpdef void parse_shape (np.ndarray[unsigned char, ndim=3] pixels, dict shape, st
     cdef double circle_x, circle_y, radius, radius2
     cdef double square_x, square_y, side, x_min, y_min, x_max, y_max
 
-    #print(np_pixels.shape)
-    #cdef unsigned char pixels[np_pixels.shape[0]][np_pixels.shape[1]][np_pixels.shape[2]]
-    #= np_pixels
-
     # on every Y MINUS because pixel grid is growing down, but math coords grows to up
 
     if shape_name.startswith('circle'):   # circle
@@ -148,7 +143,6 @@ cpdef void parse_shape (np.ndarray[unsigned char, ndim=3] pixels, dict shape, st
 
         render_shape_cyarray(
             pixels, (a, r, g, b),
-            #lambda double x, double y: ( (x+tx)**2 + (y+ty)**2 < radius2 ) ^ inverse,
             is_in_circle, (tx, ty, radius2, inverse),
             shape_number, canvas_wh, tab, tabs,
             alpha_blending_type, color_blending_type,
@@ -168,7 +162,6 @@ cpdef void parse_shape (np.ndarray[unsigned char, ndim=3] pixels, dict shape, st
 
         render_shape_cyarray(
             pixels, (a, r, g, b),
-            #lambda double x, double y: ( x_min <= x+tx <= x_max and y_min <= y+ty <= y_max ) ^ inverse,
             is_in_square, (x_min, tx, x_max, y_min, ty, y_max, inverse),
             shape_number, canvas_wh, tab, tabs,
             alpha_blending_type, color_blending_type,
@@ -187,7 +180,6 @@ cpdef void parse_shape (np.ndarray[unsigned char, ndim=3] pixels, dict shape, st
 
         render_shape_cyarray(
             pixels, (a, r, g, b),
-            #lambda x, y: is_inside_triangle(x+tx, y+ty, x1, y1, x2, y2, x3, y3) ^ inverse,
             is_in_triangle, (tx, ty, x1, y1, x2, y2, x3, y3, inverse),
             shape_number, canvas_wh, tab, tabs,
             alpha_blending_type, color_blending_type
@@ -205,12 +197,11 @@ cpdef void parse_shape (np.ndarray[unsigned char, ndim=3] pixels, dict shape, st
 cdef void render_shape_cyarray (np.ndarray[unsigned char, ndim=3, mode='c'] np_pixels, tuple color,
         type_check_func check_func, tuple args,
         int shape_n, tuple canvas_wh, str tab, int tabs,
-        alpha_blending_type: alpha_blending.AlphaBlendingType = alpha_blending.AlphaBlendingType.default,
-        color_blending_type: color_blending.ColorBlendingType = color_blending.ColorBlendingType.default):
+        alpha_blending_type: ab.AlphaBlendingType = ab.AlphaBlendingType.default,
+        color_blending_type: cb.ColorBlendingType = cb.ColorBlendingType.default):
 
     cdef int canvas_w = canvas_wh[0], canvas_h = canvas_wh[1]
 
-    #a, r, g, b = color[0], color[1], color[2], color[3]
     cdef int a = color[0]
     cdef int r = color[1]
     cdef int g = color[2]
@@ -220,7 +211,7 @@ cdef void render_shape_cyarray (np.ndarray[unsigned char, ndim=3, mode='c'] np_p
 
     cdef int x, y
 
-    if alpha_blending_type == alpha_blending.AlphaBlendingType.overlap and color_blending_type == color_blending.ColorBlendingType.overlap:
+    if alpha_blending_type == ab.AlphaBlendingType.overlap and color_blending_type == cb.ColorBlendingType.overlap:
         for y in range(canvas_h):
             for x in range(canvas_w):
                 if check_func(x, y, args):
@@ -233,7 +224,7 @@ cdef void render_shape_cyarray (np.ndarray[unsigned char, ndim=3, mode='c'] np_p
                 print((tabs+3)*tab+f'{100*y//canvas_h}%')
             #print('\n\n\n')
 
-    elif alpha_blending_type == alpha_blending.AlphaBlendingType.overlap and color_blending_type == color_blending.ColorBlendingType.add:
+    elif alpha_blending_type == ab.AlphaBlendingType.overlap and color_blending_type == cb.ColorBlendingType.add:
         for y in range(canvas_h):
             for x in range(canvas_w):
                 if check_func(x, y, args):
@@ -246,7 +237,7 @@ cdef void render_shape_cyarray (np.ndarray[unsigned char, ndim=3, mode='c'] np_p
                 print((tabs+3)*tab+f'{100*y//canvas_h}%')
             #print('\n\n\n')
 
-    elif alpha_blending_type == alpha_blending.AlphaBlendingType.add and color_blending_type == color_blending.ColorBlendingType.add:
+    elif alpha_blending_type == ab.AlphaBlendingType.add and color_blending_type == cb.ColorBlendingType.add:
         for y in range(canvas_h):
             for x in range(canvas_w):
                 if check_func(x, y, args):
@@ -259,7 +250,7 @@ cdef void render_shape_cyarray (np.ndarray[unsigned char, ndim=3, mode='c'] np_p
                 print((tabs+3)*tab+f'{100*y//canvas_h}%')
             #print('\n\n\n')
 
-    elif alpha_blending_type == alpha_blending.AlphaBlendingType.add and color_blending_type == color_blending.ColorBlendingType.overlap:
+    elif alpha_blending_type == ab.AlphaBlendingType.add and color_blending_type == cb.ColorBlendingType.overlap:
         for y in range(canvas_h):
             for x in range(canvas_w):
                 if check_func(x, y, args):
@@ -273,7 +264,7 @@ cdef void render_shape_cyarray (np.ndarray[unsigned char, ndim=3, mode='c'] np_p
             #print('\n\n\n')
 
     
-    elif alpha_blending_type == alpha_blending.AlphaBlendingType.overlap and color_blending_type == color_blending.ColorBlendingType.avg:
+    elif alpha_blending_type == ab.AlphaBlendingType.overlap and color_blending_type == cb.ColorBlendingType.avg:
         for y in range(canvas_h):
             for x in range(canvas_w):
                 if check_func(x, y, args):
@@ -286,7 +277,7 @@ cdef void render_shape_cyarray (np.ndarray[unsigned char, ndim=3, mode='c'] np_p
                 print((tabs+3)*tab+f'{100*y//canvas_h}%')
             #print('\n\n\n')
 
-    elif alpha_blending_type == alpha_blending.AlphaBlendingType.avg and color_blending_type == color_blending.ColorBlendingType.avg:
+    elif alpha_blending_type == ab.AlphaBlendingType.avg and color_blending_type == cb.ColorBlendingType.avg:
         for y in range(canvas_h):
             for x in range(canvas_w):
                 if check_func(x, y, args):
@@ -304,136 +295,6 @@ cdef void render_shape_cyarray (np.ndarray[unsigned char, ndim=3, mode='c'] np_p
             f'Unsupported Feature: Blending Type Combination: alpha_blending_type={alpha_blending_type}, color_blending_type={color_blending_type}')
 
     # end of render_object 
-
-
-
-
-
-cdef void render_shape_nparray (np.ndarray[unsigned char, ndim=3, mode='c'] pixels, tuple color,
-        type_check_func check_func, tuple args,
-        int shape_n, tuple canvas_wh, str tab, int tabs,
-        alpha_blending_type: alpha_blending.AlphaBlendingType = alpha_blending.AlphaBlendingType.default,
-        color_blending_type: color_blending.ColorBlendingType = color_blending.ColorBlendingType.default):
-
-    cdef int canvas_w = canvas_wh[0], canvas_h = canvas_wh[1]
-
-    #a, r, g, b = color[0], color[1], color[2], color[3]
-    cdef int a = color[0]
-    cdef int r = color[1]
-    cdef int g = color[2]
-    cdef int b = color[3]
-    cdef tuple rgba = (r, g, b, a)
-
-    cdef int x, y
-
-    if alpha_blending_type == alpha_blending.AlphaBlendingType.overlap and color_blending_type == color_blending.ColorBlendingType.overlap:
-        for y in range(canvas_h):
-            for x in range(canvas_w):
-                if check_func(x, y, args):
-                    pixels[y, x] = [r, g, b, a]
-                #print(pixels[y, x], end=' ')
-            if y % (100) == 0:
-                print((tabs+3)*tab+f'{100*y//canvas_h}%')
-            #print('\n\n\n')
-
-    elif alpha_blending_type == alpha_blending.AlphaBlendingType.overlap and color_blending_type == color_blending.ColorBlendingType.add:
-        for y in range(canvas_h):
-            for x in range(canvas_w):
-                if check_func(x, y, args):
-                    pixels[y, x] = [
-                        pixels[y, x, 0] + r,
-                        pixels[y, x, 1] + g,
-                        pixels[y, x, 2] + b,
-                        a
-                    ]
-                #print(pixels[y, x], end=' ')
-            if y % (100) == 0:
-                print((tabs+3)*tab+f'{100*y//canvas_h}%')
-            #print('\n\n\n')
-
-    elif alpha_blending_type == alpha_blending.AlphaBlendingType.add and color_blending_type == color_blending.ColorBlendingType.add:
-        for y in range(canvas_h):
-            for x in range(canvas_w):
-                if check_func(x, y, args):
-                    pixels[y, x] = [
-                        pixels[y, x, 0] + r,
-                        pixels[y, x, 1] + g,
-                        pixels[y, x, 2] + b,
-                        pixels[y, x, 3] + a,
-                    ]
-                #print(pixels[y, x], end=' ')
-            if y % (100) == 0:
-                print((tabs+3)*tab+f'{100*y//canvas_h}%')
-            #print('\n\n\n')
-
-    elif alpha_blending_type == alpha_blending.AlphaBlendingType.add and color_blending_type == color_blending.ColorBlendingType.overlap:
-        for y in range(canvas_h):
-            for x in range(canvas_w):
-                if check_func(x, y, args):
-                    pixels[y, x] = [
-                        r,
-                        g,
-                        b,
-                        pixels[y, x, 3] + a,
-                    ]
-                #print(pixels[y, x], end=' ')
-            if y % (100) == 0:
-                print((tabs+3)*tab+f'{100*y//canvas_h}%')
-            #print('\n\n\n')
-    
-    elif alpha_blending_type == alpha_blending.AlphaBlendingType.overlap and color_blending_type == color_blending.ColorBlendingType.avg:
-        for y in range(canvas_h):
-            for x in range(canvas_w):
-                if check_func(x, y, args):
-                    pixels[y, x] = [
-                        (pixels[y, x, 0]*shape_n+r)//(shape_n+1),
-                        (pixels[y, x, 1]*shape_n+g)//(shape_n+1),
-                        (pixels[y, x, 2]*shape_n+b)//(shape_n+1),
-                        a
-                    ]
-                #print(pixels[y, x], end=' ')
-            if y % (100) == 0:
-                print((tabs+3)*tab+f'{100*y//canvas_h}%')
-            #print('\n\n\n')
-
-    elif alpha_blending_type == alpha_blending.AlphaBlendingType.avg and color_blending_type == color_blending.ColorBlendingType.avg:
-        for y in range(canvas_h):
-            for x in range(canvas_w):
-                if check_func(x, y, args):
-                    pixels[y, x] = [
-                        (pixels[y, x, 0]*shape_n+r)//(shape_n+1),
-                        (pixels[y, x, 1]*shape_n+g)//(shape_n+1),
-                        (pixels[y, x, 2]*shape_n+b)//(shape_n+1),
-                        (pixels[y, x, 3]*shape_n+a)//(shape_n+1)
-                    ]
-                #print(pixels[y, x], end=' ')
-            if y % (100) == 0:
-                print((tabs+3)*tab+f'{100*y//canvas_h}%')
-            #print('\n\n\n')
-
-    else:
-        raise Exception(
-            f'Unsupported Feature: Blending Type Combination: alpha_blending_type={alpha_blending_type}, color_blending_type={color_blending_type}')
-
-    # end of render_object 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

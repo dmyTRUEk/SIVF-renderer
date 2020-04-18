@@ -105,6 +105,7 @@ Special Objects - some very specific and kinda tricky objects with paranormal be
   mm - milimeters
 
 
+
 ## Blending Types:
 
 ### Alpha Blending Types:
@@ -113,7 +114,14 @@ Special Objects - some very specific and kinda tricky objects with paranormal be
   default is overlap
 
 - overlap = 0
-  `pixel[y, x] = color`
+  ```
+  pixel[y, x] = (
+      <r>,
+      <g>,
+      <b>,
+      a
+  )
+  ```
 
 - add = 1
   ```

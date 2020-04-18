@@ -1,7 +1,6 @@
 # TODO:
 
-- in 'heavy_funcs_cy.pyx':
-  - pass np.ndarray with 'dtype=uint8'
+- add dx, dy for layers
 
 - entities rotating
 
@@ -9,26 +8,19 @@
   - gradient
   - ellipse
   - rectange
-  - line
+  - line (endless line)
   - segment (part of line)
   - Bezier curve
   - recursion (but specify steps amount)
 
-- write comments in all files: *.py *.md
+- write comments in all files (*.py *.md)
 
 - antialiasing
 
 - faster rendering
   - [x] Cython 
   - [ ] ? by numpy
-  - [ ] by render function written on C/C++/Rust
-
-
-
-
-
-
-
+  - [ ] by render function written on C/C++/Rust (for rust use pyo3)
 
 
 
