@@ -26,8 +26,8 @@ import color_blending as cb
 
 from convert_funcs import *
 
-#from heavy_funcs_py import *
-from heavy_funcs_cy import *
+from heavy_funcs_py import *
+# from heavy_funcs_cy import *
 
 
 
@@ -113,7 +113,6 @@ def parse_entity (pixels: 'nparray2d', entity: dict, entity_name: str = '',
 
 
 
-
 def render_from_content (content: dict) -> None:
     # delete all comments   /* blahblahblah */
     content = re.sub(re.compile('/\*.*?\*/', re.DOTALL), '', content)
@@ -130,8 +129,9 @@ def render_from_content (content: dict) -> None:
     color_scheme = content_dict['color_scheme']
     image_dict = content_dict['image']
 
-    #print('image =', image_dict, '\n')
+    #print(f'{image_dict = }\n')
 
+    # [TODO]: wtf is this?
     # delete all what is not layer
     keys_to_delete = []
     for key in image_dict:
@@ -162,6 +162,7 @@ def render_from_content (content: dict) -> None:
     result_image.save('image.png')
     result_image.show()
 
+    # end of render_from_content
 
 
 
@@ -199,7 +200,7 @@ def main () -> None:
         #print(all_sivf_files)
 
         max_number = len(all_sivf_files)
-        print(f'Choose file: (press 1..{max_number})')
+        print(f'Choose file: (input 1..{max_number})')
         for i in range(len(all_sivf_files)):
             print(f'{i+1}) {all_sivf_files[i]}')
         print()

@@ -48,5 +48,6 @@ if os.path.basename(os.getcwd()) != 'src':
     os.system('mv heavy_funcs_cy.cpython-38-x86_64-linux-gnu.so src/heavy_funcs_cy.cpython-38-x86_64-linux-gnu.so')
     os.system('mv build/ src/')
 
+print('\n\n')
 
 
