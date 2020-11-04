@@ -12,6 +12,8 @@ Dont forget to look for [TODO] in code ;)
 
 ## Refactoring:
 
+- rename 'utils' -> 'funcs_utils'
+
 - rename in code 'layer' -> 'canvas', because layer is .sivf property
 
 - rename 'var' -> 'vars'?
