@@ -19,12 +19,16 @@ class AlphaBlendingType (Enum):
     def from_str (s: str) -> 'AlphaBlendingType':
         if s == 'default':
             return AlphaBlendingType.default
+
         elif s == 'overlap':
             return AlphaBlendingType.overlap
+
         elif s == 'add':
             return AlphaBlendingType.add
+
         elif s == 'avg':
             return AlphaBlendingType.avg
+
         else:
             raise Exception(f'Error: Unsupported AlphaBlendingType: {s}')
 

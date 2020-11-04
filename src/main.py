@@ -1,5 +1,5 @@
 '''
-SIVF-renderer   v0.4
+SIVF-renderer   v0.4.0a1
 
 This is main file of SIVF-renderer
 ''' 
@@ -7,7 +7,7 @@ This is main file of SIVF-renderer
 
 
 import sys
-import random
+# import random
 
 from os import listdir
 from os.path import isfile, join
@@ -21,13 +21,15 @@ from PIL import Image
 
 import utils
 
-import alpha_blending as ab
-import color_blending as cb
+from class_layer import Layer
 
-from convert_funcs import *
+from class_alpha_blending import AlphaBlendingType
+from class_color_blending import ColorBlendingType
 
-from heavy_funcs_py import *
-# from heavy_funcs_cy import *
+from funcs_convert import *
+
+from funcs_heavy_py import *
+# from funcs_heavy_cy import *
 
 
 
@@ -40,38 +42,52 @@ tabs = 0
 
 
 
-def parse_entity (pixels: 'nparray2d', entity: dict, entity_name: str = '', 
-        delta_xy: '(delta_x, delta_y)' = (0, 0)) -> None:
-    global tab, tabs, var
+def tmp_show_image (layer: Layer):
+    Image.fromarray(layer.get_pixels(), 'RGBA').show()
 
+
+
+def parse_and_render_entity (entity: dict, entity_name: str,
+        canvas_wh: '(canvas_w, canvas_h)', delta_xy: '(delta_x, delta_y)' = (0, 0)) -> Layer:
+    global tab, tabs, var, shape_number
+
+    layer_rendering = Layer(canvas_wh)
+
+    #for      key      in  dict :
     for subentity_name in entity:
         print((tabs)*tab+f'parsing {subentity_name}:')
         subentity = entity[subentity_name]
 
-        alpha_blending_type = ab.AlphaBlendingType.default
-        color_blending_type = cb.ColorBlendingType.default
+        # [TODO]: move this out of for loop?
+        alpha_blending_type = AlphaBlendingType.default
+        color_blending_type = ColorBlendingType.default
 
-        if (entity_name == 'image' or entity_name.startswith('l')) and 'blending' in entity:
-            alpha_blending_type = ab.AlphaBlendingType.from_str(entity['blending'][0])
-            color_blending_type = cb.ColorBlendingType.from_str(entity['blending'][1])
+        if (entity_name == 'image' or entity_name.startswith('layer')) and ('blending' in entity):
+            # print('setting blending types')
+            # print(f'{entity["blending"] = }')
+            alpha_blending_type = AlphaBlendingType.from_str(entity['blending'][0])
+            color_blending_type = ColorBlendingType.from_str(entity['blending'][1])
+
+        # print(f'{alpha_blending_type = }')
+        # print(f'{color_blending_type = }')
+        # print()
 
 
         if subentity_name.startswith('blending'):   # blending
             pass
 
         elif subentity_name.startswith('layer'):   # layer
+            # raise NotImplementedError()
             tabs += 1
-            parse_entity(
-                pixels,
-                subentity,
-                subentity_name
-            )
+            layer_tmp = parse_and_render_entity(subentity, subentity_name, canvas_wh, delta_xy)
             tabs -= 1
+            layer_rendering = blend_layers(layer_rendering, layer_tmp, shape_number, alpha_blending_type, color_blending_type)
 
         elif subentity_name.startswith('mesh'):   # mesh
+            raise NotImplementedError()
             repeated_layer = subentity['layer']
             n_xleft_ydown_xright_yup = subentity['n_xleft_ydown_xright_yup']
-            nxyxy = n_xleft_ydown_xright_yup   # for shortenes
+            nxyxy = n_xleft_ydown_xright_yup   # for shorteness
             nxyxy = (
                 int(cetu(nxyxy[0], canvas_wh, var)),
                 int(cetu(nxyxy[1], canvas_wh, var)),
@@ -88,10 +104,10 @@ def parse_entity (pixels: 'nparray2d', entity: dict, entity_name: str = '',
                 for w in range(-nxyxy[0], nxyxy[2]+1):
                     print((tabs)*tab+f'parsing mesh[{w}][{h}]:')
                     tabs += 1
-                    parse_entity(
-                        pixels,
+                    parse_and_render_entity(
                         repeated_layer,
                         'layer',
+                        canvas_wh,
                         (w*delta_x, h*delta_y)
                     )
                     tabs -= 1
@@ -100,14 +116,21 @@ def parse_entity (pixels: 'nparray2d', entity: dict, entity_name: str = '',
         #elif ...:   # other special entities
 
         else:   # shape
-            parse_shape(
-                pixels, subentity, subentity_name, shape_number,
+            layer_tmp = parse_and_render_shape(
+                subentity, subentity_name, shape_number,
                 canvas_wh, tab, tabs, var,
                 alpha_blending_type, color_blending_type,
                 delta_xy
             )
+            # print(f'{layer_tmp.get_pixels() = }')
+            layer_rendering = blend_layers(layer_rendering, layer_tmp, shape_number, alpha_blending_type, color_blending_type)
 
         print()
+
+    # print(f'{layer_rendering.get_pixels() = }')
+    # tmp_show_image(layer_rendering)
+
+    return layer_rendering
 
     # end of parse_entity()
 
@@ -124,8 +147,13 @@ def render_from_content (content: dict) -> None:
     content_dict = json.loads(content)
     #print_all_about(content_dict)
 
-    sizes_wh = content_dict['sizes_wh']
-    image_sizes = ( int(sizes_wh[0]), int(sizes_wh[1]) )
+    # global canvas_wh, canvas_w, canvas_h, shape_number, var
+    global canvas_wh, shape_number, var
+
+    canvas_wh = ( int(content_dict['sizes_wh'][0]), int(content_dict['sizes_wh'][1]) )
+    # canvas_w, canvas_h = canvas_wh
+    # canvas_wh = ( int(sizes_wh[0]), int(sizes_wh[1]) )
+
     color_scheme = content_dict['color_scheme']
     image_dict = content_dict['image']
 
@@ -143,31 +171,46 @@ def render_from_content (content: dict) -> None:
 
     #print(f'{image_dict = }\n')
 
-    global canvas_wh, canvas_w, canvas_h, shape_number, var
-    canvas_wh = image_sizes
-    canvas_w, canvas_h = canvas_wh
-
     var = content_dict['vars'] if 'vars' in content_dict else {}
 
-    pixels = np.zeros((canvas_h, canvas_w, 4), dtype=np.uint8)   # create np array
+    # pixels = np.zeros((canvas_h, canvas_w, 4), dtype=np.uint8)   # create np array
+    # layer_main = Layer(canvas_wh)
 
     shape_number = 0
 
     utils.timer_begin()
-    parse_entity(pixels, image_dict, '')
+    layer_rendered = parse_and_render_entity(image_dict, '', canvas_wh)
     utils.timer_end()
+    utils.timer_show()
 
-    #print(pixels)
-    result_image = Image.fromarray(pixels, 'RGBA')
-    result_image.save('image.png')
-    result_image.show()
+    if layer_rendered.wh != canvas_wh:
+        raise ValueError()
+
+    # layer_main = blend_layers(
+    #     layer_main, layer_rendered,
+    #     shape_number,
+    #     AlphaBlendingType.default,
+    #     ColorBlendingType.default
+    # )
+    # layer_main = layer_rendered
+
+    save_pixels_to_image(layer_rendered.get_pixels_rgba(), 'image.png', show=True)
 
     # end of render_from_content
 
 
 
+def save_pixels_to_image (pixels: 'ndarray2d', output_file_name: str, show: bool=False):
+    #print(pixels)
+    result_image = Image.fromarray(pixels, 'RGBA')
+    result_image.save(output_file_name)
+    if show:
+        result_image.show()
+
+
+
 def render_from_file (file_name: str) -> None:
-    print(f'Starting Render \'{file_name}\'\n')
+    print(f'Starting Render of \'{file_name}\'\n')
 
     file = open(file_name, 'r')
     content = ''

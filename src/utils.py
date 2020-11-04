@@ -11,6 +11,11 @@ import random
 
 
 
+class DeprecatedException(Exception):
+    pass
+
+
+
 def print_all_about (var):
     print(f'Printing all about var:')
     #print(f'Printing all about \'{get_var_name(var)}\'')
@@ -47,13 +52,14 @@ def timer_begin ():
     global timer_begin_0
     timer_begin_0 = time.time()
 
-
-
 def timer_end ():
     global timer_end_0
     timer_end_0 = time.time()
-    print(f'Time elapsed from BEGIN..END = {timer_end_0-timer_begin_0}')
     #sys.exit(0)
+
+def timer_show ():
+    global timer_begin_0, timer_end_0
+    print(f'Time elapsed from BEGIN..END = {timer_end_0-timer_begin_0} seconds')
 
 
 

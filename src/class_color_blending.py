@@ -19,12 +19,16 @@ class ColorBlendingType (Enum):
     def from_str (s: str) -> 'ColorBlendingType':
         if s == 'default':
             return ColorBlendingType.default
+
         elif s == 'overlap':
             return ColorBlendingType.overlap
+
         elif s == 'add':
             return ColorBlendingType.add
+
         elif s == 'avg':
             return ColorBlendingType.avg
+
         else:
             raise Exception(f'Error: Unsupported ColorBlendingType: {s}')
 
