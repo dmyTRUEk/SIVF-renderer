@@ -12,6 +12,8 @@ Dont forget to look for [TODO] in code ;)
 
 ## Refactoring:
 
+- rename in code 'layer' -> 'canvas', because layer is .sivf property
+
 - rename 'var' -> 'vars'?
 
 - print 'parsing ent...' out of loop?
