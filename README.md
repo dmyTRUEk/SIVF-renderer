@@ -90,7 +90,7 @@ SIVF file content:
 
 
 
-## Example 2: RGB logo
+## Example 2: Handmade recursion of circles and squares
 ![Image example 2](https://raw.githubusercontent.com/dmytruek/sivf-renderer/master/examples/image_example_2.png)
 
 SIVF file content:
@@ -130,7 +130,7 @@ SIVF file content:
 
 
 
-## Example 3: Handmade recursion of circles and squares
+## Example 3: RGB logo
 ![Image example 3](https://raw.githubusercontent.com/dmytruek/sivf-renderer/master/examples/image_example_3.png)
 
 SIVF file content:
