@@ -41,6 +41,8 @@ Dont forget to look for [TODO] in code ;)
 
 ## New features:
 
+- add 'min', 'max' blending types
+
 - add dx, dy for layers
 
 - add time measurments for every figure
