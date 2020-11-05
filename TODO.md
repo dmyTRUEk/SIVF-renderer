@@ -59,6 +59,7 @@ Dont forget to look for [TODO] in code ;)
   - rectange
   - line (endless line)
   - segment (part of line)
+  - text: xy, color_fg, color_bg, font, ? width between letters
   - polygon
   - right polygon
   - gradient by n points
