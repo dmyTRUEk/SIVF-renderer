@@ -1,32 +1,27 @@
 '''
-Here my usefull utils
+My usefull utils
 '''
-
-
 
 import time
 import random
 
 
+from funcs_errors import *
+from funcs_warnings import *
 
 
 
-class DeprecatedException(Exception):
-    pass
 
-
-
-def print_all_about (var):
+def print_all_about (var, var_name):
     print(f'Printing all about var:')
     #print(f'Printing all about \'{get_var_name(var)}\'')
-    print(f'  {type(var) = }')
-    print('  content =', var)
+    print(f'    type({var_name}) = {type(var)}')
+    print(f'    content = {var}')
     print()
 
-
-
 def get_var_name (var):
-    return [k for k, v in locals().iteritems() if v == my_var][0]
+    raise WarningDeprecated('This is DEPRECATED, because it cant work in python')
+    return [k for k, v in locals().items() if v == var][0]
 
 
 
@@ -55,7 +50,6 @@ def timer_begin ():
 def timer_end ():
     global timer_end_0
     timer_end_0 = time.time()
-    #sys.exit(0)
 
 def timer_show ():
     global timer_begin_0, timer_end_0

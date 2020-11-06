@@ -2,9 +2,12 @@
 This file contains all for Class Alpha Blending
 ''' 
 
-
-
 from enum import Enum
+
+
+from funcs_errors import ErrorUnknownValue
+
+from consts_sivf_keywords import *
 
 
 
@@ -17,20 +20,20 @@ class AlphaBlendingType (Enum):
     avg = 2
 
     def from_str (s: str) -> 'AlphaBlendingType':
-        if s == 'default':
+        if s == KW_BLENDINGTYPE_DEFAULT:
             return AlphaBlendingType.default
 
-        elif s == 'overlap':
+        elif s == KW_BLENDINGTYPE_OVERLAP:
             return AlphaBlendingType.overlap
 
-        elif s == 'add':
+        elif s == KW_BLENDINGTYPE_ADD:
             return AlphaBlendingType.add
 
-        elif s == 'avg':
+        elif s == KW_BLENDINGTYPE_AVG:
             return AlphaBlendingType.avg
 
         else:
-            raise Exception(f'Error: Unsupported AlphaBlendingType: {s}')
+            raise ErrorUnknownValue(s)
 
 
 

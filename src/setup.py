@@ -1,10 +1,8 @@
 '''
-This file needed for cython compiling?
+This file needed for cython compiling
 
 compline on linux:   $ python setup.py build_ext --inplace
 '''
-
-
 
 import os
 import sys

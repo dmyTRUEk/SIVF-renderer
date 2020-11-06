@@ -2,9 +2,14 @@
 This file contains all for Class Color Blending
 ''' 
 
-
-
 from enum import Enum
+
+
+from funcs_errors import ErrorUnknownValue
+
+from consts_sivf_keywords import *
+
+from funcs_errors import ErrorUnknownValue
 
 
 
@@ -17,20 +22,20 @@ class ColorBlendingType (Enum):
     avg = 2
 
     def from_str (s: str) -> 'ColorBlendingType':
-        if s == 'default':
+        if s == KW_BLENDINGTYPE_DEFAULT:
             return ColorBlendingType.default
 
-        elif s == 'overlap':
+        elif s == KW_BLENDINGTYPE_OVERLAP:
             return ColorBlendingType.overlap
 
-        elif s == 'add':
+        elif s == KW_BLENDINGTYPE_ADD:
             return ColorBlendingType.add
 
-        elif s == 'avg':
+        elif s == KW_BLENDINGTYPE_AVG:
             return ColorBlendingType.avg
 
         else:
-            raise Exception(f'Error: Unsupported ColorBlendingType: {s}')
+            raise ErrorUnknownValue(s)
 
 
 

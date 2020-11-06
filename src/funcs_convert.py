@@ -2,43 +2,57 @@
 This file contains all functions, responsible for value convertations
 '''
 
-
-
 from math import *
 # from math import sqrt, abs, sin, cos
+
+
+from funcs_errors import ErrorUnknownValue, ErrorNotImpemented
+
 
 
 
 
 def c_rgbau_rgba (pixels_rgbau: 'array of r, g, b, a, used') -> 'array of r, g, b, a':
+    ''' For documentation look into full named function. '''
     return convert_array_rgbau_to_array_rgba(pixels_rgbau)
 
-def convert_array_rgbau_to_array_rgba (pixels_rgbau: 'array of r, g, b, a, used') -> 'array of r, g, b, a':
+def convert_array_rgbau_to_array_rgba (pixels_rgbau: 'array of (r,g,b,a,u') -> 'array of (r,g,b,a)':
+    '''
+    Converts array by Y by X of (r,g,b,a,u) -> array by Y by X of (r,g,b,a)
+    '''
     return pixels_rgbau[:, :, :4]
 
 
 
-def cctargb (color: str) -> '(a, r, g, b)':
+def cctargb (color: '#aarrggbb') -> '(a, r, g, b)':
+    ''' For documentation look into full named function. '''
     return convert_color_to_argb(color)
 
-def convert_color_to_argb (color: str) -> '(a, r, g, b)':
+def convert_color_to_argb (color: '#aarrggbb') -> '(a, r, g, b)':
+    '''
+    Converts '#ffaabbcc' -> (255, 170, 187, 204)
+    '''
     a, r, g, b = 0, 0, 0, 0
     if len(color) == 8:
         a, r, g, b = bytes.fromhex(color)
     else:
-        raise Exception(f'Error -> convert_color_to_argb -> this color type is unsupported: {color = }')
+        raise ErrorUnknownValue(color, 'maybe, len != 8 ?')
     return a, r, g, b
 
 
 
 def cetu (expression: str, canvas_wh: '(canvas_w, canvas_h)', var: dict = {}):
+    ''' For documentation look into full named function. '''
     return convert_expression_to_units(expression, canvas_wh, var)
 
 def convert_expression_to_units (expression: str, canvas_wh: '(canvas_w, canvas_h)', var: dict = {}):
-    '''value could be:
+    '''
+    Converts '42<dimention>' -> <dimetion rule>(42)
+
+    Value could be:
     - units == pixels (145px)
     - precents (34%)
-    - m, dm, cm, mm, nm ;)
+    - m, dm, cm, mm, nm, km ;)
     '''
     #print(f'{var = }')
     #print(f'{expression = }')
@@ -58,20 +72,11 @@ def convert_expression_to_units (expression: str, canvas_wh: '(canvas_w, canvas_
 
     elif expression.endswith('m'):
         # find if it is m of dm or cm or mm ot nm or other
-        raise Exception('m, cm, mm, etc is not supported for now')
+        raise ErrorNotImpemented('m, cm, mm, etc is not supported for now')
 
     else:
-        raise Exception(f'Unknown dimension in {expression = }')
-
-
-
-
-
-
-
-
-
-
+        # raise ErrorUnknownValue(f'Unknown dimension in {expression = }')
+        raise ErrorUnknownValue(expression, 'Unknown dimension')
 
 
 

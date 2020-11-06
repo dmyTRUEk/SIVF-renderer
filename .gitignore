@@ -1,0 +1,8 @@
+src/__pycache__
+src/build
+
+src/*.c
+src/*.html
+src/*.png
+src/*.sivf
+src/*.so

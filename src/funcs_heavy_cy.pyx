@@ -6,17 +6,17 @@ for compiling look in 'setup.py'
 for manual generating html file on linux:   $ cython -a heavy_funcs_cy.pyx
 ''' 
 
-
-
 from math import *
 
 import numpy as np
 cimport numpy as np
 
 
+from funcs_errors import *
+from funcs_warnings import *
 
-import alpha_blending as ab
-import color_blending as cb
+import class_alpha_blending as ab
+import class_color_blending as cb
 
 
 
@@ -30,7 +30,7 @@ cpdef tuple convert_color_to_argb (str color):
     if len(color) == 8:
         a, r, g, b = bytes.fromhex(color)
     else:
-        raise Exception(f'Error -> convert_color_to_argb -> this color type is unsupported: {color}')
+        raise ErrorUnknownValue(color, 'This color type is unsupported')
     return a, r, g, b
 
 
@@ -39,7 +39,8 @@ cpdef double cetu (str expression, tuple canvas_wh, dict var = {}):
     return convert_expression_to_units(expression, canvas_wh, var)
 
 cpdef double convert_expression_to_units (str expression, tuple canvas_wh, dict var = {}):
-    '''value could be:
+    '''
+    Value could be:
     - units == pixels (145px)
     - precents (34%)
     - m, dm, cm, mm, nm ;)
