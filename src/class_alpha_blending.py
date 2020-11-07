@@ -18,6 +18,8 @@ class AlphaBlendingType (Enum):
     overlap = 0
     add = 1
     avg = 2
+    minimum = 3
+    maximum = 4
 
     def from_str (s: str) -> 'AlphaBlendingType':
         if s == KW_BLENDINGTYPE_DEFAULT:
@@ -31,6 +33,12 @@ class AlphaBlendingType (Enum):
 
         elif s == KW_BLENDINGTYPE_AVG:
             return AlphaBlendingType.avg
+
+        elif s == KW_BLENDINGTYPE_MIN:
+            return AlphaBlendingType.minimum
+
+        elif s == KW_BLENDINGTYPE_MAX:
+            return AlphaBlendingType.maximum
 
         else:
             raise ErrorValueUnknown(s)

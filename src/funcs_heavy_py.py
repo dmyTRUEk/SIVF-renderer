@@ -8,7 +8,9 @@ import random
 
 from funcs_errors import *
 from funcs_warnings import *
+from funcs_log import *
 
+from config import *
 from consts_sivf_keywords import *
 
 from class_canvas import Canvas
@@ -28,46 +30,56 @@ CHECK_BOUNDS_OPTIMIZATION = 'Check bounds optimization'
 
 def debug_show_image (canvas: Canvas):
     '''This function is for testing and mustnt be used on release'''
+    Warning('This function is for testing and mustnt be used on release')
     from PIL import Image
-    Image.fromarray(canvas.get_pixels_rgba(), 'RGBA').show()
+    Image.fromarray(canvas.get_pixels_rgba(), PIL_IMAGE_OUTPUT_MODE).show()
 
 
 
 
 
 def parse_and_render_shape (shape: dict, shape_name: str, shape_number: int, 
-        canvas_wh: '(canvas_w, canvas_h)', tab: str, tabs: int, defined_vars: dict, 
+        canvas_wh: '(canvas_w, canvas_h)', defined_vars: dict, 
         alpha_blending_type: AlphaBlendingType,
-        color_blending_type: ColorBlendingType) -> Canvas:
+        color_blending_type: ColorBlendingType,
+        tabs: int=0) -> Canvas:
 
-    print((1+tabs)*tab+f'rendering {shape_name}:')
+    # tabs += 1
+    Log((tabs)*TAB+f'rendering {shape_name}:')
 
+    tabs += 1
     inverse = (shape[KW_INVERSE] == KW_TRUE) if KW_INVERSE in shape else False
-    print((2+tabs)*tab+f'{KW_INVERSE} = {inverse}')
+    Log((tabs)*TAB+f'{KW_INVERSE} = {inverse}')
 
     a, r, g, b = cctargb(shape[KW_COLOR][1:])
-    print((2+tabs)*tab+f'{a=}, {r=}, {g=}, {b=}')
+    Log((tabs)*TAB+f'{a=}, {r=}, {g=}, {b=}')
 
     canvas_w, canvas_h = canvas_wh
     canvas = Canvas(canvas_wh)
 
     # on every Y MINUS because pixel grid is growing down, but math coords grows to up
 
+    tabs += 1
+
     if shape_name.startswith(KW_CIRCLE):   # circle
-        canvas_tmp = parse_and_render_circle(shape, canvas_wh, tab, tabs, defined_vars)
-        canvas = blend_canvases(canvas, canvas_tmp, shape_number, alpha_blending_type, color_blending_type)
+        # canvas_tmp = parse_and_render_circle(shape, canvas_wh, defined_vars, tabs)
+        # canvas = blend_canvases(canvas, canvas_tmp, shape_number, alpha_blending_type, color_blending_type, (0, 0), tabs)
+        canvas = parse_and_render_circle(shape, canvas_wh, defined_vars, tabs)
     
     elif shape_name.startswith(KW_SQUARE):   # square
-        canvas_tmp = parse_and_render_square(shape, canvas_wh, tab, tabs, defined_vars)
-        canvas = blend_canvases(canvas, canvas_tmp, shape_number, alpha_blending_type, color_blending_type)
+        # canvas_tmp = parse_and_render_square(shape, canvas_wh, defined_vars, tabs)
+        # canvas = blend_canvases(canvas, canvas_tmp, shape_number, alpha_blending_type, color_blending_type, (0, 0), tabs)
+        canvas = parse_and_render_square(shape, canvas_wh, defined_vars, tabs)
 
     elif shape_name.startswith(KW_TRIANGLE):   # triangle
-        canvas_tmp = parse_and_render_triangle(shape, canvas_wh, tab, tabs, defined_vars)
-        canvas = blend_canvases(canvas, canvas_tmp, shape_number, alpha_blending_type, color_blending_type)
+        # canvas_tmp = parse_and_render_triangle(shape, canvas_wh, defined_vars, tabs)
+        # canvas = blend_canvases(canvas, canvas_tmp, shape_number, alpha_blending_type, color_blending_type, (0, 0), tabs)
+        canvas = parse_and_render_triangle(shape, canvas_wh, defined_vars, tabs)
 
     elif shape_name.startswith(KW_GRADIENT):
-        canvas_tmp = parse_and_render_gradient(shape, canvas_wh, tab, tabs, defined_vars)
-        canvas = blend_canvases(canvas, canvas_tmp, shape_number, alpha_blending_type, color_blending_type)
+        # canvas_tmp = parse_and_render_gradient(shape, canvas_wh, defined_vars, tabs)
+        # canvas = blend_canvases(canvas, canvas_tmp, shape_number, alpha_blending_type, color_blending_type, (0, 0), tabs)
+        canvas = parse_and_render_gradient(shape, canvas_wh, defined_vars, tabs)
 
     else:
         raise ErrorValueUnknown(f"'{shape_name}'", 'Unknown shape')
@@ -79,16 +91,17 @@ def parse_and_render_shape (shape: dict, shape_name: str, shape_number: int,
 
 
 def parse_and_render_circle (shape: dict, canvas_wh: '(canvas_w, canvas_h)',
-        tab: str, tabs: int, defined_vars: dict) -> Canvas:
+        defined_vars: dict, tabs: int=0) -> Canvas:
 
     canvas_w, canvas_h = canvas_wh
     a, r, g, b = cctargb(shape[KW_COLOR][1:])
-    # print(f'{r=}, {g=}, {b=}, {a=}')
+    # Log(f'{r=}, {g=}, {b=}, {a=}')
 
-    inverse = (shape[KW_INVERSE] == KW_TRUE) if KW_INVERSE in shape else False
     x0 =  cetu(shape[KW_XY][0], canvas_wh, defined_vars)
     y0 = -cetu(shape[KW_XY][1], canvas_wh, defined_vars)
+    inverse = (shape[KW_INVERSE] == KW_TRUE) if KW_INVERSE in shape else KW_INVERSE_DEFAULT
     radius = cetu(shape[KW_CIRCLE_R], canvas_wh, defined_vars)
+    used = (shape[KW_USED] == KW_TRUE) if KW_USED in shape else KW_USED_DEFAULT
 
     def _render_circle () -> Canvas:
         # precalculations
@@ -101,6 +114,8 @@ def parse_and_render_circle (shape: dict, canvas_wh: '(canvas_w, canvas_h)',
         WarningTodo(CHECK_BOUNDS_OPTIMIZATION)
 
         for y in range(canvas_h):
+            if y % OUTPUT_RENDER_PROGRESS_PERIOD == 0:
+                Log((tabs)*TAB+f'{100*y//(canvas_h)}%')
             for x in range(canvas_w):
                 if ( (x+tx)**2 + (y+ty)**2 < radius2 ) ^ inverse:
                     _canvas._pixels[y, x] = [
@@ -108,7 +123,7 @@ def parse_and_render_circle (shape: dict, canvas_wh: '(canvas_w, canvas_h)',
                         g,
                         b,
                         a,
-                        True
+                        used
                     ]
         return _canvas
         # end of _render_circle()
@@ -120,16 +135,17 @@ def parse_and_render_circle (shape: dict, canvas_wh: '(canvas_w, canvas_h)',
 
 
 def parse_and_render_square (shape: dict, canvas_wh: '(canvas_w, canvas_h)',
-        tab: str, tabs: int, defined_vars: dict) -> Canvas:
+        defined_vars: dict, tabs: int=0) -> Canvas:
 
     canvas_w, canvas_h = canvas_wh
     a, r, g, b = cctargb(shape[KW_COLOR][1:])
-    # print(f'{r=}, {g=}, {b=}, {a=}')
+    # Log(f'{r=}, {g=}, {b=}, {a=}')
 
-    inverse = (shape[KW_INVERSE] == KW_TRUE) if KW_INVERSE in shape else False
     x0 =  cetu(shape[KW_XY][0], canvas_wh, defined_vars) - 1/2
     y0 = -cetu(shape[KW_XY][1], canvas_wh, defined_vars) - 1/2
+    inverse = (shape[KW_INVERSE] == KW_TRUE) if KW_INVERSE in shape else KW_INVERSE_DEFAULT
     side = cetu(shape[KW_SQUARE_SIDE], canvas_wh, defined_vars)
+    used = (shape[KW_USED] == KW_TRUE) if KW_USED in shape else KW_USED_DEFAULT
 
     def _render_square () -> Canvas:
         # precalculations:
@@ -145,6 +161,8 @@ def parse_and_render_square (shape: dict, canvas_wh: '(canvas_w, canvas_h)',
         WarningTodo(CHECK_BOUNDS_OPTIMIZATION)
 
         for y in range(canvas_h):
+            if y % OUTPUT_RENDER_PROGRESS_PERIOD == 0:
+                Log((tabs)*TAB+f'{100*y//(canvas_h)}%')
             for x in range(canvas_w):
                 if ( x_min <= x+tx <= x_max and y_min <= y+ty <= y_max ) ^ inverse:
                     _canvas._pixels[y, x] = [
@@ -152,7 +170,7 @@ def parse_and_render_square (shape: dict, canvas_wh: '(canvas_w, canvas_h)',
                         g,
                         b,
                         a,
-                        True
+                        used
                     ]
         return _canvas
         # end of _render_square()
@@ -164,19 +182,20 @@ def parse_and_render_square (shape: dict, canvas_wh: '(canvas_w, canvas_h)',
 
 
 def parse_and_render_triangle (shape: dict, canvas_wh: '(canvas_w, canvas_h)',
-        tab: str, tabs: int, defined_vars: dict) -> Canvas:
+        defined_vars: dict, tabs: int=0) -> Canvas:
 
     canvas_w, canvas_h = canvas_wh
     a, r, g, b = cctargb(shape[KW_COLOR][1:])
-    # print(f'{r=}, {g=}, {b=}, {a=}')
+    # Log(f'{r=}, {g=}, {b=}, {a=}')
 
-    inverse = (shape[KW_INVERSE] == KW_TRUE) if KW_INVERSE in shape else False
     x1 =  cetu(shape[KW_XY][0], canvas_wh, defined_vars)
     y1 = -cetu(shape[KW_XY][1], canvas_wh, defined_vars)
     x2 =  cetu(shape[KW_XY][2], canvas_wh, defined_vars)
     y2 = -cetu(shape[KW_XY][3], canvas_wh, defined_vars)
     x3 =  cetu(shape[KW_XY][4], canvas_wh, defined_vars)
     y3 = -cetu(shape[KW_XY][5], canvas_wh, defined_vars)
+    inverse = (shape[KW_INVERSE] == KW_TRUE) if KW_INVERSE in shape else KW_INVERSE_DEFAULT
+    used = (shape[KW_USED] == KW_TRUE) if KW_USED in shape else KW_USED_DEFAULT
     
     def _render_triangle () -> Canvas:
         def _triangle_sign (x1: float, y1: float,
@@ -202,6 +221,8 @@ def parse_and_render_triangle (shape: dict, canvas_wh: '(canvas_w, canvas_h)',
         WarningTodo(CHECK_BOUNDS_OPTIMIZATION)
 
         for y in range(canvas_h):
+            if y % OUTPUT_RENDER_PROGRESS_PERIOD == 0:
+                Log((tabs)*TAB+f'{100*y//(canvas_h)}%')
             for x in range(canvas_w):
                 if _is_inside_triangle(x+tx, y+ty, x1, y1, x2, y2, x3, y3) ^ inverse:
                     _canvas._pixels[y, x] = [
@@ -209,7 +230,7 @@ def parse_and_render_triangle (shape: dict, canvas_wh: '(canvas_w, canvas_h)',
                         g,
                         b,
                         a,
-                        True
+                        used
                     ]
         return _canvas
         # end of _render_triangle()
@@ -221,7 +242,7 @@ def parse_and_render_triangle (shape: dict, canvas_wh: '(canvas_w, canvas_h)',
 
 
 def parse_and_render_gradient (shape: dict, canvas_wh: '(canvas_w, canvas_h)',
-        tab: str, tabs: int, defined_vars: dict) -> Canvas:
+        defined_vars: dict, tabs: int=0) -> Canvas:
 
     canvas_w, canvas_h = canvas_wh
 
@@ -230,13 +251,14 @@ def parse_and_render_gradient (shape: dict, canvas_wh: '(canvas_w, canvas_h)',
         # inverse = (shape[KW_INVERSE] == KW_TRUE) if KW_INVERSE in shape else False
 
     A, R, G, B = cctargb(shape[KW_COLOR][1:])
-    # print(f'{A=}, {R=}, {G=}, {B=}')
+    # Log(f'{A=}, {R=}, {G=}, {B=}')
 
     x0 =  cetu(shape[KW_XY][0], canvas_wh, defined_vars)
     y0 = -cetu(shape[KW_XY][1], canvas_wh, defined_vars)
-    is_fading = (shape[KW_GRADIENT_FADING] == KW_TRUE) if KW_GRADIENT_FADING in shape else False
+    is_fading = (shape[KW_GRADIENT_FADING] == KW_TRUE) if KW_GRADIENT_FADING in shape else KW_GRADIENT_FADING_DEFAULT
     points_json = shape[KW_GRADIENT_POINTS]
-    # print(points_json)
+    used = (shape[KW_USED] == KW_TRUE) if KW_USED in shape else KW_USED_DEFAULT
+    # Log(points_json)
 
     class Point:
         def __init__ (self, x: float, y: float, sigma: float, color: '(a, r, g, b)'):
@@ -251,7 +273,7 @@ def parse_and_render_gradient (shape: dict, canvas_wh: '(canvas_w, canvas_h)',
     points = []
     for key_point_json in points_json:
         point_json = points_json[key_point_json]
-        # print(point_json)
+        # Log(point_json)
         points.append(
             Point(
                 +cetu(point_json[KW_XY][0], canvas_wh, defined_vars),
@@ -260,7 +282,7 @@ def parse_and_render_gradient (shape: dict, canvas_wh: '(canvas_w, canvas_h)',
                 cctargb(point_json[KW_COLOR][1:])
             )
         )
-    # print(points)
+    # Log(points)
 
     def _render_gradient () -> Canvas:
         def _dist (dx: float, dy: float):
@@ -281,6 +303,8 @@ def parse_and_render_gradient (shape: dict, canvas_wh: '(canvas_w, canvas_h)',
 
         if is_fading:   # is_fading == True
             for y in range(canvas_h):
+                if y % OUTPUT_RENDER_PROGRESS_PERIOD == 0:
+                    Log((tabs)*TAB+f'{100*y//(canvas_h)}%')
                 for x in range(canvas_w):
                     gausses = []
                     for point in points:
@@ -303,14 +327,16 @@ def parse_and_render_gradient (shape: dict, canvas_wh: '(canvas_w, canvas_h)',
                     b += k * B
 
                     # if random.randint(0, 10**3) < 1:
-                    #     print(f'{gausses=}')
-                    #     print(f'{a=}, {r=}, {g=}, {b=}')
-                    #     print()
+                    #     Log(f'{gausses=}')
+                    #     Log(f'{a=}, {r=}, {g=}, {b=}')
+                    #     Log()
 
                     _canvas._pixels[y, x] = [ r, g, b, a, True ]
 
         else:   # is_fading == False
             for y in range(canvas_h):
+                if y % OUTPUT_RENDER_PROGRESS_PERIOD == 0:
+                    Log((tabs)*TAB+f'{100*y//(canvas_h)}%')
                 for x in range(canvas_w):
                     gausses = []
                     for point in points:
@@ -326,9 +352,9 @@ def parse_and_render_gradient (shape: dict, canvas_wh: '(canvas_w, canvas_h)',
                         b += k * points[i].color[3]
 
                     # if random.randint(0, 10**3) < 1:
-                    #     print(f'{gausses=}')
-                    #     print(f'{a=}, {r=}, {g=}, {b=}')
-                    #     print()
+                    #     Log(f'{gausses=}')
+                    #     Log(f'{a=}, {r=}, {g=}, {b=}')
+                    #     Log()
 
                     _canvas._pixels[y, x] = [ r, g, b, a, True ]
 
@@ -344,26 +370,62 @@ def parse_and_render_gradient (shape: dict, canvas_wh: '(canvas_w, canvas_h)',
 def blend_canvases (canvas_bg: Canvas, canvas_fg: Canvas, shape_number: int,
         alpha_blending_type: AlphaBlendingType,
         color_blending_type: ColorBlendingType,
-        delta_xy: '(delta_x, delta_y)'=(0, 0)) -> Canvas:
+        delta_xy: '(delta_x, delta_y)'=(0, 0), tabs: int=0) -> Canvas:
 
     if (t:=type(canvas_bg)) != Canvas:
-        raise TypeError(f'canvas_bg must be instance of Canvas, but it is {t}')
+        raise ErrorWrongType(t, 'canvas_bg', Canvas)
     if (t:=type(canvas_fg)) != Canvas:
-        raise TypeError(f'canvas_fg must be instance of Canvas, bit it is {t}')
+        raise ErrorWrongType(t, 'canvas_fg', Canvas)
 
-    # print('showing canvas_bg:'); tmp_show_image(canvas_bg)
-    # print('showing canvas_fg:'); tmp_show_image(canvas_fg)
+    # Log('--------------------- started blending ---------------------')
+    Log((tabs)*TAB+'blending canvases:')
+    tabs += 1
+    # Log()
 
-    # print(f'{canvas_bg._pixels = }')
-    # print(f'{canvas_fg._pixels = }')
+
+    # Log('showing canvas_bg:'); tmp_show_image(canvas_bg)
+    # Log('showing canvas_fg:'); tmp_show_image(canvas_fg)
+
+    # Log(f'{canvas_bg._pixels = }')
+    # Log(f'{canvas_fg._pixels = }')
+
+    def _blend_min (V, v, USED, used, shape_number):
+        if USED and used:
+            return min(V, v)
+        elif USED:
+            return V
+        elif used:
+            return v
+        else:
+            return V
+
+    def _blend_max (V, v, USED, used, shape_number):
+        if USED and used:
+            return max(V, v)
+        elif USED:
+            return V
+        elif used:
+            return v
+        else:
+            return V
 
     blending_funcs = (
         # overlap:
         lambda V, v, USED, used, shape_number: v if used else V,
+
         # add:
         lambda V, v, USED, used, shape_number: V + v,
+
         # avg:
-        lambda V, v, USED, used, shape_number: (V*shape_number+v)//(shape_number+1)
+        lambda V, v, USED, used, shape_number: (shape_number*V + v) // (shape_number+1),
+
+        # min:
+        # lambda V, v, USED, used, shape_number: min(V, v) if (USED and used) else V,
+        _blend_min,
+
+        # max:
+        # lambda V, v, USED, used, shape_number: max(V, v) if (USED and used) else V,
+        _blend_max,
     )
 
     delta_x, delta_y = delta_xy
@@ -384,6 +446,8 @@ def blend_canvases (canvas_bg: Canvas, canvas_fg: Canvas, shape_number: int,
     WarningTodo(CHECK_BOUNDS_OPTIMIZATION)
 
     for y in range(y_from, y_to):
+        if y % OUTPUT_RENDER_PROGRESS_PERIOD == 0:
+            Log((tabs)*TAB+f'{100*y//(y_to-y_from)}%')
         for x in range(x_from, x_to):
             if not (0 <= x-delta_x < canvas_fg.w) or not (0 <= y-delta_y < canvas_fg.h):
                 # if x or y of foreground not in its bounds, skip this x,y
@@ -403,6 +467,9 @@ def blend_canvases (canvas_bg: Canvas, canvas_fg: Canvas, shape_number: int,
                 used or USED
             ]
 
+            # if random.randint(0, 10**3) < 1:
+            #     Log(f'{canvas_blend._pixels[y, x]}')
+
     return canvas_blend
 
     # end of blend_canvases
@@ -411,11 +478,12 @@ def blend_canvases (canvas_bg: Canvas, canvas_fg: Canvas, shape_number: int,
 
 # [TODO]: replace by blend_canvases and parse_and_render_<shape>
 def render_shape (color: '(a, r, g, b)', check_func: 'function', shape_n: int,
-        canvas_wh: '(canvas_w, canvas_h)', tab: str, tabs: int,
+        canvas_wh: '(canvas_w, canvas_h)',
         alpha_blending_type: AlphaBlendingType = AlphaBlendingType.default,
-        color_blending_type: ColorBlendingType = ColorBlendingType.default) -> 'ndarray2d':
+        color_blending_type: ColorBlendingType = ColorBlendingType.default,
+        tabs: int=0) -> 'ndarray2d':
 
-    raise ErrorDeprecated('func render_shape is deprecated, and shouldnt be used from now')
+    raise ErrorDeprecated('func render_shape')
 
     canvas_w, canvas_h = canvas_wh
     a, r, g, b = color[0], color[1], color[2], color[3]
@@ -431,7 +499,7 @@ def render_shape (color: '(a, r, g, b)', check_func: 'function', shape_n: int,
                     pixels[y, x] = [r, g, b, a]
                 #print(pixels[y, x], end=' ')
             if y % (100) == 0:
-                print((tabs+3)*tab+f'{100*y//canvas_h}%')
+                print((tabs+3)*TAB+f'{100*y//canvas_h}%')
             #print('\n\n\n')
 
     elif alpha_blending_type == AlphaBlendingType.overlap and color_blending_type == ColorBlendingType.add:
@@ -446,7 +514,7 @@ def render_shape (color: '(a, r, g, b)', check_func: 'function', shape_n: int,
                     ]
                 #print(pixels[y, x], end=' ')
             if y % (100) == 0:
-                print((tabs+3)*tab+f'{100*y//canvas_h}%')
+                print((tabs+3)*TAB+f'{100*y//canvas_h}%')
             #print('\n\n\n')
 
     elif alpha_blending_type == AlphaBlendingType.add and color_blending_type == ColorBlendingType.add:
@@ -461,7 +529,7 @@ def render_shape (color: '(a, r, g, b)', check_func: 'function', shape_n: int,
                     ]
                 #print(pixels[y, x], end=' ')
             if y % (100) == 0:
-                print((tabs+3)*tab+f'{100*y//canvas_h}%')
+                print((tabs+3)*TAB+f'{100*y//canvas_h}%')
             #print('\n\n\n')
 
     elif alpha_blending_type == AlphaBlendingType.add and color_blending_type == ColorBlendingType.overlap:
@@ -476,7 +544,7 @@ def render_shape (color: '(a, r, g, b)', check_func: 'function', shape_n: int,
                     ]
                 #print(pixels[y, x], end=' ')
             if y % (100) == 0:
-                print((tabs+3)*tab+f'{100*y//canvas_h}%')
+                print((tabs+3)*TAB+f'{100*y//canvas_h}%')
             #print('\n\n\n')
 
     
@@ -492,7 +560,7 @@ def render_shape (color: '(a, r, g, b)', check_func: 'function', shape_n: int,
                     ]
                 #print(pixels[y, x], end=' ')
             if y % (100) == 0:
-                print((tabs+3)*tab+f'{100*y//canvas_h}%')
+                print((tabs+3)*TAB+f'{100*y//canvas_h}%')
             #print('\n\n\n')
 
     elif alpha_blending_type == AlphaBlendingType.avg and color_blending_type == ColorBlendingType.avg:
@@ -507,7 +575,7 @@ def render_shape (color: '(a, r, g, b)', check_func: 'function', shape_n: int,
                     ]
                 #print(pixels[y, x], end=' ')
             if y % (100) == 0:
-                print((tabs+3)*tab+f'{100*y//canvas_h}%')
+                print((tabs+3)*TAB+f'{100*y//canvas_h}%')
             #print('\n\n\n')
 
     else:

@@ -1,5 +1,5 @@
 '''
-SIVF-renderer   v0.4.0
+SIVF-renderer   v0.4.1
 
 This is main file of SIVF-renderer
 ''' 
@@ -19,8 +19,8 @@ from PIL import Image
 from funcs_errors import *
 from funcs_warnings import *
 
-from consts_sivf_keywords import *
 from config import *
+from consts_sivf_keywords import *
 
 from class_canvas import Canvas
 from class_alpha_blending import AlphaBlendingType
@@ -60,11 +60,6 @@ elif CONFIG_RENDER_BACKEND == CONFIG_RENDER_BACKEND_ANY:
     raise ErrorNotImpemented('Any render backend')
 
 
-
-
-
-TAB = '    '   # for fancy logs
-tabs = 0
 
 
 
@@ -116,17 +111,17 @@ def remove_suffix (string: str, suffix: str):
 
 
 def render_from_file (file_input_name: str) -> None:
-    print(f'Starting Render of \'{file_input_name}\'\n')
+    Log(f'Starting Render of \'{file_input_name}\'\n')
 
     file_input = open(file_input_name, 'r')
     content = ''
     #print('content = ', end='')
     for line in file_input:
-        print(line, end='')
+        Log(line, end='')
         content += line
-    print()
+    Log()
 
-    # file_output_name_without_ext = file output name without extension
+    # file_output_name_without_ext -> file output name without extension
     file_output_name_without_ext = remove_suffix(file_input_name, '.sivf')
     render_from_content(content, file_output_name_without_ext)
 
@@ -139,7 +134,7 @@ def render_from_content (content: dict, file_output_name_without_ext: str) -> No
     # delete all comment   // blahblahblah
     content = re.sub(re.compile('//.*?\n'), '', content)
 
-    #print(content)
+    #Log(content)
     content_dict = json.loads(content)
     #print_all_about(content_dict)
 
@@ -149,9 +144,9 @@ def render_from_content (content: dict, file_output_name_without_ext: str) -> No
 
     color_scheme = content_dict[KW_COLOR_SCHEME]
     image_dict = content_dict[KW_IMAGE]
-    #print(f'{image_dict = }\n')
+    #Log(f'{image_dict = }\n')
 
-    # delete all what is not layer in "image"
+    # deletes all what is not layer in "image" (for example blending):
     # keys_to_delete = []
     # for key in image_dict:
     #     if not key.startswith(KW_LAYER):
@@ -160,7 +155,7 @@ def render_from_content (content: dict, file_output_name_without_ext: str) -> No
     # for key in keys_to_delete:
     #     del image_dict[key]
 
-    # print(f'{image_dict = }\n')
+    # Log(f'{image_dict = }\n')
 
     defined_vars = content_dict[KW_VARS] if KW_VARS in content_dict else {}
 
@@ -184,43 +179,53 @@ def render_from_content (content: dict, file_output_name_without_ext: str) -> No
 
 
 def save_canvas_to_image (canvas: Canvas, output_file_name: str):
-    result_image = Image.fromarray(canvas.get_pixels_rgba(), 'RGBA')
+    result_image = Image.fromarray(canvas.get_pixels_rgba(), PIL_IMAGE_OUTPUT_MODE)
     result_image.save(output_file_name)
 
 
 
 def show_canvas_to_image (canvas: Canvas):
-    Image.fromarray(canvas.get_pixels_rgba(), 'RGBA').show()
+    Image.fromarray(canvas.get_pixels_rgba(), PIL_IMAGE_OUTPUT_MODE).show()
 
 
 
-def parse_and_render_entity (entity: dict, entity_name: str, shape_number: int,
-        canvas_wh: '(canvas_w, canvas_h)', delta_xy: '(delta_x, delta_y)' = (0, 0)) -> Canvas:
-    global TAB, tabs, defined_vars
+def parse_and_render_entity (entity: dict, entity_name: str,
+        shape_number: int, canvas_wh: '(canvas_w, canvas_h)',
+        delta_xy: '(delta_x, delta_y)' = (0, 0), tabs: int=0) -> Canvas:
+    global defined_vars
 
     canvas_rendering = Canvas(canvas_wh)
 
     alpha_blending_type = AlphaBlendingType.default
     color_blending_type = ColorBlendingType.default
 
+    # tabs += 1
+
     #for      key      in  dict :
     for subentity_name in entity:
-        print((tabs)*TAB+f'parsing {subentity_name}:')
+        # Log(f'{tabs = }')
+        Log((tabs)*TAB+f'parsing {subentity_name}:')
         subentity = entity[subentity_name]
+
+        tabs += 1
 
         if subentity_name.startswith(KW_BLENDING):   # blending
             alpha_blending_type = AlphaBlendingType.from_str(entity[KW_BLENDING][0])
             color_blending_type = ColorBlendingType.from_str(entity[KW_BLENDING][1])
-            # print(f'{alpha_blending_type = }')
-            # print(f'{color_blending_type = }')
+            # Log(f'{alpha_blending_type = }')
+            # Log(f'{color_blending_type = }')
 
         elif subentity_name.startswith(KW_LAYER):   # layer
-            tabs += 1
-            canvas_layer = parse_and_render_entity(subentity, subentity_name, shape_number, canvas_wh, delta_xy)
-            tabs -= 1
+            # tabs += 1
+            canvas_layer = parse_and_render_entity(
+                subentity, subentity_name, shape_number,
+                canvas_wh, (0, 0), tabs
+            )
+            # tabs -= 1
             canvas_rendering = blend_canvases(
                 canvas_rendering, canvas_layer, shape_number,
-                alpha_blending_type, color_blending_type
+                alpha_blending_type, color_blending_type,
+                delta_xy, tabs,
             )
 
         elif subentity_name.startswith(KW_LAYER_DELTA_XY):
@@ -229,7 +234,8 @@ def parse_and_render_entity (entity: dict, entity_name: str, shape_number: int,
             delta_xy = delta_x, delta_y
 
         elif subentity_name.startswith(KW_MESH):   # mesh
-            raise ErrorNotImpemented()
+            raise ErrorNotImpemented(f'{KW_MESH}')
+
             entity_layer_repeated = subentity[KW_LAYER]
             n_xleft_ydown_xright_yup = subentity[KW_MESH_N_XLEFT_YDOWN_XRIGHT_YUP]
             nxyxy = n_xleft_ydown_xright_yup   # for shorteness
@@ -247,7 +253,7 @@ def parse_and_render_entity (entity: dict, entity_name: str, shape_number: int,
             tabs += 1
             for h in range(-nxyxy[1], nxyxy[3]+1):
                 for w in range(-nxyxy[0], nxyxy[2]+1):
-                    print((tabs)*TAB+f'parsing mesh[{w}][{h}]:')
+                    Log((tabs)*TAB+f'parsing mesh[{w}][{h}]:')
                     tabs += 1
                     parse_and_render_entity(
                         entity_layer_repeated,
@@ -264,15 +270,19 @@ def parse_and_render_entity (entity: dict, entity_name: str, shape_number: int,
         else:   # shape
             canvas_shape = parse_and_render_shape(
                 subentity, subentity_name, shape_number,
-                canvas_wh, TAB, tabs, defined_vars,
+                canvas_wh, defined_vars,
                 alpha_blending_type, color_blending_type,
+                tabs,
             )
             canvas_rendering = blend_canvases(
                 canvas_rendering, canvas_shape, shape_number,
-                alpha_blending_type, color_blending_type, delta_xy
+                alpha_blending_type, color_blending_type,
+                delta_xy, tabs,
             )
 
-        print()
+        tabs -= 1
+
+        # Log()
 
     return canvas_rendering
 

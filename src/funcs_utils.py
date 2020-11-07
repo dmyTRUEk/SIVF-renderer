@@ -2,13 +2,24 @@
 My usefull utils
 '''
 
-import time
 import random
+import time
+import traceback
 
 
 from funcs_errors import *
 from funcs_warnings import *
+from funcs_log import *
 
+
+
+
+
+def print_traceback ():
+    t = traceback.format_stack(limit=None)
+    t = ''.join(t[:-2])
+    t = '\n  '.join(t.split('\n'))
+    print(t)
 
 
 
@@ -53,7 +64,7 @@ def timer_end ():
 
 def timer_show ():
     global timer_begin_0, timer_end_0
-    print(f'Time elapsed from BEGIN..END = {timer_end_0-timer_begin_0} seconds')
+    Log(f'Time elapsed from BEGIN..END = {timer_end_0-timer_begin_0} seconds')
 
 
 

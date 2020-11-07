@@ -1,7 +1,7 @@
 '''
 This file contains all SIVF KeyWords (KW)
 
-In fact, this files determines keywords which is used in sivf file
+In fact, this files determines keywords which is used in '*.sivf' file
 
 P.S. all is sorted:
 1) by scope
@@ -10,34 +10,40 @@ P.S. all is sorted:
 
 
 
-# some const:
+# GLOBAL CONST:
 KW_TRUE = 'true'
 KW_FALSE = 'false'
 
-# root properties:
+# ROOT PROPERTIES:
 KW_CANVAS_WH = 'canvas_wh'
 KW_COLOR_SCHEME = 'color_scheme'
 KW_IMAGE = 'image'
 KW_VARS = 'vars'
 
-# blending and blending types:
+# BLENDING AND BLENDING TYPES:
 KW_BLENDING = 'blending'
 KW_BLENDINGTYPE_ADD = 'add'
 KW_BLENDINGTYPE_AVG = 'avg'
 KW_BLENDINGTYPE_DEFAULT = 'default'
+KW_BLENDINGTYPE_MIN = 'min'
+KW_BLENDINGTYPE_MAX = 'max'
 KW_BLENDINGTYPE_OVERLAP = 'overlap'
 
-# global shape properties:
+# GLOBAL SHAPE PROPERTIES:
 KW_COLOR = 'color'
 KW_INVERSE = 'inverse'
+KW_INVERSE_DEFAULT = False
+KW_USED = 'used'
+KW_USED_DEFAULT = True
 KW_XY = 'xy'
 
-# entities and their custom properties:
+# ENTITIES AND THEIR CUSTOM PROPERTIES:
 KW_CIRCLE = 'circle'
 KW_CIRCLE_R = 'r'
 
 KW_GRADIENT = 'gradient'
 KW_GRADIENT_FADING = 'fading'
+KW_GRADIENT_FADING_DEFAULT = True
 KW_GRADIENT_POINTS = 'points'
 KW_GRADIENT_SIGMA = 'sigma'
 

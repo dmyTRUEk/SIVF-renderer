@@ -18,6 +18,8 @@ class ColorBlendingType (Enum):
     overlap = 0
     add = 1
     avg = 2
+    minimum = 3
+    maximum = 4
 
     def from_str (s: str) -> 'ColorBlendingType':
         if s == KW_BLENDINGTYPE_DEFAULT:
@@ -31,6 +33,12 @@ class ColorBlendingType (Enum):
 
         elif s == KW_BLENDINGTYPE_AVG:
             return ColorBlendingType.avg
+
+        elif s == KW_BLENDINGTYPE_MIN:
+            return ColorBlendingType.minimum
+
+        elif s == KW_BLENDINGTYPE_MAX:
+            return ColorBlendingType.maximum
 
         else:
             raise ErrorValueUnknown(s)

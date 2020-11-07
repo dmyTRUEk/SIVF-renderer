@@ -11,7 +11,6 @@ Dont forget to look for [TODO] in code ;)
 
 
 ## Refactoring:
-- rewrite blend_canvases error using own errors
 - add warnings
 - remove gloval vars
 - in convert_funcs import only sqrt, sin, ..., for security reason
@@ -40,8 +39,14 @@ Dont forget to look for [TODO] in code ;)
 
 
 ## New features:
-- different backend support
-- 'min', 'max' blending types
+- different backend support:
+  - yaml
+  - sivf any
+  - cython
+  - rust
+  - numpy
+  - gpu
+  - render any
 - time measurments for every figure
 - shapes intersection (overlap, add, 1minus2, 2minus1 etc)
   for better rendering use separate layer, and only then overlap/add/avg main layer and new
@@ -78,9 +83,15 @@ Dont forget to look for [TODO] in code ;)
 - 2020.04.18: Deleted numpy process func in heavy_funcs.pyx, DOCUMENTATION
 
 - 2020.10.29: v0.3.3: Saving before global changes
-- 2020.11.04: v0.4.0a1: done new architucture by layer, but only circles for now. Currently, only rgb_logo can be renderer.
-- 2020.11.06: v0.4.0a2: Added '.gitignore', Added sivf KeyWords, Added and used Error and Warning systems, A lot of Refactoring, some new Documentation in code
-- 2020.11.07: Traceback in Warnings, Added Config, Added delta_xy support for layers, Fixed bug that wrapped figure if part of it was out of canvas
+- 2020.11.04: v0.4.0a1: done new architucture by layer, but only circles for now.
+  Currently, only rgb_logo can be renderer.
+- 2020.11.06: v0.4.0a2: Added '.gitignore', Added sivf KeyWords,
+  Added and used Error and Warning systems,
+  A lot of Refactoring, some new Documentation in code
+- 2020.11.07: Added Gradient, Added Config, Added Log system,
+  Added delta_xy support for layers, Added min, max blend types,
+  Fixed bug that wrapped figure if part of it was out of canvas,
+  Traceback in Warnings, 
 
 
 

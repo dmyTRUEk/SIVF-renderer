@@ -4,13 +4,22 @@ This file contains Configurations
 
 
 
+# FOR ERRORS, WARNINGS, LOGS:
+TAG = '[{0}]: '
+
+# ERRORS:
+TAG_ERROR = 'ERROR'
+DIVIDER_ERROR = ' -> '
+
 # WARNINGS:
+TAG_WARNING = 'WARNING'
 IS_SHOWING_WARNINGS = False
 IS_SHOWING_WARNING_TRACEBACK = False
 DIVIDER_WARNINGS = ' -> '
 
-# ERRORS:
-DIVIDER_ERROR = ' -> '
+# LOGS:
+TAG_LOG = 'LOG'
+IS_SHOWING_LOG = True
 
 
 
@@ -32,6 +41,25 @@ CONFIG_SIVF_BACKEND_JSON = 'config_sivf_backend_json'
 CONFIG_SIVF_BACKEND_YAML = 'config_sivf_backend_yaml'
 
 CONFIG_SIVF_BACKEND = CONFIG_SIVF_BACKEND_JSON
+
+
+
+# RENDER PROGRESS:
+TAB = 2 * ' '                            # for fancy logs
+OUTPUT_RENDER_PROGRESS = True
+OUTPUT_RENDER_PROGRESS_PERIOD = 50
+
+
+
+# PIL SETTINGS:
+PIL_IMAGE_OUTPUT_MODE = 'RGBA'
+
+
+
+# SIVF DEFAULTS:
+# KW_INVERSE_DEFAULT = False
+# KW_GRADIENT_FADING_DEFAULT = True
+# KW_USED_DEFAULT = True
 
 
 
