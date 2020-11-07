@@ -5,7 +5,7 @@ Dont forget to look for [TODO] in code ;)
 
 
 ## Meta:
-- write comments in all files (*.py *.md)
+- write comments in all files (\*.py)
 - rewrite documentation
 
 
@@ -34,7 +34,7 @@ Dont forget to look for [TODO] in code ;)
 ## Optimisations:
 - smart bound in parse_and_render_<shape> instead of full canvas
 - faster rendering by:
-  - [ ] change 'if (...): ...' -> '(...)\*(...) + (...)\*(...)'
+  - [ ] change `if (...): ...` -> `(...)\*(...) + (...)\*(...)`
   - [ ] Cython
   - [ ] matrix operations by numpy
   - [ ] function written on C/C++/Rust (for rust use pyo3)
