@@ -7,6 +7,7 @@ Dont forget to look for [TODO] in code ;)
 ## Meta:
 - write comments in all files (\*.py)
 - rewrite documentation
+- check examples, write comments in them
 
 
 
