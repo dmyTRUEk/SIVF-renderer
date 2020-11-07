@@ -62,23 +62,15 @@ def parse_and_render_shape (shape: dict, shape_name: str, shape_number: int,
     tabs += 1
 
     if shape_name.startswith(KW_CIRCLE):   # circle
-        # canvas_tmp = parse_and_render_circle(shape, canvas_wh, defined_vars, tabs)
-        # canvas = blend_canvases(canvas, canvas_tmp, shape_number, alpha_blending_type, color_blending_type, (0, 0), tabs)
         canvas = parse_and_render_circle(shape, canvas_wh, defined_vars, tabs)
     
     elif shape_name.startswith(KW_SQUARE):   # square
-        # canvas_tmp = parse_and_render_square(shape, canvas_wh, defined_vars, tabs)
-        # canvas = blend_canvases(canvas, canvas_tmp, shape_number, alpha_blending_type, color_blending_type, (0, 0), tabs)
         canvas = parse_and_render_square(shape, canvas_wh, defined_vars, tabs)
 
     elif shape_name.startswith(KW_TRIANGLE):   # triangle
-        # canvas_tmp = parse_and_render_triangle(shape, canvas_wh, defined_vars, tabs)
-        # canvas = blend_canvases(canvas, canvas_tmp, shape_number, alpha_blending_type, color_blending_type, (0, 0), tabs)
         canvas = parse_and_render_triangle(shape, canvas_wh, defined_vars, tabs)
 
     elif shape_name.startswith(KW_GRADIENT):
-        # canvas_tmp = parse_and_render_gradient(shape, canvas_wh, defined_vars, tabs)
-        # canvas = blend_canvases(canvas, canvas_tmp, shape_number, alpha_blending_type, color_blending_type, (0, 0), tabs)
         canvas = parse_and_render_gradient(shape, canvas_wh, defined_vars, tabs)
 
     else:
@@ -473,115 +465,6 @@ def blend_canvases (canvas_bg: Canvas, canvas_fg: Canvas, shape_number: int,
     return canvas_blend
 
     # end of blend_canvases
-
-
-
-# [TODO]: replace by blend_canvases and parse_and_render_<shape>
-def render_shape (color: '(a, r, g, b)', check_func: 'function', shape_n: int,
-        canvas_wh: '(canvas_w, canvas_h)',
-        alpha_blending_type: AlphaBlendingType = AlphaBlendingType.default,
-        color_blending_type: ColorBlendingType = ColorBlendingType.default,
-        tabs: int=0) -> 'ndarray2d':
-
-    raise ErrorDeprecated('func render_shape')
-
-    canvas_w, canvas_h = canvas_wh
-    a, r, g, b = color[0], color[1], color[2], color[3]
-
-    # canvas = Canvas(canvas_wh)
-
-    pixels = np.zeros((canvas_h, canvas_w, 4), dtype=np.uint8)
-
-    if alpha_blending_type == AlphaBlendingType.overlap and color_blending_type == ColorBlendingType.overlap:
-        for y in range(canvas_h):
-            for x in range(canvas_w):
-                if check_func(x, y):
-                    pixels[y, x] = [r, g, b, a]
-                #print(pixels[y, x], end=' ')
-            if y % (100) == 0:
-                print((tabs+3)*TAB+f'{100*y//canvas_h}%')
-            #print('\n\n\n')
-
-    elif alpha_blending_type == AlphaBlendingType.overlap and color_blending_type == ColorBlendingType.add:
-        for y in range(canvas_h):
-            for x in range(canvas_w):
-                if check_func(x, y):
-                    pixels[y, x] = [
-                        pixels[y, x, 0] + r,
-                        pixels[y, x, 1] + g,
-                        pixels[y, x, 2] + b,
-                        a
-                    ]
-                #print(pixels[y, x], end=' ')
-            if y % (100) == 0:
-                print((tabs+3)*TAB+f'{100*y//canvas_h}%')
-            #print('\n\n\n')
-
-    elif alpha_blending_type == AlphaBlendingType.add and color_blending_type == ColorBlendingType.add:
-        for y in range(canvas_h):
-            for x in range(canvas_w):
-                if check_func(x, y):
-                    pixels[y, x] = [
-                        pixels[y, x, 0] + r,
-                        pixels[y, x, 1] + g,
-                        pixels[y, x, 2] + b,
-                        pixels[y, x, 3] + a,
-                    ]
-                #print(pixels[y, x], end=' ')
-            if y % (100) == 0:
-                print((tabs+3)*TAB+f'{100*y//canvas_h}%')
-            #print('\n\n\n')
-
-    elif alpha_blending_type == AlphaBlendingType.add and color_blending_type == ColorBlendingType.overlap:
-        for y in range(canvas_h):
-            for x in range(canvas_w):
-                if check_func(x, y):
-                    pixels[y, x] = [
-                        r,
-                        g,
-                        b,
-                        pixels[y, x, 3] + a,
-                    ]
-                #print(pixels[y, x], end=' ')
-            if y % (100) == 0:
-                print((tabs+3)*TAB+f'{100*y//canvas_h}%')
-            #print('\n\n\n')
-
-    
-    elif alpha_blending_type == AlphaBlendingType.overlap and color_blending_type == ColorBlendingType.avg:
-        for y in range(canvas_h):
-            for x in range(canvas_w):
-                if check_func(x, y):
-                    pixels[y, x] = [
-                        (pixels[y, x, 0]*shape_n+r)//(shape_n+1),
-                        (pixels[y, x, 1]*shape_n+g)//(shape_n+1),
-                        (pixels[y, x, 2]*shape_n+b)//(shape_n+1),
-                        a
-                    ]
-                #print(pixels[y, x], end=' ')
-            if y % (100) == 0:
-                print((tabs+3)*TAB+f'{100*y//canvas_h}%')
-            #print('\n\n\n')
-
-    elif alpha_blending_type == AlphaBlendingType.avg and color_blending_type == ColorBlendingType.avg:
-        for y in range(canvas_h):
-            for x in range(canvas_w):
-                if check_func(x, y):
-                    pixels[y, x] = [
-                        (pixels[y, x, 0]*shape_n+r)//(shape_n+1),
-                        (pixels[y, x, 1]*shape_n+g)//(shape_n+1),
-                        (pixels[y, x, 2]*shape_n+b)//(shape_n+1),
-                        (pixels[y, x, 3]*shape_n+a)//(shape_n+1)
-                    ]
-                #print(pixels[y, x], end=' ')
-            if y % (100) == 0:
-                print((tabs+3)*TAB+f'{100*y//canvas_h}%')
-            #print('\n\n\n')
-
-    else:
-        raise Exception(f'Error: This Blending Type Combination is unsupported for now: {color_blending_type = }, {alpha_blending_type = }')
-
-    # end of render_shape 
 
 
 
