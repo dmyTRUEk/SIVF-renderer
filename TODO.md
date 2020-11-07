@@ -25,8 +25,6 @@ Dont forget to look for [TODO] in code ;)
 
 
 ## Bugs:
-- if delta_x/y > 25% -> wrapping shoudnt be done
-  (caused by blend_canvases?)
 - check if render is pixel perfect
 
 

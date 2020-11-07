@@ -258,7 +258,6 @@ def parse_and_render_entity (entity: dict, entity_name: str, shape_number: int,
                 subentity, subentity_name, shape_number,
                 canvas_wh, TAB, tabs, defined_vars,
                 alpha_blending_type, color_blending_type,
-                delta_xy
             )
             canvas_rendering = blend_canvases(
                 canvas_rendering, canvas_shape, shape_number,

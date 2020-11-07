@@ -34,8 +34,7 @@ def debug_show_image (canvas: Canvas):
 def parse_and_render_shape (shape: dict, shape_name: str, shape_number: int, 
         canvas_wh: '(canvas_w, canvas_h)', tab: str, tabs: int, defined_vars: dict, 
         alpha_blending_type: AlphaBlendingType,
-        color_blending_type: ColorBlendingType,
-        delta_xy: '(delta_x, delta_y)' = (0, 0)) -> Canvas:
+        color_blending_type: ColorBlendingType) -> Canvas:
 
     print((1+tabs)*tab+f'rendering {shape_name}:')
 
@@ -45,7 +44,7 @@ def parse_and_render_shape (shape: dict, shape_name: str, shape_number: int,
     a, r, g, b = cctargb(shape[KW_COLOR][1:])
     print((2+tabs)*tab+f'{a=}, {r=}, {g=}, {b=}')
 
-    print((2+tabs)*tab+f'{KW_DELTA_XY} = {delta_xy}')
+    # print((2+tabs)*tab+f'{KW_DELTA_XY} = {delta_xy}')
 
     canvas_w, canvas_h = canvas_wh
     canvas = Canvas(canvas_wh)
@@ -170,8 +169,7 @@ def parse_and_render_circle (shape: dict, shape_number: int,
 def parse_and_render_square (shape: dict, shape_number: int, 
         canvas_wh: '(canvas_w, canvas_h)', tab: str, tabs: int, defined_vars: dict, 
         alpha_blending_type: AlphaBlendingType,
-        color_blending_type: ColorBlendingType,
-        delta_xy: '(delta_x, delta_y)' = (0, 0)) -> Canvas:
+        color_blending_type: ColorBlendingType) -> Canvas:
     
     def _render_square () -> Canvas:
         raise ErrorNotImpemented()
@@ -183,8 +181,7 @@ def parse_and_render_square (shape: dict, shape_number: int,
 def parse_and_render_triangle (shape: dict, shape_number: int, 
         canvas_wh: '(canvas_w, canvas_h)', tab: str, tabs: int, defined_vars: dict, 
         alpha_blending_type: AlphaBlendingType,
-        color_blending_type: ColorBlendingType,
-        delta_xy: '(delta_x, delta_y)' = (0, 0)) -> Canvas:
+        color_blending_type: ColorBlendingType) -> Canvas:
     
     def _render_triangle () -> Canvas:
         raise ErrorNotImpemented()
