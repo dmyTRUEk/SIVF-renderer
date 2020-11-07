@@ -58,7 +58,6 @@ def parse_and_render_shape (shape: dict, shape_name: str, shape_number: int,
             canvas_wh, tab, tabs, defined_vars,
             alpha_blending_type,
             color_blending_type,
-            delta_xy
         )
         canvas = blend_canvases(canvas, canvas_tmp, shape_number, alpha_blending_type, color_blending_type)
     
@@ -126,8 +125,7 @@ def parse_and_render_shape (shape: dict, shape_name: str, shape_number: int,
 def parse_and_render_circle (shape: dict, shape_number: int, 
         canvas_wh: '(canvas_w, canvas_h)', tab: str, tabs: int, defined_vars: dict, 
         alpha_blending_type: AlphaBlendingType,
-        color_blending_type: ColorBlendingType,
-        delta_xy: '(delta_x, delta_y)' = (0, 0)) -> Canvas:
+        color_blending_type: ColorBlendingType) -> Canvas:
 
     canvas_w, canvas_h = canvas_wh
 
@@ -136,8 +134,8 @@ def parse_and_render_circle (shape: dict, shape_number: int,
 
     inverse = (shape[KW_INVERSE] == KW_TRUE) if KW_INVERSE in shape else False
     radius = cetu(shape[KW_R], canvas_wh, defined_vars)
-    circle_x =  cetu(shape[KW_XY][0], canvas_wh, defined_vars) + delta_xy[0]
-    circle_y = -cetu(shape[KW_XY][1], canvas_wh, defined_vars) + delta_xy[1]
+    circle_x =  cetu(shape[KW_XY][0], canvas_wh, defined_vars)
+    circle_y = -cetu(shape[KW_XY][1], canvas_wh, defined_vars)
 
     def _render_circle () -> Canvas:
         radius2 = radius**2
@@ -150,7 +148,9 @@ def parse_and_render_circle (shape: dict, shape_number: int,
 
         for y in range(canvas_h):
             for x in range(canvas_w):
-                if ( (x+tx)**2 + (y+ty)**2 < radius2 ) ^ inverse:
+                if is_true := ( (x+tx)**2 + (y+ty)**2 < radius2 ) ^ inverse:
+                    # if random.randint(0, 10**2) < 1 and not inverse:
+                    #     print(f'\n{x=}, {y=}\n{tx=}, {ty=}\n{radius=}\n{is_true=}\n')
                     _canvas._pixels[y, x] = [
                         r,
                         g,
@@ -174,9 +174,9 @@ def parse_and_render_square (shape: dict, shape_number: int,
         delta_xy: '(delta_x, delta_y)' = (0, 0)) -> Canvas:
     
     def _render_square () -> Canvas:
-        raise ErrorNotImpemented('not implemented yet')
+        raise ErrorNotImpemented()
 
-    raise ErrorNotImpemented('not implemented yet')
+    raise ErrorNotImpemented()
 
 
 
@@ -187,9 +187,9 @@ def parse_and_render_triangle (shape: dict, shape_number: int,
         delta_xy: '(delta_x, delta_y)' = (0, 0)) -> Canvas:
     
     def _render_triangle () -> Canvas:
-        raise ErrorNotImpemented('not implemented yet')
+        raise ErrorNotImpemented()
 
-    raise ErrorNotImpemented('not implemented yet')
+    raise ErrorNotImpemented()
 
 
 
@@ -220,11 +220,16 @@ def blend_canvases (canvas_bg: Canvas, canvas_fg: Canvas, shape_number: int,
 
     delta_x, delta_y = delta_xy
 
-    x_from = delta_x - canvas_fg.w//2
-    y_from = delta_y - canvas_fg.h//2
+    # old bounds for blending
+    # x_from = delta_x - canvas_fg.w//2
+    # y_from = delta_y - canvas_fg.h//2
+    # x_to = canvas_bg.w // 2
+    # y_to = canvas_bg.h // 2
 
-    x_to = canvas_bg.w // 2
-    y_to = canvas_bg.h // 2
+    x_from = 0
+    y_from = 0
+    x_to = canvas_bg.w
+    y_to = canvas_bg.h
 
     canvas_blend = Canvas(canvas_bg.wh, canvas_bg.get_pixels_rgbau())
 
@@ -232,14 +237,15 @@ def blend_canvases (canvas_bg: Canvas, canvas_fg: Canvas, shape_number: int,
 
     for y in range(y_from, y_to):
         for x in range(x_from, x_to):
+            if not (0 <= x-delta_x < canvas_fg.w) or not (0 <= y-delta_y < canvas_fg.h):
+                # if x or y of foreground not in its bounds, skip this x,y
+                continue
+
             color_bg = canvas_bg._pixels[y, x]
             color_fg = canvas_fg._pixels[y-delta_y, x-delta_x]
 
             R, G, B, A, USED = color_bg     # BACKGROUND
             r, g, b, a, used = color_fg     # foreground
-
-            # if random.randint(0, 10**3) < 1: 
-            #     print(f'{r=}, {g=}, {b=}, {a=}')
 
             canvas_blend._pixels[y, x] = [
                 blending_funcs[color_blending_type.value](R, r, USED, used, shape_number),
@@ -251,7 +257,7 @@ def blend_canvases (canvas_bg: Canvas, canvas_fg: Canvas, shape_number: int,
 
     return canvas_blend
 
-    # end of blend_canvass
+    # end of blend_canvases
 
 
 

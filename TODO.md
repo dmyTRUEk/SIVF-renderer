@@ -11,18 +11,23 @@ Dont forget to look for [TODO] in code ;)
 
 
 ## Refactoring:
+- rewrite blend_canvases error using own errors
 - add warnings
-- use sivf KW everywhere
-- print 'parsing ent...' out of loop?
 - remove gloval vars
-- use or delete 'shape_number' in one of main functions
 - in convert_funcs import only sqrt, sin, ..., for security reason
-- rewrite heavy_funcs_cy.pyx from heavy_funcs_py.py
 
 
 
 ## Changes:
 - in .sivf use x, y separetly, so: xy -> x, y
+- dont pass delta_xy to parse_and_render_<shape>
+
+
+
+## Bugs:
+- if delta_x/y > 25% -> wrapping shoudnt be done
+  (caused by blend_canvases?)
+- check if render is pixel perfect
 
 
 
@@ -30,7 +35,7 @@ Dont forget to look for [TODO] in code ;)
 - smart bound in parse_and_render_<shape> instead of full canvas
 - faster rendering by:
   - [ ] change 'if (...): ...' -> '(...)\*(...) + (...)\*(...)'
-  - [ ] Cython 
+  - [ ] Cython
   - [ ] matrix operations by numpy
   - [ ] function written on C/C++/Rust (for rust use pyo3)
   - [ ] gpu: render by fragment shaders

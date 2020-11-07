@@ -165,7 +165,7 @@ def render_from_content (content: dict) -> None:
     funcs_utils.timer_show()
 
     if canvas_rendered.wh != canvas_wh:
-        raise ErrorNotEqual(canvas_rendered.wh, canvas_wh, 'canvas_rendered.wh', 'canvas_wh')
+        raise ErrorNotEqual(canvas_rendered.wh, canvas_wh, 'canvas_rendered.wh', KW_CANVAS_WH)
 
     save_canvas_to_image(canvas_rendered, 'image.png')
     show_canvas_to_image(canvas_rendered)
@@ -213,6 +213,12 @@ def parse_and_render_entity (entity: dict, entity_name: str, shape_number: int,
                 canvas_rendering, canvas_layer, shape_number,
                 alpha_blending_type, color_blending_type
             )
+
+        elif subentity_name.startswith(KW_DELTA_XY):
+            # print(f'{subentity = }')
+            delta_x = int( cetu(subentity[0], canvas_wh, defined_vars) )
+            delta_y = int( cetu(subentity[1], canvas_wh, defined_vars) )
+            delta_xy = delta_x, delta_y
 
         elif subentity_name.startswith(KW_MESH):   # mesh
             raise ErrorNotImpemented()
