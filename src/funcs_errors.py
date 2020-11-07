@@ -2,9 +2,9 @@
 This file conains all my ERRORS
 ''' 
 
+from config import DIVIDER_ERROR
 
 
-DIVIDER = ' -> '
 
 
 
@@ -14,20 +14,20 @@ class ErrorValueUnknown (Exception):
         print(f'{value = }')
         super().__init__(
             ( message_main ) +
-            ( (DIVIDER+message_additional) if (message_additional!='') else ('') ) +
-            ( (DIVIDER+str(value)) if (value!=None) else ('') )
+            ( (DIVIDER_ERROR+message_additional) if (message_additional!='') else ('') ) +
+            ( (DIVIDER_ERROR+str(value)) if (value!=None) else ('') )
         )
 
 
 
-class ErrorValueValueWrong (Exception):
+class ErrorValueWrong (Exception):
     MESSAGE_DEFAULT = 'Value is WRONG'
     def __init__ (self, value=None, message_additional='', message_main=MESSAGE_DEFAULT):
         print(f'{value = }')
         super().__init__(
             ( message_main ) +
-            ( (DIVIDER+message_additional) if (message_additional!='') else ('') ) +
-            ( (DIVIDER+str(value)) if (value!=None) else ('') )
+            ( (DIVIDER_ERROR+message_additional) if (message_additional!='') else ('') ) +
+            ( (DIVIDER_ERROR+str(value)) if (value!=None) else ('') )
         )
 
 
@@ -37,7 +37,7 @@ class ErrorDeprecated (Exception):
     def __init__ (self, message_additional='', message_main=MESSAGE_DEFAULT):
         super().__init__(
             ( message_main ) +
-            ( (DIVIDER+message_additional) if (message_additional!='') else ('') )
+            ( (DIVIDER_ERROR+message_additional) if (message_additional!='') else ('') )
         )
 
 
@@ -47,7 +47,7 @@ class ErrorNotImpemented (Exception):
     def __init__ (self, message_additional='', message_main=MESSAGE_DEFAULT):
         super().__init__(
             ( message_main ) +
-            ( (DIVIDER+message_additional) if (message_additional!='') else ('') )
+            ( (DIVIDER_ERROR+message_additional) if (message_additional!='') else ('') )
         )
 
 

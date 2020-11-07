@@ -1,5 +1,5 @@
 '''
-SIVF-renderer   v0.4.0a2
+SIVF-renderer   v0.4.0
 
 This is main file of SIVF-renderer
 ''' 
@@ -107,22 +107,32 @@ def main () -> None:
 
 
 
-def render_from_file (file_name: str) -> None:
-    print(f'Starting Render of \'{file_name}\'\n')
+def remove_suffix (string: str, suffix: str):
+    if string.endswith(suffix):
+        return string[:-len(suffix)]
+    else:
+        return string
 
-    file = open(file_name, 'r')
+
+
+def render_from_file (file_input_name: str) -> None:
+    print(f'Starting Render of \'{file_input_name}\'\n')
+
+    file_input = open(file_input_name, 'r')
     content = ''
     #print('content = ', end='')
-    for line in file:
+    for line in file_input:
         print(line, end='')
         content += line
     print()
 
-    render_from_content(content)
+    # file_output_name_without_ext = file output name without extension
+    file_output_name_without_ext = remove_suffix(file_input_name, '.sivf')
+    render_from_content(content, file_output_name_without_ext)
 
 
 
-def render_from_content (content: dict) -> None:
+def render_from_content (content: dict, file_output_name_without_ext: str) -> None:
     # delete all comments   /* blahblahblah */
     content = re.sub(re.compile('/\*.*?\*/', re.DOTALL), '', content)
 
@@ -141,15 +151,14 @@ def render_from_content (content: dict) -> None:
     image_dict = content_dict[KW_IMAGE]
     #print(f'{image_dict = }\n')
 
-    # [TODO]: wtf is this?
-    # delete all what is not layer
-    keys_to_delete = []
-    for key in image_dict:
-        if not key.startswith(KW_LAYER):
-            keys_to_delete.append(key)
+    # delete all what is not layer in "image"
+    # keys_to_delete = []
+    # for key in image_dict:
+    #     if not key.startswith(KW_LAYER):
+    #         keys_to_delete.append(key)
 
-    for key in keys_to_delete:
-        del image_dict[key]
+    # for key in keys_to_delete:
+    #     del image_dict[key]
 
     # print(f'{image_dict = }\n')
 
@@ -165,7 +174,9 @@ def render_from_content (content: dict) -> None:
     if canvas_rendered.wh != canvas_wh:
         raise ErrorNotEqual(canvas_rendered.wh, canvas_wh, 'canvas_rendered.wh', KW_CANVAS_WH)
 
-    save_canvas_to_image(canvas_rendered, 'image.png')
+    file_output_name = f'{file_output_name_without_ext}_{canvas_wh[0]}x{canvas_wh[1]}' + '.png'
+
+    save_canvas_to_image(canvas_rendered, file_output_name)
     show_canvas_to_image(canvas_rendered)
 
     # end of render_from_content
@@ -212,8 +223,7 @@ def parse_and_render_entity (entity: dict, entity_name: str, shape_number: int,
                 alpha_blending_type, color_blending_type
             )
 
-        elif subentity_name.startswith(KW_DELTA_XY):
-            # print(f'{subentity = }')
+        elif subentity_name.startswith(KW_LAYER_DELTA_XY):
             delta_x = int( cetu(subentity[0], canvas_wh, defined_vars) )
             delta_y = int( cetu(subentity[1], canvas_wh, defined_vars) )
             delta_xy = delta_x, delta_y
@@ -221,7 +231,7 @@ def parse_and_render_entity (entity: dict, entity_name: str, shape_number: int,
         elif subentity_name.startswith(KW_MESH):   # mesh
             raise ErrorNotImpemented()
             entity_layer_repeated = subentity[KW_LAYER]
-            n_xleft_ydown_xright_yup = subentity[KW_N_XLEFT_YDOWN_XRIGHT_YUP]
+            n_xleft_ydown_xright_yup = subentity[KW_MESH_N_XLEFT_YDOWN_XRIGHT_YUP]
             nxyxy = n_xleft_ydown_xright_yup   # for shorteness
             nxyxy = (
                 int(cetu(nxyxy[0], canvas_wh, defined_vars)),
@@ -229,7 +239,7 @@ def parse_and_render_entity (entity: dict, entity_name: str, shape_number: int,
                 int(cetu(nxyxy[2], canvas_wh, defined_vars)),
                 int(cetu(nxyxy[3], canvas_wh, defined_vars))
             )
-            _delta_xy_str = subentity[KW_DELTA_XY]
+            _delta_xy_str = subentity[KW_LAYER_DELTA_XY]
 
             _delta_x = cetu(_delta_xy_str[0], canvas_wh, defined_vars)
             _delta_y = cetu(_delta_xy_str[1], canvas_wh, defined_vars)

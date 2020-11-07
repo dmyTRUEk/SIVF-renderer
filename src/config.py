@@ -4,6 +4,17 @@ This file contains Configurations
 
 
 
+# WARNINGS:
+IS_SHOWING_WARNINGS = False
+IS_SHOWING_WARNING_TRACEBACK = False
+DIVIDER_WARNINGS = ' -> '
+
+# ERRORS:
+DIVIDER_ERROR = ' -> '
+
+
+
+# RENDERING BACKEND:
 CONFIG_RENDER_BACKEND_ANY = 'config_render_backend_any'
 CONFIG_RENDER_BACKEND_PYTHON = 'config_render_backend_python'
 CONFIG_RENDER_BACKEND_CYTHON = 'config_render_backend_cython'
@@ -15,6 +26,7 @@ CONFIG_RENDER_BACKEND = CONFIG_RENDER_BACKEND_PYTHON
 
 
 
+# SIVF BACKEND:
 CONFIG_SIVF_BACKEND_ANY = 'config_sivf_backend_any'
 CONFIG_SIVF_BACKEND_JSON = 'config_sivf_backend_json'
 CONFIG_SIVF_BACKEND_YAML = 'config_sivf_backend_yaml'

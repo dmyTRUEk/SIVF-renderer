@@ -2,14 +2,19 @@
 This file contains all SIVF KeyWords (KW)
 
 In fact, this files determines keywords which is used in sivf file
+
+P.S. all is sorted:
+1) by scope
+2) by alphabet order
 '''
 
 
 
-# root properties:
+# some const:
 KW_TRUE = 'true'
 KW_FALSE = 'false'
 
+# root properties:
 KW_CANVAS_WH = 'canvas_wh'
 KW_COLOR_SCHEME = 'color_scheme'
 KW_IMAGE = 'image'
@@ -29,16 +34,21 @@ KW_XY = 'xy'
 
 # entities and their custom properties:
 KW_CIRCLE = 'circle'
-KW_R = 'r'
+KW_CIRCLE_R = 'r'
+
+KW_GRADIENT = 'gradient'
+KW_GRADIENT_FADING = 'fading'
+KW_GRADIENT_POINTS = 'points'
+KW_GRADIENT_SIGMA = 'sigma'
 
 KW_LAYER = 'layer'
-KW_DELTA_XY = 'delta_xy'
+KW_LAYER_DELTA_XY = 'delta_xy'
 
 KW_MESH = 'mesh'
-KW_N_XLEFT_YDOWN_XRIGHT_YUP = 'n_xleft_ydown_xright_yup'
+KW_MESH_N_XLEFT_YDOWN_XRIGHT_YUP = 'n_xleft_ydown_xright_yup'
 
 KW_SQUARE = 'square'
-KW_SIDE = 'side'
+KW_SQUARE_SIDE = 'side'
 
 KW_TRIANGLE = 'triangle'
 

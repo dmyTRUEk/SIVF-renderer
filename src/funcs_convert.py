@@ -6,7 +6,7 @@ from math import *
 # from math import sqrt, abs, sin, cos
 
 
-from funcs_errors import ErrorValueUnknown, ErrorNotImpemented
+from funcs_errors import *
 
 
 
@@ -36,7 +36,7 @@ def convert_color_to_argb (color: '#aarrggbb') -> '(a, r, g, b)':
     if len(color) == 8:
         a, r, g, b = bytes.fromhex(color)
     else:
-        raise ErrorUnknownValue(color, 'maybe, len != 8 ?')
+        raise ErrorValueUnknown(color, 'maybe, len != 8 ?')
     return a, r, g, b
 
 
@@ -76,7 +76,7 @@ def convert_expression_to_units (expression: str, canvas_wh: '(canvas_w, canvas_
 
     else:
         # raise ErrorUnknownValue(f'Unknown dimension in {expression = }')
-        raise ErrorUnknownValue(expression, 'Unknown dimension')
+        raise ErrorValueUnknown(expression, 'Unknown dimension')
 
 
 

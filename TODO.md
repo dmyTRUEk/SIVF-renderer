@@ -48,7 +48,6 @@ Dont forget to look for [TODO] in code ;)
 - local vars (scoping) in layer
 - entities rotating
 - entities:
-  - gradient by n points
   - ellipse
   - rectange
   - line (endless line)

@@ -48,8 +48,6 @@ def parse_and_render_shape (shape: dict, shape_name: str, shape_number: int,
     a, r, g, b = cctargb(shape[KW_COLOR][1:])
     print((2+tabs)*tab+f'{a=}, {r=}, {g=}, {b=}')
 
-    # print((2+tabs)*tab+f'{KW_DELTA_XY} = {delta_xy}')
-
     canvas_w, canvas_h = canvas_wh
     canvas = Canvas(canvas_wh)
 
@@ -67,8 +65,12 @@ def parse_and_render_shape (shape: dict, shape_name: str, shape_number: int,
         canvas_tmp = parse_and_render_triangle(shape, canvas_wh, tab, tabs, defined_vars)
         canvas = blend_canvases(canvas, canvas_tmp, shape_number, alpha_blending_type, color_blending_type)
 
+    elif shape_name.startswith(KW_GRADIENT):
+        canvas_tmp = parse_and_render_gradient(shape, canvas_wh, tab, tabs, defined_vars)
+        canvas = blend_canvases(canvas, canvas_tmp, shape_number, alpha_blending_type, color_blending_type)
+
     else:
-        raise ErrorUnknownValue(f"'{shape_name}'", 'Unknown shape')
+        raise ErrorValueUnknown(f"'{shape_name}'", 'Unknown shape')
 
     return canvas
 
@@ -86,10 +88,10 @@ def parse_and_render_circle (shape: dict, canvas_wh: '(canvas_w, canvas_h)',
     inverse = (shape[KW_INVERSE] == KW_TRUE) if KW_INVERSE in shape else False
     x0 =  cetu(shape[KW_XY][0], canvas_wh, defined_vars)
     y0 = -cetu(shape[KW_XY][1], canvas_wh, defined_vars)
-    radius = cetu(shape[KW_R], canvas_wh, defined_vars)
+    radius = cetu(shape[KW_CIRCLE_R], canvas_wh, defined_vars)
 
     def _render_circle () -> Canvas:
-        # pre calculations
+        # precalculations
         radius2 = radius**2
         tx = -canvas_w/2 - x0 + 1/2
         ty = -canvas_h/2 - y0 + 1/2
@@ -125,11 +127,12 @@ def parse_and_render_square (shape: dict, canvas_wh: '(canvas_w, canvas_h)',
     # print(f'{r=}, {g=}, {b=}, {a=}')
 
     inverse = (shape[KW_INVERSE] == KW_TRUE) if KW_INVERSE in shape else False
-    x0 =  cetu(shape[KW_XY][0], canvas_wh, defined_vars)
-    y0 = -cetu(shape[KW_XY][1], canvas_wh, defined_vars)
-    side = cetu(shape[KW_SIDE], canvas_wh, defined_vars)
+    x0 =  cetu(shape[KW_XY][0], canvas_wh, defined_vars) - 1/2
+    y0 = -cetu(shape[KW_XY][1], canvas_wh, defined_vars) - 1/2
+    side = cetu(shape[KW_SQUARE_SIDE], canvas_wh, defined_vars)
 
     def _render_square () -> Canvas:
+        # precalculations:
         x_min = x0 - side/2
         y_min = y0 - side/2
         x_max = x0 + side/2
@@ -176,20 +179,21 @@ def parse_and_render_triangle (shape: dict, canvas_wh: '(canvas_w, canvas_h)',
     y3 = -cetu(shape[KW_XY][5], canvas_wh, defined_vars)
     
     def _render_triangle () -> Canvas:
-        def triangle_sign (x1: float, y1: float,
+        def _triangle_sign (x1: float, y1: float,
                 x2: float, y2: float, x3: float, y3: float) -> float:
             return (x1-x3)*(y2-y3) - (x2-x3)*(y1-y3)
 
-        def is_inside_triangle (x: float, y: float, x1: float, y1: float,
+        def _is_inside_triangle (x: float, y: float, x1: float, y1: float,
                 x2: float, y2: float, x3: float, y3: float) -> bool:
-            d1 = triangle_sign(x, y, x1, y1, x2, y2)
-            d2 = triangle_sign(x, y, x2, y2, x3, y3)
-            d3 = triangle_sign(x, y, x3, y3, x1, y1)
+            d1 = _triangle_sign(x, y, x1, y1, x2, y2)
+            d2 = _triangle_sign(x, y, x2, y2, x3, y3)
+            d3 = _triangle_sign(x, y, x3, y3, x1, y1)
             #has_neg = (d1 < 0) or (d2 < 0) or (d3 < 0)
             #has_pos = (d1 > 0) or (d2 > 0) or (d3 > 0)
             #return not (has_neg and has_pos)
             return not ( ((d1 < 0) or (d2 < 0) or (d3 < 0)) and ((d1 > 0) or (d2 > 0) or (d3 > 0)) )
 
+        # precalculations:
         tx = -canvas_w/2
         ty = -canvas_h/2
 
@@ -199,7 +203,7 @@ def parse_and_render_triangle (shape: dict, canvas_wh: '(canvas_w, canvas_h)',
 
         for y in range(canvas_h):
             for x in range(canvas_w):
-                if ( is_inside_triangle(x+tx, y+ty, x1, y1, x2, y2, x3, y3) ) ^ inverse:
+                if _is_inside_triangle(x+tx, y+ty, x1, y1, x2, y2, x3, y3) ^ inverse:
                     _canvas._pixels[y, x] = [
                         r,
                         g,
@@ -214,6 +218,126 @@ def parse_and_render_triangle (shape: dict, canvas_wh: '(canvas_w, canvas_h)',
     return canvas
     # end of parse_and_render_triangle()
 
+
+
+def parse_and_render_gradient (shape: dict, canvas_wh: '(canvas_w, canvas_h)',
+        tab: str, tabs: int, defined_vars: dict) -> Canvas:
+
+    canvas_w, canvas_h = canvas_wh
+
+    if KW_INVERSE in shape:
+        raise ErrorValueWrong(shape[KW_INVERSE], '{KW_INVERSE} mustnt be in gradient')
+        # inverse = (shape[KW_INVERSE] == KW_TRUE) if KW_INVERSE in shape else False
+
+    A, R, G, B = cctargb(shape[KW_COLOR][1:])
+    # print(f'{A=}, {R=}, {G=}, {B=}')
+
+    x0 =  cetu(shape[KW_XY][0], canvas_wh, defined_vars)
+    y0 = -cetu(shape[KW_XY][1], canvas_wh, defined_vars)
+    is_fading = (shape[KW_GRADIENT_FADING] == KW_TRUE) if KW_GRADIENT_FADING in shape else False
+    points_json = shape[KW_GRADIENT_POINTS]
+    # print(points_json)
+
+    class Point:
+        def __init__ (self, x: float, y: float, sigma: float, color: '(a, r, g, b)'):
+            self.x = x
+            self.y = y
+            self.sigma = sigma
+            self.color = color
+
+        def __repr__ (self):
+            return f'Point(x={self.x}, y={self.y}, color={self.color})'
+
+    points = []
+    for key_point_json in points_json:
+        point_json = points_json[key_point_json]
+        # print(point_json)
+        points.append(
+            Point(
+                +cetu(point_json[KW_XY][0], canvas_wh, defined_vars),
+                -cetu(point_json[KW_XY][1], canvas_wh, defined_vars),
+                cetu(point_json[KW_GRADIENT_SIGMA], canvas_wh, defined_vars),
+                cctargb(point_json[KW_COLOR][1:])
+            )
+        )
+    # print(points)
+
+    def _render_gradient () -> Canvas:
+        def _dist (dx: float, dy: float):
+            return sqrt(dx**2 + dy**2)
+
+        def _gauss (dist: float, sigma: float):
+            return exp(-(dist)**2 / (2 * sigma**2))
+
+        # precalculations
+        tx = -canvas_w/2 - x0 + 1/2
+        ty = -canvas_h/2 - y0 + 1/2
+        
+        _canvas = Canvas(canvas_wh)
+
+        WarningTodo(CHECK_BOUNDS_OPTIMIZATION)
+
+        gausses = []
+
+        if is_fading:   # is_fading == True
+            for y in range(canvas_h):
+                for x in range(canvas_w):
+                    gausses = []
+                    for point in points:
+                        gausses.append(_gauss( _dist(point.x-(x+tx), -point.y+(y+ty)), point.sigma ))
+                    gausses_sum = sum(gausses)
+
+                    a, r, g, b = 0, 0, 0, 0
+                    for i in range(len(gausses)):
+                        k = gausses[i]
+                        a += k * points[i].color[0]
+                        r += k * points[i].color[1]
+                        g += k * points[i].color[2]
+                        b += k * points[i].color[3]
+
+                    # include fading:
+                    k = 1 - gausses_sum
+                    a += k * A
+                    r += k * R
+                    g += k * G
+                    b += k * B
+
+                    # if random.randint(0, 10**3) < 1:
+                    #     print(f'{gausses=}')
+                    #     print(f'{a=}, {r=}, {g=}, {b=}')
+                    #     print()
+
+                    _canvas._pixels[y, x] = [ r, g, b, a, True ]
+
+        else:   # is_fading == False
+            for y in range(canvas_h):
+                for x in range(canvas_w):
+                    gausses = []
+                    for point in points:
+                        gausses.append(_gauss( _dist(point.x-(x+tx), -point.y+(y+ty)), point.sigma ))
+                    gausses_sum = sum(gausses)
+
+                    a, r, g, b = 0, 0, 0, 0
+                    for i in range(len(gausses)):
+                        k = gausses[i] / gausses_sum
+                        a += k * points[i].color[0]
+                        r += k * points[i].color[1]
+                        g += k * points[i].color[2]
+                        b += k * points[i].color[3]
+
+                    # if random.randint(0, 10**3) < 1:
+                    #     print(f'{gausses=}')
+                    #     print(f'{a=}, {r=}, {g=}, {b=}')
+                    #     print()
+
+                    _canvas._pixels[y, x] = [ r, g, b, a, True ]
+
+        return _canvas
+        # end of _render_gradient()
+
+    canvas = _render_gradient()
+    return canvas
+    # end of parse_and_render_gradient()
 
 
 
