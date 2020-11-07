@@ -14,7 +14,7 @@ Dont forget to look for [TODO] in code ;)
 - add warnings
 - use sivf KW everywhere
 - print 'parsing ent...' out of loop?
-- use 'layer' instead of 'l' and so on
+- remove gloval vars
 - use or delete 'shape_number' in one of main functions
 - in convert_funcs import only sqrt, sin, ..., for security reason
 - rewrite heavy_funcs_cy.pyx from heavy_funcs_py.py
@@ -22,7 +22,6 @@ Dont forget to look for [TODO] in code ;)
 
 
 ## Changes:
-- in .sivf rename 'sizes_wh' -> 'canvas_wh'
 - in .sivf use x, y separetly, so: xy -> x, y
 
 
@@ -30,13 +29,20 @@ Dont forget to look for [TODO] in code ;)
 ## Optimisations:
 - smart bound in parse_and_render_<shape> instead of full canvas
 - faster rendering by:
+  - [ ] change 'if (...): ...' -> '(...)\*(...) + (...)\*(...)'
   - [ ] Cython 
   - [ ] matrix operations by numpy
   - [ ] function written on C/C++/Rust (for rust use pyo3)
+  - [ ] gpu: render by fragment shaders
 
 
 
 ## New features:
+- add different backend support:
+  - different rendering types
+  - different sivf types:
+    - json
+    - yaml
 - add 'min', 'max' blending types
 - add dx, dy for layers
 - add yaml support
@@ -46,6 +52,7 @@ Dont forget to look for [TODO] in code ;)
 - local vars (scoping) in layer
 - entities rotating
 - add entities:
+  - gradient by n points
   - ellipse
   - rectange
   - line (endless line)
@@ -53,7 +60,6 @@ Dont forget to look for [TODO] in code ;)
   - text: xy, color_fg, color_bg, font, ? width between letters
   - polygon
   - right polygon
-  - gradient by n points
 - antialiasing (just upscaled render and then downscale?)
 
 
