@@ -38,20 +38,15 @@ Dont forget to look for [TODO] in code ;)
 
 
 ## New features:
-- add different backend support:
-  - different rendering types
-  - different sivf types:
-    - json
-    - yaml
-- add 'min', 'max' blending types
-- add dx, dy for layers
-- add yaml support
-- add time measurments for every figure
+- different backend support
+- 'min', 'max' blending types
+- 'dx', 'dy' for layers
+- time measurments for every figure
 - shapes intersection (overlap, add, 1minus2, 2minus1 etc)
   for better rendering use separate layer, and only then overlap/add/avg main layer and new
 - local vars (scoping) in layer
 - entities rotating
-- add entities:
+- entities:
   - gradient by n points
   - ellipse
   - rectange
@@ -65,7 +60,7 @@ Dont forget to look for [TODO] in code ;)
 
 
 ## Ideas:
-- add entities:
+- new entities:
   - Bezier curve
   - recursion (but specify steps amount)
 - if "import" found in .sivf, terminate render due to vulnerability risk

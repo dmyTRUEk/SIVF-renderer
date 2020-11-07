@@ -8,7 +8,7 @@ import sys
 # import random
 
 import re
-import json
+# import json
 from os import listdir
 from os.path import isfile, join
 
@@ -20,6 +20,7 @@ from funcs_errors import *
 from funcs_warnings import *
 
 from consts_sivf_keywords import *
+from config import *
 
 from class_canvas import Canvas
 from class_alpha_blending import AlphaBlendingType
@@ -28,14 +29,41 @@ from class_color_blending import ColorBlendingType
 from funcs_convert import *
 import funcs_utils
 
-from funcs_heavy_py import *
-# from funcs_heavy_cy import *
+
+if CONFIG_SIVF_BACKEND == CONFIG_SIVF_BACKEND_JSON:
+    import json
+
+elif CONFIG_SIVF_BACKEND == CONFIG_SIVF_BACKEND_YAML:
+    raise ErrorNotImpemented('YAML sivf backend')
+
+elif CONFIG_SIVF_BACKEND == CONFIG_SIVF_BACKEND_ANY:
+    raise ErrorNotImpemented('Any sivf backend')
+
+
+if CONFIG_RENDER_BACKEND == CONFIG_RENDER_BACKEND_PYTHON:
+    from funcs_heavy_py import *
+
+elif CONFIG_RENDER_BACKEND == CONFIG_RENDER_BACKEND_CYTHON:
+    raise ErrorNotImpemented('Cython render backend')
+    # from funcs_heavy_cy import *
+
+elif CONFIG_RENDER_BACKEND == CONFIG_RENDER_BACKEND_RUST:
+    raise ErrorNotImpemented('Rust render backend')
+
+elif CONFIG_RENDER_BACKEND == CONFIG_RENDER_BACKEND_NUMPY:
+    raise ErrorNotImpemented('Numpy render backend')
+
+elif CONFIG_RENDER_BACKEND == CONFIG_RENDER_BACKEND_GPU:
+    raise ErrorNotImpemented('GPU render backend')
+
+elif CONFIG_RENDER_BACKEND == CONFIG_RENDER_BACKEND_ANY:
+    raise ErrorNotImpemented('Any render backend')
 
 
 
 
 
-tab = '    '   # for fancy logs
+TAB = '    '   # for fancy logs
 tabs = 0
 
 
@@ -159,7 +187,7 @@ def show_canvas_to_image (canvas: Canvas):
 
 def parse_and_render_entity (entity: dict, entity_name: str, shape_number: int,
         canvas_wh: '(canvas_w, canvas_h)', delta_xy: '(delta_x, delta_y)' = (0, 0)) -> Canvas:
-    global tab, tabs, defined_vars
+    global TAB, tabs, defined_vars
 
     canvas_rendering = Canvas(canvas_wh)
 
@@ -168,7 +196,7 @@ def parse_and_render_entity (entity: dict, entity_name: str, shape_number: int,
 
     #for      key      in  dict :
     for subentity_name in entity:
-        print((tabs)*tab+f'parsing {subentity_name}:')
+        print((tabs)*TAB+f'parsing {subentity_name}:')
         subentity = entity[subentity_name]
 
         if subentity_name.startswith(KW_BLENDING):   # blending
@@ -205,7 +233,7 @@ def parse_and_render_entity (entity: dict, entity_name: str, shape_number: int,
             tabs += 1
             for h in range(-nxyxy[1], nxyxy[3]+1):
                 for w in range(-nxyxy[0], nxyxy[2]+1):
-                    print((tabs)*tab+f'parsing mesh[{w}][{h}]:')
+                    print((tabs)*TAB+f'parsing mesh[{w}][{h}]:')
                     tabs += 1
                     parse_and_render_entity(
                         entity_layer_repeated,
@@ -222,7 +250,7 @@ def parse_and_render_entity (entity: dict, entity_name: str, shape_number: int,
         else:   # shape
             canvas_shape = parse_and_render_shape(
                 subentity, subentity_name, shape_number,
-                canvas_wh, tab, tabs, defined_vars,
+                canvas_wh, TAB, tabs, defined_vars,
                 alpha_blending_type, color_blending_type,
                 delta_xy
             )
