@@ -5,11 +5,9 @@ This file contains all for Class Color Blending
 from enum import Enum
 
 
-from funcs_errors import ErrorUnknownValue
+from funcs_errors import ErrorValueUnknown
 
 from consts_sivf_keywords import *
-
-from funcs_errors import ErrorUnknownValue
 
 
 
@@ -35,7 +33,7 @@ class ColorBlendingType (Enum):
             return ColorBlendingType.avg
 
         else:
-            raise ErrorUnknownValue(s)
+            raise ErrorValueUnknown(s)
 
 
 

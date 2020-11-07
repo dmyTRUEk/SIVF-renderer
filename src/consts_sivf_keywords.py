@@ -41,7 +41,6 @@ KW_SQUARE = 'square'
 KW_SIDE = 'side'
 
 KW_TRIANGLE = 'triangle'
-KW_POINTS = '???'
 
 
 

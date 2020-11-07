@@ -6,7 +6,7 @@ from math import *
 # from math import sqrt, abs, sin, cos
 
 
-from funcs_errors import ErrorUnknownValue, ErrorNotImpemented
+from funcs_errors import ErrorValueUnknown, ErrorNotImpemented
 
 
 

@@ -27,17 +27,19 @@ class Canvas:
     '''
     def __init__ (self, _canvas_wh: '(canvas_w, canvas_h)', _pixels: 'nparray2d'=None):
         if (t:=type(_pixels)) != np.ndarray and _pixels != None:
-            raise TypeError(f'_pixels must be numpy.ndarray, but it is {t}')
+            raise ErrorWrongType(_pixels, '_pixels', np.ndarray)
 
         elif type(_pixels) != np.ndarray and _pixels == None:
             # 5 because: red, green, blue, alpha, used
             _pixels = np.zeros((_canvas_wh[1], _canvas_wh[0], 5), dtype=np.uint8)
         
         elif (t:=_pixels.ndim) != 3:
-            raise ValueError('_pixels must be 3d (x, y, rgba) numpy array, but it is {t}d')
+            raise ErrorNotEqual(t, 3, '_pixels.ndim', '3')
 
-        elif (t:=_pixels.shape[0:2]) != _canvas_wh:
-            raise ValueError(f'_pixels sizes must be {_canvas_wh}, but it is {t}')
+        elif (t:=_pixels.shape[0:2][::-1]) != _canvas_wh:
+            # raise ValueError(f'_pixels sizes must be {_canvas_wh}, but it is {t}')
+
+            raise ErrorValuesNotEqual(t, _canvas_wh, '_pixels.shape[0:2][::-1]', '_canvas_wh')
 
         # PUBLIC:
         self.wh = _canvas_wh

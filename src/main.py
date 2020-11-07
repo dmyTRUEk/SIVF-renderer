@@ -68,8 +68,6 @@ tabs = 0
 
 
 
-
-
 def main () -> None:
     argv = sys.argv
     argv.pop(0)

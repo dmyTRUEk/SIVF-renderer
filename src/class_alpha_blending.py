@@ -5,7 +5,7 @@ This file contains all for Class Alpha Blending
 from enum import Enum
 
 
-from funcs_errors import ErrorUnknownValue
+from funcs_errors import ErrorValueUnknown
 
 from consts_sivf_keywords import *
 
@@ -33,7 +33,7 @@ class AlphaBlendingType (Enum):
             return AlphaBlendingType.avg
 
         else:
-            raise ErrorUnknownValue(s)
+            raise ErrorValueUnknown(s)
 
 
 

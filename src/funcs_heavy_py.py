@@ -22,6 +22,10 @@ from funcs_utils import *
 
 
 
+CHECK_BOUNDS_OPTIMIZATION = 'Check bounds optimization'
+
+
+
 def debug_show_image (canvas: Canvas):
     '''This function is for testing and mustnt be used on release'''
     from PIL import Image
@@ -52,65 +56,16 @@ def parse_and_render_shape (shape: dict, shape_name: str, shape_number: int,
     # on every Y MINUS because pixel grid is growing down, but math coords grows to up
 
     if shape_name.startswith(KW_CIRCLE):   # circle
-        canvas_tmp = parse_and_render_circle(
-            shape, shape_number,
-            canvas_wh, tab, tabs, defined_vars,
-            alpha_blending_type,
-            color_blending_type,
-        )
+        canvas_tmp = parse_and_render_circle(shape, canvas_wh, tab, tabs, defined_vars)
         canvas = blend_canvases(canvas, canvas_tmp, shape_number, alpha_blending_type, color_blending_type)
     
     elif shape_name.startswith(KW_SQUARE):   # square
-        raise ErrorNotImpemented('square processing')
+        canvas_tmp = parse_and_render_square(shape, canvas_wh, tab, tabs, defined_vars)
+        canvas = blend_canvases(canvas, canvas_tmp, shape_number, alpha_blending_type, color_blending_type)
 
-        square_x = cetu(shape[KW_XY][0], canvas_wh, defined_vars) + delta_xy[0]
-        square_y = -cetu(shape[KW_XY][1], canvas_wh, defined_vars) + delta_xy[1]
-        side = cetu(shape[KW_SIDE], canvas_wh, defined_vars)
-
-        x_min = square_x - side/2
-        y_min = square_y - side/2
-        x_max = square_x + side/2
-        y_max = square_y + side/2
-        tx = -canvas_w/2
-        ty = -canvas_h/2
-        render_shape(
-            (a, r, g, b),
-            lambda x, y: ( x_min <= x+tx <= x_max and y_min <= y+ty <= y_max ) ^ inverse,
-            shape_number, canvas_wh, tab, tabs,
-            alpha_blending_type, color_blending_type,
-        )
-
-    elif shape_name.startswith('triangle'):   # triangle
-        raise ErrorNotImpemented('triangle processing')
-
-        def triangle_sign (x1: float, y1: float, x2: float, y2: float, x3: float, y3: float) -> float:
-            return (x1-x3)*(y2-y3) - (x2-x3)*(y1-y3)
-
-        def is_inside_triangle (x: float, y: float, x1: float, y1: float, x2: float, y2: float, x3: float, y3: float) -> bool:
-            d1 = triangle_sign(x, y, x1, y1, x2, y2)
-            d2 = triangle_sign(x, y, x2, y2, x3, y3)
-            d3 = triangle_sign(x, y, x3, y3, x1, y1)
-            #has_neg = (d1 < 0) or (d2 < 0) or (d3 < 0)
-            #has_pos = (d1 > 0) or (d2 > 0) or (d3 > 0)
-            #return not (has_neg and has_pos)
-            return not ( ((d1 < 0) or (d2 < 0) or (d3 < 0)) and ((d1 > 0) or (d2 > 0) or (d3 > 0)) )
-
-        x1 =  cetu(shape['xy'][0], canvas_wh, defined_vars) + delta_xy[0]
-        y1 = -cetu(shape['xy'][1], canvas_wh, defined_vars) + delta_xy[1]
-        x2 =  cetu(shape['xy'][2], canvas_wh, defined_vars) + delta_xy[0]
-        y2 = -cetu(shape['xy'][3], canvas_wh, defined_vars) + delta_xy[1]
-        x3 =  cetu(shape['xy'][4], canvas_wh, defined_vars) + delta_xy[0]
-        y3 = -cetu(shape['xy'][5], canvas_wh, defined_vars) + delta_xy[1]
-
-        tx = -canvas_w/2
-        ty = -canvas_h/2
-
-        render_shape(
-            (a, r, g, b),
-            lambda x, y: is_inside_triangle(x+tx, y+ty, x1, y1, x2, y2, x3, y3) ^ inverse,
-            shape_number, canvas_wh, tab, tabs,
-            alpha_blending_type, color_blending_type
-        )
+    elif shape_name.startswith(KW_TRIANGLE):   # triangle
+        canvas_tmp = parse_and_render_triangle(shape, canvas_wh, tab, tabs, defined_vars)
+        canvas = blend_canvases(canvas, canvas_tmp, shape_number, alpha_blending_type, color_blending_type)
 
     else:
         raise ErrorUnknownValue(f"'{shape_name}'", 'Unknown shape')
@@ -121,35 +76,31 @@ def parse_and_render_shape (shape: dict, shape_name: str, shape_number: int,
 
 
 
-def parse_and_render_circle (shape: dict, shape_number: int, 
-        canvas_wh: '(canvas_w, canvas_h)', tab: str, tabs: int, defined_vars: dict, 
-        alpha_blending_type: AlphaBlendingType,
-        color_blending_type: ColorBlendingType) -> Canvas:
+def parse_and_render_circle (shape: dict, canvas_wh: '(canvas_w, canvas_h)',
+        tab: str, tabs: int, defined_vars: dict) -> Canvas:
 
     canvas_w, canvas_h = canvas_wh
-
     a, r, g, b = cctargb(shape[KW_COLOR][1:])
     # print(f'{r=}, {g=}, {b=}, {a=}')
 
     inverse = (shape[KW_INVERSE] == KW_TRUE) if KW_INVERSE in shape else False
+    x0 =  cetu(shape[KW_XY][0], canvas_wh, defined_vars)
+    y0 = -cetu(shape[KW_XY][1], canvas_wh, defined_vars)
     radius = cetu(shape[KW_R], canvas_wh, defined_vars)
-    circle_x =  cetu(shape[KW_XY][0], canvas_wh, defined_vars)
-    circle_y = -cetu(shape[KW_XY][1], canvas_wh, defined_vars)
 
     def _render_circle () -> Canvas:
+        # pre calculations
         radius2 = radius**2
-        tx = -canvas_w/2 - circle_x + 1/2
-        ty = -canvas_h/2 - circle_y + 1/2
+        tx = -canvas_w/2 - x0 + 1/2
+        ty = -canvas_h/2 - y0 + 1/2
         
         _canvas = Canvas(canvas_wh)
 
-        WarningTodo('Check if bounds optimized')
+        WarningTodo(CHECK_BOUNDS_OPTIMIZATION)
 
         for y in range(canvas_h):
             for x in range(canvas_w):
-                if is_true := ( (x+tx)**2 + (y+ty)**2 < radius2 ) ^ inverse:
-                    # if random.randint(0, 10**2) < 1 and not inverse:
-                    #     print(f'\n{x=}, {y=}\n{tx=}, {ty=}\n{radius=}\n{is_true=}\n')
+                if ( (x+tx)**2 + (y+ty)**2 < radius2 ) ^ inverse:
                     _canvas._pixels[y, x] = [
                         r,
                         g,
@@ -166,27 +117,103 @@ def parse_and_render_circle (shape: dict, shape_number: int,
 
 
 
-def parse_and_render_square (shape: dict, shape_number: int, 
-        canvas_wh: '(canvas_w, canvas_h)', tab: str, tabs: int, defined_vars: dict, 
-        alpha_blending_type: AlphaBlendingType,
-        color_blending_type: ColorBlendingType) -> Canvas:
-    
+def parse_and_render_square (shape: dict, canvas_wh: '(canvas_w, canvas_h)',
+        tab: str, tabs: int, defined_vars: dict) -> Canvas:
+
+    canvas_w, canvas_h = canvas_wh
+    a, r, g, b = cctargb(shape[KW_COLOR][1:])
+    # print(f'{r=}, {g=}, {b=}, {a=}')
+
+    inverse = (shape[KW_INVERSE] == KW_TRUE) if KW_INVERSE in shape else False
+    x0 =  cetu(shape[KW_XY][0], canvas_wh, defined_vars)
+    y0 = -cetu(shape[KW_XY][1], canvas_wh, defined_vars)
+    side = cetu(shape[KW_SIDE], canvas_wh, defined_vars)
+
     def _render_square () -> Canvas:
-        raise ErrorNotImpemented()
+        x_min = x0 - side/2
+        y_min = y0 - side/2
+        x_max = x0 + side/2
+        y_max = y0 + side/2
+        tx = -canvas_w/2
+        ty = -canvas_h/2
 
-    raise ErrorNotImpemented()
+        _canvas = Canvas(canvas_wh)
+
+        WarningTodo(CHECK_BOUNDS_OPTIMIZATION)
+
+        for y in range(canvas_h):
+            for x in range(canvas_w):
+                if ( x_min <= x+tx <= x_max and y_min <= y+ty <= y_max ) ^ inverse:
+                    _canvas._pixels[y, x] = [
+                        r,
+                        g,
+                        b,
+                        a,
+                        True
+                    ]
+        return _canvas
+        # end of _render_square()
+
+    canvas = _render_square()
+    return canvas
+    # end of parse_and_render_square()
 
 
 
-def parse_and_render_triangle (shape: dict, shape_number: int, 
-        canvas_wh: '(canvas_w, canvas_h)', tab: str, tabs: int, defined_vars: dict, 
-        alpha_blending_type: AlphaBlendingType,
-        color_blending_type: ColorBlendingType) -> Canvas:
+def parse_and_render_triangle (shape: dict, canvas_wh: '(canvas_w, canvas_h)',
+        tab: str, tabs: int, defined_vars: dict) -> Canvas:
+
+    canvas_w, canvas_h = canvas_wh
+    a, r, g, b = cctargb(shape[KW_COLOR][1:])
+    # print(f'{r=}, {g=}, {b=}, {a=}')
+
+    inverse = (shape[KW_INVERSE] == KW_TRUE) if KW_INVERSE in shape else False
+    x1 =  cetu(shape[KW_XY][0], canvas_wh, defined_vars)
+    y1 = -cetu(shape[KW_XY][1], canvas_wh, defined_vars)
+    x2 =  cetu(shape[KW_XY][2], canvas_wh, defined_vars)
+    y2 = -cetu(shape[KW_XY][3], canvas_wh, defined_vars)
+    x3 =  cetu(shape[KW_XY][4], canvas_wh, defined_vars)
+    y3 = -cetu(shape[KW_XY][5], canvas_wh, defined_vars)
     
     def _render_triangle () -> Canvas:
-        raise ErrorNotImpemented()
+        def triangle_sign (x1: float, y1: float,
+                x2: float, y2: float, x3: float, y3: float) -> float:
+            return (x1-x3)*(y2-y3) - (x2-x3)*(y1-y3)
 
-    raise ErrorNotImpemented()
+        def is_inside_triangle (x: float, y: float, x1: float, y1: float,
+                x2: float, y2: float, x3: float, y3: float) -> bool:
+            d1 = triangle_sign(x, y, x1, y1, x2, y2)
+            d2 = triangle_sign(x, y, x2, y2, x3, y3)
+            d3 = triangle_sign(x, y, x3, y3, x1, y1)
+            #has_neg = (d1 < 0) or (d2 < 0) or (d3 < 0)
+            #has_pos = (d1 > 0) or (d2 > 0) or (d3 > 0)
+            #return not (has_neg and has_pos)
+            return not ( ((d1 < 0) or (d2 < 0) or (d3 < 0)) and ((d1 > 0) or (d2 > 0) or (d3 > 0)) )
+
+        tx = -canvas_w/2
+        ty = -canvas_h/2
+
+        _canvas = Canvas(canvas_wh)
+
+        WarningTodo(CHECK_BOUNDS_OPTIMIZATION)
+
+        for y in range(canvas_h):
+            for x in range(canvas_w):
+                if ( is_inside_triangle(x+tx, y+ty, x1, y1, x2, y2, x3, y3) ) ^ inverse:
+                    _canvas._pixels[y, x] = [
+                        r,
+                        g,
+                        b,
+                        a,
+                        True
+                    ]
+        return _canvas
+        # end of _render_triangle()
+
+    canvas = _render_triangle()
+    return canvas
+    # end of parse_and_render_triangle()
+
 
 
 
@@ -230,7 +257,7 @@ def blend_canvases (canvas_bg: Canvas, canvas_fg: Canvas, shape_number: int,
 
     canvas_blend = Canvas(canvas_bg.wh, canvas_bg.get_pixels_rgbau())
 
-    WarningTodo('Check bound optimization')
+    WarningTodo(CHECK_BOUNDS_OPTIMIZATION)
 
     for y in range(y_from, y_to):
         for x in range(x_from, x_to):
