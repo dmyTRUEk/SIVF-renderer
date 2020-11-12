@@ -33,7 +33,7 @@ Dont forget to look for [TODO] in code ;)
 - faster rendering by:
   - [ ] change `if (...): ...` -> `(...)*(...) + (...)*(...)`
   - [ ] Cython
-  - [ ] matrix operations by numpy
+  - [ ] fast operations for every element in array by numpy
   - [ ] function written on C/C++/Rust (for rust use pyo3)
   - [ ] gpu: render by fragment shaders: (qtrender, opengl, vulkan)
 
