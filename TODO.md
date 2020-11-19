@@ -14,7 +14,7 @@ Dont forget to look for [TODO] in code ;)
 ## Refactoring:
 - add warnings
 - remove gloval vars
-- in convert_funcs import only sqrt, sin, ..., for security reason
+- in convert_funcs import only sqrt, sin, etc, for security reason
 
 
 
@@ -40,6 +40,7 @@ Dont forget to look for [TODO] in code ;)
 
 
 ## New features:
+- shapes intersection (overlap, add, 1minus2, 2minus1 etc)
 - different backend support:
   - yaml
   - sivf any
@@ -49,7 +50,6 @@ Dont forget to look for [TODO] in code ;)
   - gpu
   - render any
 - time measurments for every figure
-- shapes intersection (overlap, add, 1minus2, 2minus1 etc)
   for better rendering use separate layer, and only then overlap/add/avg main layer and new
 - local vars (scoping) in layer
 - entities rotating

@@ -36,6 +36,106 @@ def debug_show_image (canvas: Canvas):
 
 
 
+def parse_and_render_entity (entity: dict, entity_name: str,
+        shape_number: int, canvas_wh: '(canvas_w, canvas_h)',
+        defined_vars: dict, delta_xy: '(delta_x, delta_y)' = (0, 0), tabs: int=0) -> Canvas:
+    # global defined_vars
+
+    canvas_result = Canvas(canvas_wh)
+
+    alpha_blending_type = AlphaBlendingType.default
+    color_blending_type = ColorBlendingType.default
+
+    # tabs += 1
+
+    #for      key      in  dict :
+    for subentity_name in entity:
+        # Log(f'{tabs = }')
+        Log((tabs)*TAB+f'parsing {subentity_name}:')
+        subentity = entity[subentity_name]
+
+        tabs += 1
+
+        if subentity_name.startswith(KW_BLENDING):   # blending
+            alpha_blending_type = AlphaBlendingType.from_str(entity[KW_BLENDING][0])
+            color_blending_type = ColorBlendingType.from_str(entity[KW_BLENDING][1])
+            # Log(f'{alpha_blending_type = }')
+            # Log(f'{color_blending_type = }')
+
+        elif subentity_name.startswith(KW_LAYER):   # layer
+            # tabs += 1
+            canvas_layer = parse_and_render_entity(
+                subentity, subentity_name, shape_number,
+                canvas_wh, defined_vars, (0, 0), tabs
+            )
+            # tabs -= 1
+            canvas_result = blend_canvases(
+                canvas_result, canvas_layer, shape_number,
+                alpha_blending_type, color_blending_type,
+                delta_xy, tabs,
+            )
+
+        elif subentity_name.startswith(KW_LAYER_DELTA_XY):
+            delta_x = int( cetu(subentity[0], canvas_wh, defined_vars) )
+            delta_y = int( cetu(subentity[1], canvas_wh, defined_vars) )
+            delta_xy = delta_x, delta_y
+
+        # elif subentity_name.startswith(KW_COMBINE):
+        #     raise ErrorNotImpemented(f'{KW_COMBINE}')
+
+        elif subentity_name.startswith(KW_MESH):   # mesh
+            raise ErrorNotImpemented(f'{KW_MESH}')
+
+            entity_layer_repeated = subentity[KW_LAYER]
+            n_xleft_ydown_xright_yup = subentity[KW_MESH_N_XLEFT_YDOWN_XRIGHT_YUP]
+            nxyxy = n_xleft_ydown_xright_yup   # for shorteness
+            nxyxy = (
+                int(cetu(nxyxy[0], canvas_wh, defined_vars)),
+                int(cetu(nxyxy[1], canvas_wh, defined_vars)),
+                int(cetu(nxyxy[2], canvas_wh, defined_vars)),
+                int(cetu(nxyxy[3], canvas_wh, defined_vars))
+            )
+            _delta_xy_str = subentity[KW_LAYER_DELTA_XY]
+
+            _delta_x = cetu(_delta_xy_str[0], canvas_wh, defined_vars)
+            _delta_y = cetu(_delta_xy_str[1], canvas_wh, defined_vars)
+
+            tabs += 1
+            for h in range(-nxyxy[1], nxyxy[3]+1):
+                for w in range(-nxyxy[0], nxyxy[2]+1):
+                    Log((tabs)*TAB+f'parsing mesh[{w}][{h}]:')
+                    tabs += 1
+                    parse_and_render_entity(
+                        entity_layer_repeated,
+                        KW_LAYER,
+                        shape_number,
+                        canvas_wh,
+                        (w*_delta_x, h*_delta_y)
+                    )
+                    tabs -= 1
+            tabs -= 1
+
+        #elif ...:   # other special entities
+
+        else:   # shape
+            canvas_shape = parse_and_render_shape(
+                subentity, subentity_name, shape_number,
+                canvas_wh, defined_vars,
+                alpha_blending_type, color_blending_type,
+                tabs,
+            )
+            canvas_result = blend_canvases(
+                canvas_result, canvas_shape, shape_number,
+                alpha_blending_type, color_blending_type,
+                delta_xy, tabs,
+            )
+
+        tabs -= 1
+
+    return canvas_result
+
+    # end of parse_and_render_entity()
+
 
 
 def parse_and_render_shape (shape: dict, shape_name: str, shape_number: int, 
@@ -51,32 +151,36 @@ def parse_and_render_shape (shape: dict, shape_name: str, shape_number: int,
     inverse = (shape[KW_INVERSE] == KW_TRUE) if KW_INVERSE in shape else False
     Log((tabs)*TAB+f'{KW_INVERSE} = {inverse}')
 
-    a, r, g, b = cctargb(shape[KW_COLOR][1:])
-    Log((tabs)*TAB+f'{a=}, {r=}, {g=}, {b=}')
+    if KW_COLOR in shape:
+        a, r, g, b = cctargb(shape[KW_COLOR][1:])
+        Log((tabs)*TAB+f'{a=}, {r=}, {g=}, {b=}')
 
     canvas_w, canvas_h = canvas_wh
-    canvas = Canvas(canvas_wh)
+    canvas_result = Canvas(canvas_wh)
 
     # on every Y MINUS because pixel grid is growing down, but math coords grows to up
 
     tabs += 1
 
-    if shape_name.startswith(KW_CIRCLE):   # circle
-        canvas = parse_and_render_circle(shape, canvas_wh, defined_vars, tabs)
+    if shape_name.startswith(KW_CIRCLE):        # circle
+        canvas_result = parse_and_render_circle(shape, canvas_wh, defined_vars, tabs)
     
-    elif shape_name.startswith(KW_SQUARE):   # square
-        canvas = parse_and_render_square(shape, canvas_wh, defined_vars, tabs)
+    elif shape_name.startswith(KW_SQUARE):      # square
+        canvas_result = parse_and_render_square(shape, canvas_wh, defined_vars, tabs)
 
-    elif shape_name.startswith(KW_TRIANGLE):   # triangle
-        canvas = parse_and_render_triangle(shape, canvas_wh, defined_vars, tabs)
+    elif shape_name.startswith(KW_TRIANGLE):    # triangle
+        canvas_result = parse_and_render_triangle(shape, canvas_wh, defined_vars, tabs)
 
-    elif shape_name.startswith(KW_GRADIENT):
-        canvas = parse_and_render_gradient(shape, canvas_wh, defined_vars, tabs)
+    elif shape_name.startswith(KW_GRADIENT):    # gradient
+        canvas_result = parse_and_render_gradient(shape, canvas_wh, defined_vars, tabs)
+
+    elif shape_name.startswith(KW_COMBINE):     # combine
+        canvas_result = parse_and_render_combine(shape, canvas_wh, defined_vars, tabs)
 
     else:
         raise ErrorValueUnknown(f"'{shape_name}'", 'Unknown shape')
 
-    return canvas
+    return canvas_result
 
     # end of parse_and_render_shape()
 
@@ -120,8 +224,8 @@ def parse_and_render_circle (shape: dict, canvas_wh: '(canvas_w, canvas_h)',
         return _canvas
         # end of _render_circle()
 
-    canvas = _render_circle()
-    return canvas
+    canvas_result = _render_circle()
+    return canvas_result
     # end of parse_and_render_circle()
 
 
@@ -167,8 +271,8 @@ def parse_and_render_square (shape: dict, canvas_wh: '(canvas_w, canvas_h)',
         return _canvas
         # end of _render_square()
 
-    canvas = _render_square()
-    return canvas
+    canvas_result = _render_square()
+    return canvas_result
     # end of parse_and_render_square()
 
 
@@ -227,8 +331,8 @@ def parse_and_render_triangle (shape: dict, canvas_wh: '(canvas_w, canvas_h)',
         return _canvas
         # end of _render_triangle()
 
-    canvas = _render_triangle()
-    return canvas
+    canvas_result = _render_triangle()
+    return canvas_result
     # end of parse_and_render_triangle()
 
 
@@ -239,8 +343,7 @@ def parse_and_render_gradient (shape: dict, canvas_wh: '(canvas_w, canvas_h)',
     canvas_w, canvas_h = canvas_wh
 
     if KW_INVERSE in shape:
-        raise ErrorValueWrong(shape[KW_INVERSE], '{KW_INVERSE} mustnt be in gradient')
-        # inverse = (shape[KW_INVERSE] == KW_TRUE) if KW_INVERSE in shape else False
+        raise ErrorValueWrong(shape[KW_INVERSE], f'{KW_INVERSE} mustnt be in {KW_GRADIENT}')
 
     A, R, G, B = cctargb(shape[KW_COLOR][1:])
     # Log(f'{A=}, {R=}, {G=}, {B=}')
@@ -353,9 +456,193 @@ def parse_and_render_gradient (shape: dict, canvas_wh: '(canvas_w, canvas_h)',
         return _canvas
         # end of _render_gradient()
 
-    canvas = _render_gradient()
-    return canvas
+    canvas_result = _render_gradient()
+    return canvas_result
     # end of parse_and_render_gradient()
+
+
+
+def parse_and_render_combine (shape: dict, canvas_wh: '(canvas_w, canvas_h)',
+        defined_vars: dict, tabs: int=0) -> Canvas:
+
+    canvas_w, canvas_h = canvas_wh
+
+    if KW_INVERSE in shape:
+        raise ErrorValueWrong(shape[KW_INVERSE], f'{KW_INVERSE} mustnt be in {KW_COMBINE}')
+
+    if KW_COMBINE_TYPE not in shape:
+        raise ErrorValueWrong(f'{KW_COMBINE_TYPE} must be provided')
+    combine_type = shape[KW_COMBINE_TYPE]
+    # Log(f'{combine_type = }')
+
+    if KW_COMBINE_FIGURES not in shape:
+        raise ErrorValueWrong(f'{KW_COMBINE_FIGURES} must be provided')
+    combine_figures = shape[KW_COMBINE_FIGURES]
+
+    canvases = []
+    for subentity_name in combine_figures:
+        if not subentity_name.startswith(KW_LAYER):
+            raise ErrorValueWrong(f'must be {KW_LAYER}')
+        # Log(combine_figures[subentity_name])
+
+        canvases.append(
+            parse_and_render_entity(
+                combine_figures[subentity_name],
+                subentity_name, 0, canvas_wh,
+                defined_vars, (0, 0), tabs
+            )
+        )
+
+    def _combine_value_1plus2 (v1: int, v2: int, used1: bool, used2: bool) -> int:
+        if used1 and used2:
+            return v1
+        elif used1 and not used2:
+            return v1
+        elif not used1 and used2:
+            return v2
+        else:   # not used1 and not used2
+            return 0
+    def _combine_used_1plus2 (used1: bool, used2: bool) -> bool:
+        return used1 or used2
+
+    def _combine_value_2plus1 (v1: int, v2: int, used1: bool, used2: bool) -> int:
+        if used1 and used2:
+            return v2
+        elif used1 and not used2:
+            return v1
+        elif not used1 and used2:
+            return v2
+        else:   # not used1 and not used2
+            return 0
+    def _combine_used_2plus1 (used1: bool, used2: bool) -> bool:
+        return used1 or used2
+
+
+    def _combine_value_1minus2 (v1: int, v2: int, used1: bool, used2: bool) -> int:
+        if used1 and used2:
+            return 0
+        elif used1 and not used2:
+            return v1
+        elif not used1 and used2:
+            return 0
+        else:   # not used1 and not used2
+            return 0
+    def _combine_used_1minus2 (used1: bool, used2: bool) -> bool:
+        return (used1) and (not used2)
+
+    def _combine_value_2minus1 (v1: int, v2: int, used1: bool, used2: bool) -> int:
+        if used1 and used2:
+            return 0
+        elif used1 and not used2:
+            return 0
+        elif not used1 and used2:
+            return v2
+        else:   # not used1 and not used2
+            return 0
+    def _combine_used_2minus1 (used1: bool, used2: bool) -> bool:
+        return (not used1) and (used2)
+
+
+    def _combine_value_1product2 (v1: int, v2: int, used1: bool, used2: bool) -> int:
+        if used1 and used2:
+            return v1
+        elif used1 and not used2:
+            return 0
+        elif not used1 and used2:
+            return 0
+        else:   # not used1 and not used2
+            return 0
+    def _combine_used_1product2 (used1: bool, used2: bool) -> bool:
+        return (used1) and (used2)
+
+    def _combine_value_2product1 (v1: int, v2: int, used1: bool, used2: bool) -> int:
+        if used1 and used2:
+            return v2
+        elif used1 and not used2:
+            return 0
+        elif not used1 and used2:
+            return 0
+        else:   # not used1 and not used2
+            return 0
+    def _combine_used_2product1 (used1: bool, used2: bool) -> bool:
+        return (used1) and (used2)
+
+
+    def _combine_value_1symdiff2 (v1: int, v2: int, used1: bool, used2: bool) -> int:
+        if used1 and used2:
+            return 0
+        elif used1 and not used2:
+            return v1
+        elif not used1 and used2:
+            return v2
+        else:   # not used1 and not used2
+            return 0
+    def _combine_used_1symdiff2 (used1: bool, used2: bool) -> bool:
+        return used1 ^ used2
+
+    def _combine_value_2symdiff1 (v1: int, v2: int, used1: bool, used2: bool) -> int:
+        if used1 and used2:
+            return 0
+        elif used1 and not used2:
+            return v1
+        elif not used1 and used2:
+            return v2
+        else:   # not used1 and not used2
+            return 0
+    def _combine_used_2symdiff1 (used1: bool, used2: bool) -> bool:
+        return used1 ^ used2
+
+    combine_value_funcs = {
+        KW_COMBINE_TYPE_1PLUS2: _combine_value_1plus2,
+        KW_COMBINE_TYPE_2PLUS1: _combine_value_2plus1,
+        KW_COMBINE_TYPE_1MINUS2: _combine_value_1minus2,
+        KW_COMBINE_TYPE_2MINUS1: _combine_value_2minus1,
+        KW_COMBINE_TYPE_1PRODUCT2: _combine_value_1product2,
+        KW_COMBINE_TYPE_2PRODUCT1: _combine_value_2product1,
+        KW_COMBINE_TYPE_1SYMDIFF2: _combine_value_1symdiff2,
+        KW_COMBINE_TYPE_2SYMDIFF1: _combine_value_2symdiff1,
+    }
+    combine_used_funcs = {
+        KW_COMBINE_TYPE_1PLUS2: _combine_used_1plus2,
+        KW_COMBINE_TYPE_2PLUS1: _combine_used_2plus1,
+        KW_COMBINE_TYPE_1MINUS2: _combine_used_1minus2,
+        KW_COMBINE_TYPE_2MINUS1: _combine_used_2minus1,
+        KW_COMBINE_TYPE_1PRODUCT2: _combine_used_1product2,
+        KW_COMBINE_TYPE_2PRODUCT1: _combine_used_2product1,
+        KW_COMBINE_TYPE_1SYMDIFF2: _combine_used_1symdiff2,
+        KW_COMBINE_TYPE_2SYMDIFF1: _combine_used_2symdiff1,
+    }
+
+    if combine_type not in combine_value_funcs:
+        raise ErrorValueUnknown(f'{combine_type} is unknown for combine type')
+
+    canvas_result = canvases[0]
+
+    for i in range(1, len(canvases)):
+        for y in range(canvas_h):
+            for x in range(canvas_w):
+                color_1 = canvas_result._pixels[y, x]
+                color_2 = canvases[i]._pixels[y, x]
+
+                r1, g1, b1, a1, used1 = color_1
+                r2, g2, b2, a2, used2 = color_2
+
+                canvas_result._pixels[y, x] = [
+                    combine_value_funcs[combine_type](r1, r2, used1, used2),
+                    combine_value_funcs[combine_type](g1, g2, used1, used2),
+                    combine_value_funcs[combine_type](b1, b2, used1, used2),
+                    combine_value_funcs[combine_type](a1, a2, used1, used2),
+                    combine_used_funcs[combine_type](used1, used2)
+                ]
+
+                if random.randint(0, 10**3) < 1:
+                    Log(f'{canvas_result._pixels[y, x]}')
+                    Log(f'{color_1 = }')
+                    Log(f'{color_2 = }')
+
+    return canvas_result
+    # ErrorNotImpemented('parse_and_render_combine')
+    # end of parse_and_render_combine()
 
 
 
@@ -365,9 +652,9 @@ def blend_canvases (canvas_bg: Canvas, canvas_fg: Canvas, shape_number: int,
         delta_xy: '(delta_x, delta_y)'=(0, 0), tabs: int=0) -> Canvas:
 
     if (t:=type(canvas_bg)) != Canvas:
-        raise ErrorWrongType(t, 'canvas_bg', Canvas)
+        raise ErrorTypeWrong(t, 'canvas_bg', Canvas)
     if (t:=type(canvas_fg)) != Canvas:
-        raise ErrorWrongType(t, 'canvas_fg', Canvas)
+        raise ErrorTypeWrong(t, 'canvas_fg', Canvas)
 
     # Log('--------------------- started blending ---------------------')
     Log((tabs)*TAB+'blending canvases:')
@@ -433,7 +720,7 @@ def blend_canvases (canvas_bg: Canvas, canvas_fg: Canvas, shape_number: int,
     x_to = canvas_bg.w
     y_to = canvas_bg.h
 
-    canvas_blend = Canvas(canvas_bg.wh, canvas_bg.get_pixels_rgbau())
+    canvas_result = Canvas(canvas_bg.wh, canvas_bg.get_pixels_rgbau())
 
     WarningTodo(CHECK_BOUNDS_OPTIMIZATION)
 
@@ -451,7 +738,7 @@ def blend_canvases (canvas_bg: Canvas, canvas_fg: Canvas, shape_number: int,
             R, G, B, A, USED = color_bg     # BACKGROUND
             r, g, b, a, used = color_fg     # foreground
 
-            canvas_blend._pixels[y, x] = [
+            canvas_result._pixels[y, x] = [
                 blending_funcs[color_blending_type.value](R, r, USED, used, shape_number),
                 blending_funcs[color_blending_type.value](G, g, USED, used, shape_number),
                 blending_funcs[color_blending_type.value](B, b, USED, used, shape_number),
@@ -462,7 +749,7 @@ def blend_canvases (canvas_bg: Canvas, canvas_fg: Canvas, shape_number: int,
             # if random.randint(0, 10**3) < 1:
             #     Log(f'{canvas_blend._pixels[y, x]}')
 
-    return canvas_blend
+    return canvas_result
 
     # end of blend_canvases
 
