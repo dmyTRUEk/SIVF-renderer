@@ -618,8 +618,12 @@ def parse_and_render_combine (shape: dict, canvas_wh: '(canvas_w, canvas_h)',
 
     canvas_result = canvases[0]
 
+    Log((tabs)*TAB+'combining:')
+    tabs += 1
     for i in range(1, len(canvases)):
         for y in range(canvas_h):
+            if y % OUTPUT_RENDER_PROGRESS_PERIOD == 0:
+                Log((tabs)*TAB+f'{100*y//(canvas_h)}%')
             for x in range(canvas_w):
                 color_1 = canvas_result._pixels[y, x]
                 color_2 = canvases[i]._pixels[y, x]
@@ -634,11 +638,6 @@ def parse_and_render_combine (shape: dict, canvas_wh: '(canvas_w, canvas_h)',
                     combine_value_funcs[combine_type](a1, a2, used1, used2),
                     combine_used_funcs[combine_type](used1, used2)
                 ]
-
-                if random.randint(0, 10**3) < 1:
-                    Log(f'{canvas_result._pixels[y, x]}')
-                    Log(f'{color_1 = }')
-                    Log(f'{color_2 = }')
 
     return canvas_result
     # ErrorNotImpemented('parse_and_render_combine')
