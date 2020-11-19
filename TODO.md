@@ -29,11 +29,13 @@ Dont forget to look for [TODO] in code ;)
 
 
 ## Optimizations:
+- do render by mask, so colors not calcualted where used=0
 - smart bound in parse_and_render_<shape> instead of full canvas
 - faster rendering by:
   - [ ] change `if (...): ...` -> `(...)*(...) + (...)*(...)`
   - [ ] Cython
   - [ ] fast operations for every element in array by numpy
+  - [ ] OpenCL, for example pyopencl
   - [ ] function written on C/C++/Rust (for rust use pyo3)
   - [ ] gpu: render by fragment shaders: (qtrender, opengl, vulkan)
 
@@ -91,6 +93,7 @@ Dont forget to look for [TODO] in code ;)
   Added delta_xy support for layers, Added min, max blend types,
   Fixed bug that wrapped figure if part of it was out of canvas,
   Traceback in Warnings, 
+- 2020.11.19: v0.4.2h: added combine
 
 
 
