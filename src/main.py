@@ -162,7 +162,7 @@ def render_from_content (content: dict, file_output_name_without_ext: str) -> No
     shape_number = 0
 
     funcs_utils.timer_begin()
-    canvas_rendered = parse_and_render_entity(image_dict, '', shape_number, canvas_wh, defined_vars)
+    canvas_rendered = parse_and_render_entity(image_dict, '', shape_number, canvas_wh, defined_vars, (0, 0))
     funcs_utils.timer_end()
     funcs_utils.timer_show()
 

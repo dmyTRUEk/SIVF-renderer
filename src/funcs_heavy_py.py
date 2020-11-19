@@ -48,6 +48,8 @@ def parse_and_render_entity (entity: dict, entity_name: str,
 
     # tabs += 1
 
+    # on every Y MINUS because pixel grid is growing down, but math coords grows to up
+
     #for      key      in  dict :
     for subentity_name in entity:
         # Log(f'{tabs = }')
@@ -76,8 +78,8 @@ def parse_and_render_entity (entity: dict, entity_name: str,
             )
 
         elif subentity_name.startswith(KW_LAYER_DELTA_XY):
-            delta_x = int( cetu(subentity[0], canvas_wh, defined_vars) )
-            delta_y = int( cetu(subentity[1], canvas_wh, defined_vars) )
+            delta_x = +int( cetu(subentity[0], canvas_wh, defined_vars) )
+            delta_y = -int( cetu(subentity[1], canvas_wh, defined_vars) )
             delta_xy = delta_x, delta_y
 
         # elif subentity_name.startswith(KW_COMBINE):
@@ -157,8 +159,6 @@ def parse_and_render_shape (shape: dict, shape_name: str, shape_number: int,
 
     canvas_w, canvas_h = canvas_wh
     canvas_result = Canvas(canvas_wh)
-
-    # on every Y MINUS because pixel grid is growing down, but math coords grows to up
 
     tabs += 1
 
