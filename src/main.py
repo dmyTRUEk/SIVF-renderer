@@ -1,5 +1,5 @@
 '''
-SIVF-renderer   v0.4.2
+SIVF-renderer   v0.4.3
 
 This is main file of SIVF-renderer
 ''' 
@@ -39,13 +39,19 @@ elif CONFIG_SIVF_BACKEND == CONFIG_SIVF_BACKEND_YAML:
 elif CONFIG_SIVF_BACKEND == CONFIG_SIVF_BACKEND_ANY:
     raise ErrorNotImpemented('Any sivf backend')
 
+else:
+    raise ErroeUnknownValue(CONFIG_SIVF_BACKEND)
+
 
 if CONFIG_RENDER_BACKEND == CONFIG_RENDER_BACKEND_PYTHON:
-    from funcs_heavy_py import *
+    from funcs_heavy_python import *
 
 elif CONFIG_RENDER_BACKEND == CONFIG_RENDER_BACKEND_CYTHON:
-    raise ErrorNotImpemented('Cython render backend')
-    # from funcs_heavy_cy import *
+    # raise ErrorNotImpemented('Cython render backend')
+    from funcs_heavy_cython import *
+
+elif CONFIG_RENDER_BACKEND == CONFIG_RENDER_BACKEND_NUMBA:
+    from funcs_heavy_numba import *
 
 elif CONFIG_RENDER_BACKEND == CONFIG_RENDER_BACKEND_RUST:
     raise ErrorNotImpemented('Rust render backend')
@@ -58,6 +64,9 @@ elif CONFIG_RENDER_BACKEND == CONFIG_RENDER_BACKEND_GPU:
 
 elif CONFIG_RENDER_BACKEND == CONFIG_RENDER_BACKEND_ANY:
     raise ErrorNotImpemented('Any render backend')
+
+else:
+    raise ErroeUnknownValue(CONFIG_RENDER_BACKEND)
 
 
 
@@ -138,9 +147,8 @@ def render_from_content (content: dict, file_output_name_without_ext: str) -> No
     content_dict = json.loads(content)
     #print_all_about(content_dict)
 
-    # global defined_vars
-
-    canvas_wh = ( int(content_dict[KW_CANVAS_WH][0]), int(content_dict[KW_CANVAS_WH][1]) )
+    canvas_w = int(content_dict[KW_CANVAS_WH][0])
+    canvas_h = int(content_dict[KW_CANVAS_WH][1])
 
     color_scheme = content_dict[KW_COLOR_SCHEME]
     image_dict = content_dict[KW_IMAGE]
@@ -162,14 +170,14 @@ def render_from_content (content: dict, file_output_name_without_ext: str) -> No
     shape_number = 0
 
     funcs_utils.timer_begin()
-    canvas_rendered = parse_and_render_entity(image_dict, '', shape_number, canvas_wh, defined_vars, (0, 0))
+    canvas_rendered = parse_and_render_entity(image_dict, '', shape_number, canvas_w, canvas_h, defined_vars, 0, 0, 0)
     funcs_utils.timer_end()
     funcs_utils.timer_show()
 
-    if canvas_rendered.wh != canvas_wh:
-        raise ErrorNotEqual(canvas_rendered.wh, canvas_wh, 'canvas_rendered.wh', KW_CANVAS_WH)
+    if canvas_rendered.w != canvas_w or canvas_rendered.h != canvas_h:
+        raise ErrorNotEqual(canvas_rendered.wh, canvas_w, canvas_h, 'canvas_rendered.wh', KW_CANVAS_WH)
 
-    file_output_name = f'{file_output_name_without_ext}_{canvas_wh[0]}x{canvas_wh[1]}' + '.png'
+    file_output_name = f'{file_output_name_without_ext}_{canvas_w}x{canvas_h}' + '.png'
 
     save_canvas_to_image(canvas_rendered, file_output_name)
     show_canvas_to_image(canvas_rendered)

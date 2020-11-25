@@ -70,7 +70,7 @@ class ErrorNotImpemented (MyError):
 class ErrorTypeWrong (MyError):
     MESSAGE_DEFAULT = 'Var \'{1}\' must be of type {2}, but:\n  type({1}) = {3}'
     def __init__ (self, var, var_name, var_type_expected, message_main=MESSAGE_DEFAULT):
-        super().__init__( message_main.format(var, var_name, type_expected, type(var)) )
+        super().__init__( message_main.format(var, var_name, var_type_expected, type(var)) )
 
 
 

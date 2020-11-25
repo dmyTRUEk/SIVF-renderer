@@ -13,7 +13,6 @@ Dont forget to look for [TODO] in code ;)
 
 ## Refactoring:
 - add warnings
-- remove gloval vars
 - in convert_funcs import only sqrt, sin, etc, for security reason
 
 
@@ -24,16 +23,16 @@ Dont forget to look for [TODO] in code ;)
 
 
 ## Bugs:
+- print: rendering <shape> mask, rendering <shape> color
 - check if render is pixel perfect
 
 
 
 ## Optimizations:
-- do render by mask, so colors not calcualted where used=0
 - smart bound in parse_and_render_<shape> instead of full canvas
 - faster rendering by:
   - [ ] change `if (...): ...` -> `(...)*(...) + (...)*(...)`
-  - [ ] Cython
+  - [x] Cython
   - [ ] fast operations for every element in array by numpy
   - [ ] OpenCL, for example pyopencl
   - [ ] function written on C/C++/Rust (for rust use pyo3)
@@ -42,17 +41,15 @@ Dont forget to look for [TODO] in code ;)
 
 
 ## New features:
-- shapes intersection (overlap, add, 1minus2, 2minus1 etc)
+- log in file
 - different backend support:
   - yaml
   - sivf any
-  - cython
   - rust
   - numpy
   - gpu
   - render any
 - time measurments for every figure
-  for better rendering use separate layer, and only then overlap/add/avg main layer and new
 - local vars (scoping) in layer
 - entities rotating
 - entities:
@@ -94,6 +91,7 @@ Dont forget to look for [TODO] in code ;)
   Fixed bug that wrapped figure if part of it was out of canvas,
   Traceback in Warnings, 
 - 2020.11.19: v0.4.2h: added combine
+- 2020.11.25: v0.4.3: delta_xy -> (delta_x, delta_y), Cython support
 
 
 

@@ -29,7 +29,7 @@ if os.path.basename(os.getcwd()) != 'src':
 
 setup(
     ext_modules = cythonize(
-        additional_path_to_pyx+'heavy_funcs_cy.pyx',
+        additional_path_to_pyx+'funcs_heavy_cython.pyx',
         compiler_directives={'language_level' : sys.version_info[0]}
     ),
     include_dirs = [numpy.get_include()]
@@ -43,7 +43,7 @@ if os.path.basename(os.getcwd()) != 'src':
     os.system('rm -rf src/build')
 
     # move new bulid files to /src
-    os.system('mv heavy_funcs_cy.cpython-38-x86_64-linux-gnu.so src/heavy_funcs_cy.cpython-38-x86_64-linux-gnu.so')
+    os.system('mv funcs_heavy_cython.cpython-38-x86_64-linux-gnu.so src/funcs_heavy_cython.cpython-38-x86_64-linux-gnu.so')
     os.system('mv build/ src/')
 
 print('\n\n')

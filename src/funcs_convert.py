@@ -41,11 +41,11 @@ def convert_color_to_argb (color: '#aarrggbb') -> '(a, r, g, b)':
 
 
 
-def cetu (expression: str, canvas_wh: '(canvas_w, canvas_h)', var: dict = {}):
+def cetu (expression: str, canvas_w, canvas_h: '(canvas_w, canvas_h)', var: dict = {}):
     ''' For documentation look into full named function. '''
-    return convert_expression_to_units(expression, canvas_wh, var)
+    return convert_expression_to_units(expression, canvas_w, canvas_h, var)
 
-def convert_expression_to_units (expression: str, canvas_wh: '(canvas_w, canvas_h)', var: dict = {}):
+def convert_expression_to_units (expression: str, canvas_w, canvas_h: '(canvas_w, canvas_h)', var: dict = {}):
     '''
     Converts '42<dimention>' -> <dimetion rule>(42)
 
@@ -65,8 +65,8 @@ def convert_expression_to_units (expression: str, canvas_wh: '(canvas_w, canvas_
         return float(value)
     
     elif expression.endswith('%'):
-        canvas_w = canvas_wh[0]
-        canvas_h = canvas_wh[1]
+        # canvas_w = canvas_w, canvas_h[0]
+        # canvas_h = canvas_w, canvas_h[1]
         value = eval(expression[:-1])
         return canvas_h * float(value) / 100
 

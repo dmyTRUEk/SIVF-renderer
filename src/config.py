@@ -27,11 +27,12 @@ IS_SHOWING_LOG = True
 CONFIG_RENDER_BACKEND_ANY = 'config_render_backend_any'
 CONFIG_RENDER_BACKEND_PYTHON = 'config_render_backend_python'
 CONFIG_RENDER_BACKEND_CYTHON = 'config_render_backend_cython'
+CONFIG_RENDER_BACKEND_NUMBA  = 'config_render_backend_numba'
 CONFIG_RENDER_BACKEND_NUMPY  = 'config_render_backend_nympy'
 CONFIG_RENDER_BACKEND_RUST   = 'config_render_backend_rust'
 CONFIG_RENDER_BACKEND_GPU    = 'config_render_backend_gpu'
 
-CONFIG_RENDER_BACKEND = CONFIG_RENDER_BACKEND_PYTHON
+CONFIG_RENDER_BACKEND = CONFIG_RENDER_BACKEND_CYTHON
 
 
 
@@ -47,7 +48,7 @@ CONFIG_SIVF_BACKEND = CONFIG_SIVF_BACKEND_JSON
 # RENDER PROGRESS:
 TAB = 2 * ' '                            # for fancy logs
 OUTPUT_RENDER_PROGRESS = True
-OUTPUT_RENDER_PROGRESS_PERIOD = 50
+OUTPUT_RENDER_PROGRESS_PERIOD = 100
 
 
 
