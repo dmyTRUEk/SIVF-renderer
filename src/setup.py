@@ -39,11 +39,11 @@ setup(
 
 if os.path.basename(os.getcwd()) != 'src':
     # delete old builded files
-    os.system('rm src/heavy_funcs_cy.cpython-38-x86_64-linux-gnu.so')
+    os.system('rm src/heavy_funcs_cy.cpython-39-x86_64-linux-gnu.so')
     os.system('rm -rf src/build')
 
     # move new bulid files to /src
-    os.system('mv funcs_heavy_cython.cpython-38-x86_64-linux-gnu.so src/funcs_heavy_cython.cpython-38-x86_64-linux-gnu.so')
+    os.system('mv funcs_heavy_cython.cpython-39-x86_64-linux-gnu.so src/funcs_heavy_cython.cpython-39-x86_64-linux-gnu.so')
     os.system('mv build/ src/')
 
 print('\n\n')

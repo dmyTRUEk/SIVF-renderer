@@ -14,6 +14,7 @@ Dont forget to look for [TODO] in code ;)
 ## Refactoring:
 - add warnings
 - in convert_funcs import only sqrt, sin, etc, for security reason
+- rewrite cctargb, so you can use it as: `cctargb(shape[KW_COLOR])`, and nothing more
 
 
 
@@ -34,21 +35,22 @@ Dont forget to look for [TODO] in code ;)
   - [ ] change `if (...): ...` -> `(...)*(...) + (...)*(...)`
   - [x] Cython
   - [ ] fast operations for every element in array by numpy
-  - [ ] OpenCL, for example pyopencl
   - [ ] function written on C/C++/Rust (for rust use pyo3)
+  - [ ] OpenCL, for example pyopencl
   - [ ] gpu: render by fragment shaders: (qtrender, opengl, vulkan)
 
 
 
 ## New features:
+- if user doesnt input file in args, open file manager to choose
 - log in file
 - different backend support:
-  - yaml
-  - sivf any
-  - rust
-  - numpy
-  - gpu
-  - render any
+  - [x] yaml
+  - [ ] sivf any
+  - [ ] rust
+  - [ ] numpy
+  - [ ] gpu
+  - [ ] render any
 - time measurments for every figure
 - local vars (scoping) in layer
 - entities rotating
@@ -61,6 +63,7 @@ Dont forget to look for [TODO] in code ;)
   - polygon
   - right polygon
 - antialiasing (upscaled render and then downscale?)
+- different color scheme support
 
 
 
@@ -92,6 +95,7 @@ Dont forget to look for [TODO] in code ;)
   Traceback in Warnings, 
 - 2020.11.19: v0.4.2h: added combine
 - 2020.11.25: v0.4.3: delta_xy -> (delta_x, delta_y), Cython support
+- 2021.03.25: v0.4.4: added YAML support in heavy_funcs_python.py, fixed some error related to inverse and color starting from #, rewrite main.py
 
 
 

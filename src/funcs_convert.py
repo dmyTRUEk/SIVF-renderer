@@ -24,16 +24,22 @@ def convert_array_rgbau_to_array_rgba (pixels_rgbau: 'array of (r,g,b,a,u') -> '
 
 
 
-def cctargb (color: '#aarrggbb') -> '(a, r, g, b)':
+def cctargb (color: 'aarrggbb') -> '(a, r, g, b)':
     ''' For documentation look into full named function. '''
     return convert_color_to_argb(color)
 
-def convert_color_to_argb (color: '#aarrggbb') -> '(a, r, g, b)':
+def convert_color_to_argb (color: 'aarrggbb') -> '(a, r, g, b)':
     '''
-    Converts '#ffaabbcc' -> (255, 170, 187, 204)
+    Converts 'ffaabbcc' -> (255, 170, 187, 204)
     '''
+    color = str(color)
     a, r, g, b = 0, 0, 0, 0
     if len(color) == 8:
+        a, r, g, b = bytes.fromhex(color)
+    elif len(color) < 8:
+        # this needed for YAML :(
+        while len(color) < 8:
+            color = '0' + color
         a, r, g, b = bytes.fromhex(color)
     else:
         raise ErrorValueUnknown(color, 'maybe, len != 8 ?')
@@ -41,11 +47,11 @@ def convert_color_to_argb (color: '#aarrggbb') -> '(a, r, g, b)':
 
 
 
-def cetu (expression: str, canvas_w, canvas_h: '(canvas_w, canvas_h)', var: dict = {}):
+def cetu (expression: str, canvas_w: int, canvas_h: int, var: dict = {}):
     ''' For documentation look into full named function. '''
     return convert_expression_to_units(expression, canvas_w, canvas_h, var)
 
-def convert_expression_to_units (expression: str, canvas_w, canvas_h: '(canvas_w, canvas_h)', var: dict = {}):
+def convert_expression_to_units (expression: str, canvas_w: int, canvas_h: int, var: dict = {}):
     '''
     Converts '42<dimention>' -> <dimetion rule>(42)
 
@@ -54,10 +60,11 @@ def convert_expression_to_units (expression: str, canvas_w, canvas_h: '(canvas_w
     - precents (34%)
     - m, dm, cm, mm, nm, km ;)
     '''
+    expression = str(expression)
     #print(f'{var = }')
     #print(f'{expression = }')
     for var_name in var:
-         expression = expression.replace(var_name, var[var_name])
+        expression = expression.replace(var_name, str(var[var_name]))
     #print(f'{expression = }\n')
 
     if expression[-1].isdigit():
