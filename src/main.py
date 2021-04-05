@@ -1,5 +1,5 @@
 '''
-SIVF-renderer   v0.4.3
+SIVF-renderer   v0.4.4
 
 This is main file of SIVF-renderer
 ''' 
@@ -11,6 +11,7 @@ import re
 # import json
 from os import listdir
 from os.path import isfile, join
+import datetime
 
 import numpy as np
 from PIL import Image
@@ -104,7 +105,16 @@ def main () -> None:
     canvas_rendered = render_from_content(content_dict, file_output_name_without_ext)
 
     # save all:
-    file_output_name = f'{file_output_name_without_ext}_{canvas_w}x{canvas_h}' + '.png'
+    def make_len (s: str, l: int) -> str:
+        s = str(s)
+        while len(s) < l:
+            s = '0' + s
+        return s
+
+    dt_now = datetime.datetime.now()
+    dt_now_str = f'{make_len(dt_now.year, 4)}_{make_len(dt_now.month, 2)}_{make_len(dt_now.day, 2)}__{make_len(dt_now.hour, 2)}_{make_len(dt_now.minute, 2)}_{make_len(dt_now.second, 2)}__{make_len(dt_now.microsecond, 6)}'
+    print(dt_now_str)
+    file_output_name = f'{file_output_name_without_ext}_{canvas_w}x{canvas_h}_{dt_now_str}' + '.png'
     unpure_save_canvas_to_image(canvas_rendered, file_output_name)
     unpure_show_canvas_to_image(canvas_rendered)
     

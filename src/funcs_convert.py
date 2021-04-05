@@ -2,8 +2,9 @@
 This file contains all functions, responsible for value convertations
 '''
 
-from math import *
-# from math import sqrt, abs, sin, cos
+# from math import *
+from math import sqrt, sin, cos   # abs
+from random import randint, uniform, choice
 
 
 from funcs_errors import *
@@ -32,6 +33,21 @@ def convert_color_to_argb (color: 'aarrggbb') -> '(a, r, g, b)':
     '''
     Converts 'ffaabbcc' -> (255, 170, 187, 204)
     '''
+    def random_color_rgb (alpha: str) -> 'AARRGGBB':
+        symbols = '0123456789abcdef'
+        if len(alpha) != 2:
+            raise ErrorValueWrong(alpha, 'len(alpha) must be 2')
+        res = alpha
+        for _ in range(6):
+            res += choice(symbols)
+        return res
+
+    def random_color_argb () -> 'AARRGGBB':
+        symbols = '0123456789abcdef'
+        for _ in range(8):
+            res += choice(symbols)
+        return res
+
     color = str(color)
     a, r, g, b = 0, 0, 0, 0
     if len(color) == 8:
@@ -41,8 +57,12 @@ def convert_color_to_argb (color: 'aarrggbb') -> '(a, r, g, b)':
         while len(color) < 8:
             color = '0' + color
         a, r, g, b = bytes.fromhex(color)
+    elif len(color) > 8:
+        color = eval(color)
+        a, r, g, b = bytes.fromhex(color)
     else:
         raise ErrorValueUnknown(color, 'maybe, len != 8 ?')
+
     return a, r, g, b
 
 
@@ -66,6 +86,11 @@ def convert_expression_to_units (expression: str, canvas_w: int, canvas_h: int, 
     for var_name in var:
         expression = expression.replace(var_name, str(var[var_name]))
     #print(f'{expression = }\n')
+
+    # def random_float (x_min: float, x_max: float) -> float:
+    #     return uniform(x_min, x_max)
+    random_int = randint
+    random_float = uniform
 
     if expression[-1].isdigit():
         value = eval(expression)

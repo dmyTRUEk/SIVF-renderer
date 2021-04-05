@@ -4,6 +4,7 @@ This file contains all heavy functions, that should be accelerated with Cython
 
 import numpy as np
 import random
+from math import exp
 
 
 from funcs_errors import *
@@ -138,17 +139,6 @@ def parse_and_render_entity (entity: dict, entity_name: str,
 
 
 
-def convert_shape_KW_INVERSE_to_bool (shape_KW_INVERSE: 'str or bool'):
-    if type(shape_KW_INVERSE) == str:
-        inverse = (shape[KW_INVERSE] == KW_TRUE)
-    elif type(shape_KW_INVERSE) == bool:
-        inverse = shape_KW_INVERSE
-    else:
-        ErrorTypeWrong(shape_KW_INVERSE, 'shape_KW_INVERSE', 'str ot bool')
-    return inverse
-
-
-
 def parse_and_render_shape (shape: dict, shape_name: str, shape_number: int, 
         canvas_w, canvas_h: '(canvas_w, canvas_h)', defined_vars: dict, 
         alpha_blending_type: AlphaBlendingType,
@@ -158,6 +148,16 @@ def parse_and_render_shape (shape: dict, shape_name: str, shape_number: int,
     Log((tabs)*TAB+f'rendering {shape_name}:')
 
     tabs += 1
+
+    def convert_shape_KW_INVERSE_to_bool (shape_KW_INVERSE: 'str or bool'):
+        if type(shape_KW_INVERSE) == str:
+            inverse = (shape[KW_INVERSE] == KW_TRUE)
+        elif type(shape_KW_INVERSE) == bool:
+            inverse = shape_KW_INVERSE
+        else:
+            ErrorTypeWrong(shape_KW_INVERSE, 'shape_KW_INVERSE', 'str ot bool')
+        return inverse
+
 
     if KW_INVERSE in shape:
         inverse = convert_shape_KW_INVERSE_to_bool(shape[KW_INVERSE])
@@ -424,9 +424,24 @@ def parse_and_render_gradient (shape: dict, canvas_w, canvas_h: '(canvas_w, canv
 
     x0 =  cetu(shape[KW_XY][0], canvas_w, canvas_h, defined_vars)
     y0 = -cetu(shape[KW_XY][1], canvas_w, canvas_h, defined_vars)
-    is_fading = (shape[KW_GRADIENT_FADING] == KW_TRUE) if KW_GRADIENT_FADING in shape else KW_GRADIENT_FADING_DEFAULT
+
+    def convert_shape_KW_GRADIENT_FADING_to_bool (shape_KW_INVERSE: 'str or bool'):
+        if type(shape_KW_INVERSE) == str:
+            inverse = (shape[KW_INVERSE] == KW_TRUE)
+        elif type(shape_KW_INVERSE) == bool:
+            inverse = shape_KW_INVERSE
+        else:
+            ErrorTypeWrong(shape_KW_INVERSE, 'shape_KW_INVERSE', 'str ot bool')
+        return inverse
+
+    if KW_GRADIENT_FADING in shape:
+        is_fading = convert_shape_KW_GRADIENT_FADING_to_bool(shape[KW_GRADIENT_FADING])
+    else:
+        is_fading = KW_GRADIENT_FADING_DEFAULT
+
+    Log((tabs)*TAB+f'{shape[KW_GRADIENT_FADING] = }')
+    Log((tabs)*TAB+f'{is_fading = }')
     points_json = shape[KW_GRADIENT_POINTS]
-    used = (shape[KW_USED] == KW_TRUE) if KW_USED in shape else KW_USED_DEFAULT
     # Log(points_json)
 
     class Point:
