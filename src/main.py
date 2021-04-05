@@ -90,11 +90,11 @@ def main () -> None:
     content_str, file_output_name_without_ext = unpure_load_sivf_file(file_to_open)
 
     content_str = remove_comments(content_str)
-    Log(content_str)
+    # Log(content_str)
 
     # convert str to dict (json)
     content_dict = load_dict_from_str(content_str)
-    Log(content_dict)
+    # Log(content_dict)
 
     # load canvas sizes
     canvas_w = int(content_dict[KW_CANVAS_WH][0])

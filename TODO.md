@@ -12,9 +12,10 @@ Dont forget to look for [TODO] in code ;)
 
 
 ## Refactoring:
-- add warnings
+- create separate function `sivf_to_dict` in convert_funcs, and use it in main, so heavy_funcs_\*.\* mustnt implement it
 - in convert_funcs import only sqrt, sin, etc, for security reason
 - rewrite cctargb, so you can use it as: `cctargb(shape[KW_COLOR])`, and nothing more
+- add warnings
 
 
 
@@ -42,6 +43,7 @@ Dont forget to look for [TODO] in code ;)
 
 
 ## New features:
+- `random(a, b)` in sivf
 - if user doesnt input file in args, open file manager to choose
 - log in file
 - different backend support:
