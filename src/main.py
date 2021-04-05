@@ -1,5 +1,5 @@
 '''
-SIVF-renderer   v0.4.4
+SIVF-renderer   v0.4.5
 
 This is main file of SIVF-renderer
 ''' 
@@ -113,8 +113,8 @@ def main () -> None:
 
     dt_now = datetime.datetime.now()
     dt_now_str = f'{make_len(dt_now.year, 4)}_{make_len(dt_now.month, 2)}_{make_len(dt_now.day, 2)}__{make_len(dt_now.hour, 2)}_{make_len(dt_now.minute, 2)}_{make_len(dt_now.second, 2)}__{make_len(dt_now.microsecond, 6)}'
-    print(dt_now_str)
-    file_output_name = f'{file_output_name_without_ext}_{canvas_w}x{canvas_h}_{dt_now_str}' + '.png'
+    # print(dt_now_str)
+    file_output_name = f'{file_output_name_without_ext}_{dt_now_str}_{canvas_w}x{canvas_h}' + '.png'
     unpure_save_canvas_to_image(canvas_rendered, file_output_name)
     unpure_show_canvas_to_image(canvas_rendered)
     

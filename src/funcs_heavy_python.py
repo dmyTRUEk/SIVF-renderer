@@ -439,7 +439,6 @@ def parse_and_render_gradient (shape: dict, canvas_w, canvas_h: '(canvas_w, canv
     else:
         is_fading = KW_GRADIENT_FADING_DEFAULT
 
-    Log((tabs)*TAB+f'{shape[KW_GRADIENT_FADING] = }')
     Log((tabs)*TAB+f'{is_fading = }')
     points_json = shape[KW_GRADIENT_POINTS]
     # Log(points_json)
@@ -498,10 +497,14 @@ def parse_and_render_gradient (shape: dict, canvas_w, canvas_h: '(canvas_w, canv
                     a, r, g, b = 0, 0, 0, 0
                     for i in range(len(gausses)):
                         k = gausses[i]
-                        a += k * points[i].color[0]
-                        r += k * points[i].color[1]
-                        g += k * points[i].color[2]
-                        b += k * points[i].color[3]
+                        # a += k * points[i].color[0]
+                        # r += k * points[i].color[1]
+                        # g += k * points[i].color[2]
+                        # b += k * points[i].color[3]
+                        a = min(255, a + k * points[i].color[0])
+                        r = min(255, r + k * points[i].color[1])
+                        g = min(255, g + k * points[i].color[2])
+                        b = min(255, b + k * points[i].color[3])
 
                     # include fading:
                     k = 1 - gausses_sum
