@@ -43,6 +43,7 @@ Dont forget to look for [TODO] in code ;)
 
 
 ## New features:
+- add content hash to output file name, so different content in same folder wont override old output files (\*.png)
 - `random(a, b)` in sivf
 - if user doesnt input file in args, open file manager to choose
 - log in file
