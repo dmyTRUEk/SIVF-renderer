@@ -58,6 +58,7 @@ Dont forget to look for [TODO] in code ;)
 - entities:
   - ellipse
   - rectange
+  - formula: `formula_for_argb: [255, 255*sin(x), 255*cos(y), 255*sin(x+y)]`
   - line (endless line)
   - segment (part of line)
   - text: xy, color_fg, color_bg, font, ? width between letters
