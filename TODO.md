@@ -5,18 +5,18 @@ Dont forget to look for [TODO] in code ;)
 
 
 ## Meta:
-- write comments in all files (\*.py)
 - rewrite documentation
-- check examples, write comments in them
+- polish all project, and make v0.5.0
+- `exmaples_tmp/` -> `examples/`
+- write comments in all files (\*.py)
 
 
 
 ## Refactoring:
-- create separate function `sivf_to_dict` in convert_funcs, and use it in main, so heavy_funcs_\*.\* mustnt implement it
-- rewrite `convert_KW_*_to_bool` (in `funcs_heavy_python.py`) so it can be used universaly
+- rename `KW_GRADIENT_FADING` -> `KW_GRADIENT_IS_FADING`
 - check if `used` needed everywhere
 - ? rewrite cctargb, so you can use it as: `cctargb(shape[KW_COLOR])`, and nothing more
-- add warnings
+- add warnings (what and where?)
 
 
 
@@ -26,7 +26,8 @@ Dont forget to look for [TODO] in code ;)
 
 
 ## Bugs:
-- print: rendering <shape> mask, rendering <shape> color
+- solve default parametrs, such as is_fading(default)=false
+- ? print: rendering <shape> mask, rendering <shape> color
 - check if render is pixel perfect
 
 
@@ -34,8 +35,7 @@ Dont forget to look for [TODO] in code ;)
 ## Optimizations:
 - smart bound in parse_and_render_<shape> instead of full canvas
 - faster rendering by:
-  - [ ] change `if (...): ...` -> `(...)*(...) + (...)*(...)`
-  - [x] Cython
+  - [ ] Cython
   - [ ] fast operations for every element in array by numpy
   - [ ] function written on C/C++/Rust (for rust use pyo3)
   - [ ] OpenCL, for example pyopencl
@@ -53,7 +53,6 @@ Dont forget to look for [TODO] in code ;)
   - [ ] numpy
   - [ ] gpu
   - [ ] render any
-- time measurments for every figure
 - local vars (scoping) in layer
 - entities rotating
 - entities:
@@ -98,6 +97,9 @@ Dont forget to look for [TODO] in code ;)
 - 2020.11.19: v0.4.2h: added combine
 - 2020.11.25: v0.4.3: delta_xy -> (delta_x, delta_y), Cython support
 - 2021.03.25: v0.4.4: added YAML support in heavy_funcs_python.py, fixed some error related to inverse and color starting from #, rewrite main.py
+- 2021.04.05: v0.4.4(2): fixed is_fading in gradient for yaml, added datetime to output file name, but not in `funcs_heavy_*.*`
+- 2021.04.05: v0.4.5: new output file name format: 'title_date_resolution.png', fixed bug in gradient is_fading=True when rgb becomes > 255
+- 2021.04.06: v0.5.0a1: time for every shape, converting expressions to units and colors to ints only in main
 
 
 
