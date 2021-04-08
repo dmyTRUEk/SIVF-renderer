@@ -13,21 +13,22 @@ Dont forget to look for [TODO] in code ;)
 
 
 ## Refactoring:
-- rename `KW_GRADIENT_FADING` -> `KW_GRADIENT_IS_FADING`
-- check if `used` needed everywhere
-- ? rewrite cctargb, so you can use it as: `cctargb(shape[KW_COLOR])`, and nothing more
+- solve default parametrs, such as is_fading(default)=false
 - add warnings (what and where?)
 
 
 
 ## Changes:
-- ? in .sivf use x, y separetly, so: xy -> x, y
+- 
 
 
 
 ## Bugs:
-- solve default parametrs, such as is_fading(default)=false
-- ? print: rendering <shape> mask, rendering <shape> color
+- in gradient when `is_fading=False` add `min(255, ...)`
+- in `convert_expression_to_units` sort vars by length,
+  so firstly it replaces longest vars, and only then shorter
+- change Log for rendering progress:
+  `rendering <shape>:` -> `rendering <shape> mask` and `rendering <shape> color`
 - check if render is pixel perfect
 
 
@@ -44,11 +45,12 @@ Dont forget to look for [TODO] in code ;)
 
 
 ## New features:
+- layer scale, like delta_xy
 - if user doesnt input file in args, open file manager to choose
 - log in file
 - different backend support:
   - [x] yaml
-  - [ ] sivf any
+  - [ ] sivf any (json or yaml)
   - [ ] rust
   - [ ] numpy
   - [ ] gpu
@@ -62,6 +64,7 @@ Dont forget to look for [TODO] in code ;)
   - line (endless line)
   - segment (part of line)
   - text: xy, color_fg, color_bg, font, ? width between letters
+  - mask: layer_bg, layer_mask, ?
   - polygon
   - right polygon
 - antialiasing (upscaled render and then downscale?)
@@ -79,7 +82,7 @@ Dont forget to look for [TODO] in code ;)
 
 
 
-# DONE:
+# CHANGELOG:
 - 2020.03.22: v0.1: Added figures: Circle, Square, Added properies: canvas sizes, color scheme, Added comment to my json
 - 2020.03.23: v0.2: Code refactor, 3 examples with images, blending types support (only in code)
 - 2020.03.25: v0.3: Added triangle, Added nested layers, Blendingtype in .sivf, rendering progress output, Mesh
@@ -101,6 +104,7 @@ Dont forget to look for [TODO] in code ;)
 - 2021.04.05: v0.4.4(2): fixed is_fading in gradient for yaml, added datetime to output file name, but not in `funcs_heavy_*.*`
 - 2021.04.05: v0.4.5: new output file name format: 'title_date_resolution.png', fixed bug in gradient is_fading=True when rgb becomes > 255
 - 2021.04.06: v0.5.0a1: time for every shape, converting expressions to units and colors to ints only in main
+- 2021.04.08: v0.5.0a2: fixed inversed delta_y, optimized mask rendering, better comment removment, removed many unuseful comments, many polishment
 
 
 

@@ -19,7 +19,6 @@ from class_canvas import Canvas
 from class_alpha_blending import AlphaBlendingType
 from class_color_blending import ColorBlendingType
 
-# from funcs_convert import *
 import funcs_utils
 
 
@@ -60,8 +59,6 @@ def parse_and_render_entity (entity: dict,
         time_begin = funcs_utils.get_current_time()
 
         if subentity_name == KW_BLENDING:   # blending
-            # alpha_blending_type = AlphaBlendingType.from_str(entity[KW_BLENDING][0])
-            # color_blending_type = ColorBlendingType.from_str(entity[KW_BLENDING][1])
             alpha_blending_type, color_blending_type = entity[KW_BLENDING]
             # Log(f'{alpha_blending_type = }')
             # Log(f'{color_blending_type = }')
@@ -75,8 +72,6 @@ def parse_and_render_entity (entity: dict,
             )
 
         elif subentity_name == KW_LAYER_DELTA_XY:
-            # delta_x = +int( cetu(subentity[0], canvas_w, canvas_h, defined_vars) )
-            # delta_y = -int( cetu(subentity[1], canvas_w, canvas_h, defined_vars) )
             delta_x, delta_y = entity[KW_LAYER_DELTA_XY]
             Log((tabs)*TAB+f'{delta_x=}, {delta_y=}')
 
@@ -152,7 +147,7 @@ def parse_and_render_entity (entity: dict,
 
 
 def parse_and_render_shape (shape: dict, shape_name: str, shape_number: int, 
-        canvas_w, canvas_h: '(canvas_w, canvas_h)', defined_vars: dict, 
+        canvas_w: int, canvas_h: int, defined_vars: dict, 
         alpha_blending_type: AlphaBlendingType,
         color_blending_type: ColorBlendingType,
         tabs: int) -> Canvas:
@@ -199,30 +194,24 @@ def parse_and_render_shape (shape: dict, shape_name: str, shape_number: int,
 
 
 
-def render_mask_circle (canvas_w, canvas_h: '(canvas_w, canvas_h)',
-        radius: float, tx: float, ty: float,
-        inverse: bool, tabs: int) -> Mask:
-    canvas_w, canvas_h = canvas_w, canvas_h
-    radius2 = radius**2
+def render_mask_circle (canvas_w: int, canvas_h: int, radius: float,
+        tx: float, ty: float, inverse: bool, tabs: int) -> Mask:
 
+    radius2 = radius**2
     mask_result = Mask(canvas_w, canvas_h)
 
     for y in range(canvas_h):
         if y % OUTPUT_RENDER_PROGRESS_PERIOD == 0:
             Log((tabs)*TAB+f'{100*y//(canvas_h)}%')
         for x in range(canvas_w):
-            if ( (x+tx)**2 + (y+ty)**2 < radius2 ) ^ inverse:
-                mask_result._pixels[y, x] = True
-            else:
-                mask_result._pixels[y, x] = False
+            mask_result._pixels[y, x] = ( (x+tx)**2 + (y+ty)**2 < radius2 ) ^ inverse
 
     return mask_result
 
-def render_canvas_circle (canvas_w, canvas_h: '(canvas_w, canvas_h)',
-        mask: Mask, color: '(a, r, g, b)', tabs: int) -> Canvas:
-    canvas_w, canvas_h = canvas_w, canvas_h
-    a, r, g, b = color
+def render_canvas_circle (canvas_w: int, canvas_h: int, mask: Mask,
+        color: '(a, r, g, b)', tabs: int) -> Canvas:
 
+    a, r, g, b = color
     canvas_result = Canvas(canvas_w, canvas_h)
 
     for y in range(canvas_h):
@@ -239,18 +228,13 @@ def render_canvas_circle (canvas_w, canvas_h: '(canvas_w, canvas_h)',
                 ]
     return canvas_result
 
-def parse_and_render_circle (shape: dict, canvas_w, canvas_h: '(canvas_w, canvas_h)',
+def parse_and_render_circle (shape: dict, canvas_w: int, canvas_h: int,
         inverse: bool, defined_vars: dict, tabs: int) -> Canvas:
 
-    canvas_w, canvas_h = canvas_w, canvas_h
-    # color = cctargb(remove_prefix(str(shape[KW_COLOR]), '#'))
     color = shape[KW_COLOR]
     a, r, g, b = color
     Log((tabs)*TAB+f'{a, r, g, b = }')
 
-    # x0 =  cetu(shape[KW_XY][0], canvas_w, canvas_h, defined_vars)
-    # y0 = -cetu(shape[KW_XY][1], canvas_w, canvas_h, defined_vars)
-    # radius = cetu(shape[KW_CIRCLE_R], canvas_w, canvas_h, defined_vars)
     x0, y0 = shape[KW_XY]
     radius = shape[KW_CIRCLE_R]
     if KW_USED in shape:
@@ -268,10 +252,8 @@ def parse_and_render_circle (shape: dict, canvas_w, canvas_h: '(canvas_w, canvas
 
 
 
-def render_mask_square (canvas_w, canvas_h: '(canvas_w, canvas_h)',
-        side: float, x0: float, y0: float,
-        inverse: bool, tabs: int) -> Mask:
-    canvas_w, canvas_h = canvas_w, canvas_h
+def render_mask_square (canvas_w: int, canvas_h: int, side: float,
+        x0: float, y0: float, inverse: bool, tabs: int) -> Mask:
 
     tx = -canvas_w/2
     ty = -canvas_h/2
@@ -286,18 +268,14 @@ def render_mask_square (canvas_w, canvas_h: '(canvas_w, canvas_h)',
         if y % OUTPUT_RENDER_PROGRESS_PERIOD == 0:
             Log((tabs)*TAB+f'{100*y//(canvas_h)}%')
         for x in range(canvas_w):
-            if ( x_min <= x+tx <= x_max and y_min <= y+ty <= y_max ) ^ inverse:
-                mask_result._pixels[y, x] = True
-            else:
-                mask_result._pixels[y, x] = False
+            mask_result._pixels[y, x] = ( x_min <= x+tx <= x_max and y_min <= y+ty <= y_max ) ^ inverse
 
     return mask_result
 
-def render_canvas_square (canvas_w, canvas_h: '(canvas_w, canvas_h)',
-        mask: Mask, color: '(a, r, g, b)', tabs: int) -> Canvas:
-    canvas_w, canvas_h = canvas_w, canvas_h
-    a, r, g, b = color
+def render_canvas_square (canvas_w: int, canvas_h: int, mask: Mask,
+        color: '(a, r, g, b)', tabs: int) -> Canvas:
 
+    a, r, g, b = color
     canvas_result = Canvas(canvas_w, canvas_h)
 
     for y in range(canvas_h):
@@ -314,18 +292,13 @@ def render_canvas_square (canvas_w, canvas_h: '(canvas_w, canvas_h)',
                 ]
     return canvas_result
 
-def parse_and_render_square (shape: dict, canvas_w, canvas_h: '(canvas_w, canvas_h)',
+def parse_and_render_square (shape: dict, canvas_w: int, canvas_h: int,
         inverse: bool, defined_vars: dict, tabs: int) -> Canvas:
 
-    canvas_w, canvas_h = canvas_w, canvas_h
     color = shape[KW_COLOR]
-    # Log(f'{r=}, {g=}, {b=}, {a=}')
     a, r, g, b = color
     Log((tabs)*TAB+f'{a, r, g, b = }')
 
-    # x0 =  cetu(shape[KW_XY][0], canvas_w, canvas_h, defined_vars)
-    # y0 = -cetu(shape[KW_XY][1], canvas_w, canvas_h, defined_vars)
-    # side = cetu(shape[KW_SQUARE_SIDE], canvas_w, canvas_h, defined_vars)
     x0, y0 = shape[KW_XY]
     side = shape[KW_SQUARE_SIDE]
     if KW_USED in shape:
@@ -339,10 +312,9 @@ def parse_and_render_square (shape: dict, canvas_w, canvas_h: '(canvas_w, canvas
 
 
 
-def render_mask_triangle (canvas_w, canvas_h: '(canvas_w, canvas_h)',
+def render_mask_triangle (canvas_w: int, canvas_h: int,
         x1: float, y1: float, x2: float, y2: float, x3: float, y3: float,
         inverse: bool, tabs: int) -> Mask:
-    canvas_w, canvas_h = canvas_w, canvas_h
 
     # +1/2 for pixel perfect ?
     tx = -canvas_w/2
@@ -350,8 +322,7 @@ def render_mask_triangle (canvas_w, canvas_h: '(canvas_w, canvas_h)',
 
     mask_result = Mask(canvas_w, canvas_h)
 
-    def _triangle_sign (x1: float, y1: float,
-            x2: float, y2: float, x3: float, y3: float) -> float:
+    def _triangle_sign (x1: float, y1: float, x2: float, y2: float, x3: float, y3: float) -> float:
         return (x1-x3)*(y2-y3) - (x2-x3)*(y1-y3)
 
     def _is_inside_triangle (x: float, y: float, x1: float, y1: float,
@@ -368,18 +339,14 @@ def render_mask_triangle (canvas_w, canvas_h: '(canvas_w, canvas_h)',
         if y % OUTPUT_RENDER_PROGRESS_PERIOD == 0:
             Log((tabs)*TAB+f'{100*y//(canvas_h)}%')
         for x in range(canvas_w):
-            if _is_inside_triangle(x+tx, y+ty, x1, y1, x2, y2, x3, y3) ^ inverse:
-                mask_result._pixels[y, x] = True
-            else:
-                mask_result._pixels[y, x] = False
+            mask_result._pixels[y, x] = _is_inside_triangle(x+tx, y+ty, x1, y1, x2, y2, x3, y3) ^ inverse
 
     return mask_result
 
-def render_canvas_triangle (canvas_w, canvas_h: '(canvas_w, canvas_h)',
-        mask: Mask, color: '(a, r, g, b)', tabs: int) -> Canvas:
-    canvas_w, canvas_h = canvas_w, canvas_h
-    a, r, g, b = color
+def render_canvas_triangle (canvas_w: int, canvas_h: int, mask: Mask,
+        color: '(a, r, g, b)', tabs: int) -> Canvas:
 
+    a, r, g, b = color
     canvas_result = Canvas(canvas_w, canvas_h)
 
     for y in range(canvas_h):
@@ -396,22 +363,13 @@ def render_canvas_triangle (canvas_w, canvas_h: '(canvas_w, canvas_h)',
                 ]
     return canvas_result
 
-def parse_and_render_triangle (shape: dict, canvas_w, canvas_h: '(canvas_w, canvas_h)',
+def parse_and_render_triangle (shape: dict, canvas_w: int, canvas_h: int,
         inverse: bool, defined_vars: dict, tabs: int) -> Canvas:
 
-    canvas_w, canvas_h = canvas_w, canvas_h
-    # color = cctargb(remove_prefix(str(shape[KW_COLOR]), '#'))
     color = shape[KW_COLOR]
-    # Log(f'{r=}, {g=}, {b=}, {a=}')
     a, r, g, b = color
     Log((tabs)*TAB+f'{a, r, g, b = }')
 
-    # x1 =  cetu(shape[KW_XY][0], canvas_w, canvas_h, defined_vars)
-    # y1 = -cetu(shape[KW_XY][1], canvas_w, canvas_h, defined_vars)
-    # x2 =  cetu(shape[KW_XY][2], canvas_w, canvas_h, defined_vars)
-    # y2 = -cetu(shape[KW_XY][3], canvas_w, canvas_h, defined_vars)
-    # x3 =  cetu(shape[KW_XY][4], canvas_w, canvas_h, defined_vars)
-    # y3 = -cetu(shape[KW_XY][5], canvas_w, canvas_h, defined_vars)
     x1, y1, x2, y2, x3, y3 = shape[KW_XY]
     if KW_USED in shape:
         ErrorDeprecated(f'{KW_USED}')
@@ -424,9 +382,8 @@ def parse_and_render_triangle (shape: dict, canvas_w, canvas_h: '(canvas_w, canv
 
 
 
-def parse_and_render_gradient (shape: dict, canvas_w, canvas_h: '(canvas_w, canvas_h)',
+def parse_and_render_gradient (shape: dict, canvas_w: int, canvas_h: int,
         defined_vars: dict, tabs: int) -> Canvas:
-    canvas_w, canvas_h = canvas_w, canvas_h
 
     if KW_INVERSE in shape:
         raise ErrorValueWrong(shape[KW_INVERSE], f'{KW_INVERSE} mustnt be in {KW_GRADIENT}')
@@ -436,23 +393,12 @@ def parse_and_render_gradient (shape: dict, canvas_w, canvas_h: '(canvas_w, canv
     # Log(f'{A, R, G, B =}')
     Log((tabs)*TAB+f'{A, R, G, B = }')
 
-    # x0 =  cetu(shape[KW_XY][0], canvas_w, canvas_h, defined_vars)
-    # y0 = -cetu(shape[KW_XY][1], canvas_w, canvas_h, defined_vars)
     x0, y0 = shape[KW_XY]
 
-    def convert_shape_KW_GRADIENT_FADING_to_bool (shape_KW_INVERSE: 'str or bool'):
-        if type(shape_KW_INVERSE) == str:
-            inverse = (shape[KW_INVERSE] == KW_TRUE)
-        elif type(shape_KW_INVERSE) == bool:
-            inverse = shape_KW_INVERSE
-        else:
-            ErrorTypeWrong(shape_KW_INVERSE, 'shape_KW_INVERSE', 'str ot bool')
-        return inverse
-
-    if KW_GRADIENT_FADING in shape:
-        is_fading = convert_shape_KW_GRADIENT_FADING_to_bool(shape[KW_GRADIENT_FADING])
+    if KW_GRADIENT_IS_FADING in shape:
+        is_fading = shape[KW_GRADIENT_IS_FADING]
     else:
-        is_fading = KW_GRADIENT_FADING_DEFAULT
+        is_fading = KW_GRADIENT_IS_FADING_DEFAULT
 
     Log((tabs)*TAB+f'{is_fading = }')
     points_json = shape[KW_GRADIENT_POINTS]
@@ -499,8 +445,6 @@ def parse_and_render_gradient (shape: dict, canvas_w, canvas_h: '(canvas_w, canv
 
         WarningTodo(CHECK_BOUNDS_OPTIMIZATION)
 
-        gausses = []
-
         if is_fading:   # is_fading == True
             for y in range(canvas_h):
                 if y % OUTPUT_RENDER_PROGRESS_PERIOD == 0:
@@ -514,10 +458,6 @@ def parse_and_render_gradient (shape: dict, canvas_w, canvas_h: '(canvas_w, canv
                     a, r, g, b = 0, 0, 0, 0
                     for i in range(len(gausses)):
                         k = gausses[i]
-                        # a += k * points[i].color[0]
-                        # r += k * points[i].color[1]
-                        # g += k * points[i].color[2]
-                        # b += k * points[i].color[3]
                         a = min(255, a + k * points[i].color[0])
                         r = min(255, r + k * points[i].color[1])
                         g = min(255, g + k * points[i].color[2])
@@ -550,6 +490,7 @@ def parse_and_render_gradient (shape: dict, canvas_w, canvas_h: '(canvas_w, canv
                     a, r, g, b = 0, 0, 0, 0
                     for i in range(len(gausses)):
                         k = gausses[i] / gausses_sum
+                        # TODO: add min(255, ...)
                         a += k * points[i].color[0]
                         r += k * points[i].color[1]
                         g += k * points[i].color[2]
@@ -574,8 +515,6 @@ def parse_and_render_gradient (shape: dict, canvas_w, canvas_h: '(canvas_w, canv
 def parse_and_render_combine (shape: dict, canvas_w, canvas_h: '(canvas_w, canvas_h)',
         defined_vars: dict, tabs: int) -> Canvas:
 
-    canvas_w, canvas_h = canvas_w, canvas_h
-
     if KW_INVERSE in shape:
         raise ErrorValueWrong(shape[KW_INVERSE], f'{KW_INVERSE} mustnt be in {KW_COMBINE}')
 
@@ -596,7 +535,6 @@ def parse_and_render_combine (shape: dict, canvas_w, canvas_h: '(canvas_w, canva
 
         canvases.append(
             parse_and_render_entity(
-                # combine_figures[subentity_name], subentity_name, 0, canvas_w, canvas_h, defined_vars, 0, 0, tabs
                 combine_figures[subentity_name], canvas_w, canvas_h, 0, 0, defined_vars, 0, tabs
             )
         )
@@ -733,11 +671,11 @@ def parse_and_render_combine (shape: dict, canvas_w, canvas_h: '(canvas_w, canva
             if y % OUTPUT_RENDER_PROGRESS_PERIOD == 0:
                 Log((tabs)*TAB+f'{100*y//(canvas_h)}%')
             for x in range(canvas_w):
-                color_1 = canvas_result._pixels[y, x]
-                color_2 = canvases[i]._pixels[y, x]
+                color1 = canvas_result._pixels[y, x]
+                color2 = canvases[i]._pixels[y, x]
 
-                r1, g1, b1, a1, used1 = color_1
-                r2, g2, b2, a2, used2 = color_2
+                r1, g1, b1, a1, used1 = color1
+                r2, g2, b2, a2, used2 = color2
 
                 canvas_result._pixels[y, x] = [
                     combine_value_funcs[combine_type](r1, r2, used1, used2),
@@ -748,7 +686,6 @@ def parse_and_render_combine (shape: dict, canvas_w, canvas_h: '(canvas_w, canva
                 ]
 
     return canvas_result
-
     # end of parse_and_render_combine()
 
 
@@ -804,21 +741,11 @@ def blend_canvases (canvas_bg: Canvas, canvas_fg: Canvas, shape_number: int,
         lambda V, v, USED, used, shape_number: (shape_number*V + v) // (shape_number+1),
 
         # min:
-        # lambda V, v, USED, used, shape_number: min(V, v) if (USED and used) else V,
         _blend_min,
 
         # max:
-        # lambda V, v, USED, used, shape_number: max(V, v) if (USED and used) else V,
         _blend_max,
     )
-
-    # delta_x, delta_y = delta_xy
-
-    # old bounds for blending
-    # x_from = delta_x - canvas_fg.w//2
-    # y_from = delta_y - canvas_fg.h//2
-    # x_to = canvas_bg.w // 2
-    # y_to = canvas_bg.h // 2
 
     x_from = 0
     y_from = 0

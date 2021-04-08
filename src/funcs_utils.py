@@ -59,18 +59,6 @@ def min_dist2 (np_point, np_points):
 
 
 
-# def timer_begin ():
-#     global timer_begin_0
-#     timer_begin_0 = time.time()
-
-# def timer_end ():
-#     global timer_end_0
-#     timer_end_0 = time.time()
-
-# def timer_show ():
-#     global timer_begin_0, timer_end_0
-#     Log(f'Time elapsed from BEGIN..END = {timer_end_0-timer_begin_0} seconds')
-
 def get_current_time ():
     return time.time()
 

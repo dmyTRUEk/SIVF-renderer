@@ -1,14 +1,12 @@
 '''
-SIVF-renderer   v0.5.0a1
+SIVF-renderer   v0.5.0a2
 
 This is main file of SIVF-renderer
 ''' 
 
 import sys
-# import random
 
 import re
-# import json
 from os import listdir
 from os.path import isfile, join
 import datetime
@@ -49,8 +47,8 @@ if CONFIG_RENDER_BACKEND == CONFIG_RENDER_BACKEND_PYTHON:
     from funcs_heavy_python import *
 
 elif CONFIG_RENDER_BACKEND == CONFIG_RENDER_BACKEND_CYTHON:
-    # raise ErrorNotImpemented('Cython render backend')
-    from funcs_heavy_cython import *
+    raise ErrorNotImpemented('Cython render backend')
+    # from funcs_heavy_cython import *
 
 elif CONFIG_RENDER_BACKEND == CONFIG_RENDER_BACKEND_NUMBA:
     raise ErrorNotImpemented('Numba render backend')
@@ -96,27 +94,25 @@ def main () -> None:
 
     # convert str to dict
     content_dict_sivf = load_dict_from_str(content_str)
-    Log(content_dict_sivf)
+    # Log(content_dict_sivf)
 
     # load canvas sizes and defined_vars
-    canvas_w = int(content_dict_sivf[KW_CANVAS_WH][0])
-    canvas_h = int(content_dict_sivf[KW_CANVAS_WH][1])
-    defined_vars = load_vars_from_dict(content_dict_sivf)
+    canvas_w, canvas_h = load_canvas_wh_from_dict_sivf(content_dict_sivf)
+    defined_vars = load_vars_from_dict_sivf(content_dict_sivf)
 
-    print(f'\nbefore = "{content_dict_sivf}"\n')
+    # print(f'\nbefore = "{content_dict_sivf}"\n')
     content_dict_data = convert_dict_sivf_to_dict_data(content_dict_sivf, canvas_w, canvas_h, defined_vars)
-    print(f'\nafter  = "{content_dict_data}"\n')
+    # print(f'\nafter  = "{content_dict_data}"\n')
 
     # render:
     canvas_rendered = render_from_content(content_dict_data)
 
     # add_prefix = funcs_utils.add_prefix
-    def add_prefix(text: str, length: int):
-        text = str(text)
-        return funcs_utils.add_prefix(text, '0', length)
+    def add_prefix_0(text: 'int or str', length: int):
+        return funcs_utils.add_prefix(str(text), '0', length)
 
     dt_now = datetime.datetime.now()
-    dt_now_str = f'{add_prefix(dt_now.year, 4)}_{add_prefix(dt_now.month, 2)}_{add_prefix(dt_now.day, 2)}__{add_prefix(dt_now.hour, 2)}_{add_prefix(dt_now.minute, 2)}_{add_prefix(dt_now.second, 2)}__{add_prefix(dt_now.microsecond, 6)}'
+    dt_now_str = f'{add_prefix_0(dt_now.year, 4)}_{add_prefix_0(dt_now.month, 2)}_{add_prefix_0(dt_now.day, 2)}__{add_prefix_0(dt_now.hour, 2)}_{add_prefix_0(dt_now.minute, 2)}_{add_prefix_0(dt_now.second, 2)}__{add_prefix_0(dt_now.microsecond, 6)}'
     # print(dt_now_str)
     file_output_name = f'{file_output_name_without_ext}_{dt_now_str}_{canvas_w}x{canvas_h}' + '.png'
 
@@ -185,7 +181,14 @@ def load_dict_from_str (content_str: str) -> dict:
 
 
 def remove_comments (content_str: str) -> str:
-    return remove_comments_oneline(remove_comments_multiline(content_str))
+    content_str_removed_commens_order_1 = remove_comments_oneline(remove_comments_multiline(content_str))
+    content_str_removed_commens_order_2 = remove_comments_multiline(remove_comments_oneline(content_str))
+    if content_str_removed_commens_order_1 != content_str_removed_commens_order_2:
+        raise ErrorValuesNotEqual(
+            content_str_removed_commens_order_1, content_str_removed_commens_order_2,
+            'content_str_removed_commens_order_1', 'content_str_removed_commens_order_2'
+        )
+    return content_str_removed_commens_order_1
 
 def remove_comments_oneline (content_str: str) -> str:
     '''delete all comments   // blahblahblah '''
@@ -199,44 +202,41 @@ def remove_comments_multiline (content_str: str) -> str:
 
 
 
-def load_vars_from_dict (content_dict: dict) -> dict:
-    return content_dict[KW_VARS] if KW_VARS in content_dict else {}
+def load_canvas_wh_from_dict_sivf (content_dict_sivf: dict) -> '(canvas_w, canvas_h)':
+    canvas_w = int(content_dict_sivf[KW_CANVAS_WH][0])
+    canvas_h = int(content_dict_sivf[KW_CANVAS_WH][1])
+    return canvas_w, canvas_h
+
+def load_vars_from_dict_sivf (content_dict_sivf: dict) -> dict:
+    return content_dict_sivf[KW_VARS] if KW_VARS in content_dict_sivf else {}
+
+def load_vars_from_dict_data (content_dict_data: dict) -> dict:
+    return content_dict_data[KW_VARS] if KW_VARS in content_dict_data else {}
+
 
 
 def render_from_content (content_dict_data: dict) -> Canvas:
     canvas_w, canvas_h = content_dict_data[KW_CANVAS_WH]
+    defined_vars = load_vars_from_dict_data(content_dict_data)
 
     # color_scheme = content_dict[KW_COLOR_SCHEME]
     image_dict = content_dict_data[KW_IMAGE]
 
-    # deletes all what is not layer in "image" (for example blending):
-    # keys_to_delete = []
-    # for key in image_dict:
-    #     if not key.startswith(KW_LAYER):
-    #         keys_to_delete.append(key)
-    # for key in keys_to_delete:
-    #     del image_dict[key]
-    # Log(f'{image_dict = }\n')
-
-    if KW_VARS in content_dict_data:
-        defined_vars = content_dict_data[KW_VARS]
-    else:
-        defined_vars = {}
-
-    # funcs_utils.timer_begin()
     time_begin = funcs_utils.get_current_time()
     canvas_rendered = parse_and_render_entity(image_dict, canvas_w, canvas_h, 0, 0, defined_vars, 0, 0)
     timer_end = funcs_utils.get_current_time()
-    # funcs_utils.timer_end()
-    # funcs_utils.timer_show()
     print()
     Log(f'Time elapsed TOTALLY: {funcs_utils.delta_time(time_begin, timer_end)} seconds')
 
     if canvas_rendered.w != canvas_w or canvas_rendered.h != canvas_h:
-        raise ErrorNotEqual((canvas_rendered.w, canvas_rendered.h), (canvas_w, canvas_h), 'canvas_rendered.wh', KW_CANVAS_WH)
+        raise ErrorNotEqual(
+            (canvas_rendered.w, canvas_rendered.h),
+            (canvas_w, canvas_h),
+            'canvas_rendered.wh',
+            KW_CANVAS_WH
+        )
 
     return canvas_rendered
-
     # end of render_from_content
 
 

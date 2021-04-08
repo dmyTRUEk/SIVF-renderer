@@ -3,9 +3,9 @@ This file contains all SIVF KeyWords (KW)
 
 In fact, this files determines keywords which is used in '*.sivf' file
 
-P.S. all is sorted:
-1) by scope
-2) by alphabet order
+P.S. all is sorted by:
+1) scope
+2) alphabet order
 '''
 
 
@@ -54,8 +54,8 @@ KW_COMBINE_TYPE_1SYMDIFF2 = '1%2'    # SymDiff = Symmetric Difference
 KW_COMBINE_TYPE_2SYMDIFF1 = '2%1'
 
 KW_GRADIENT = 'gradient'
-KW_GRADIENT_FADING = 'fading'
-KW_GRADIENT_FADING_DEFAULT = True
+KW_GRADIENT_IS_FADING = 'fading'
+KW_GRADIENT_IS_FADING_DEFAULT = True
 KW_GRADIENT_POINTS = 'points'
 KW_GRADIENT_SIGMA = 'sigma'
 

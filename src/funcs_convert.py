@@ -11,7 +11,7 @@ from funcs_errors import *
 
 
 from consts_sivf_keywords import *
-from funcs_utils import remove_prefix
+from funcs_utils import remove_prefix, add_prefix
 from class_alpha_blending import AlphaBlendingType
 from class_color_blending import ColorBlendingType
 
@@ -23,7 +23,7 @@ def convert_dict_sivf_to_dict_data (dict_sivf: str, canvas_w: int, canvas_h: int
     '''
     using convert functions everywhere where needed
     '''
-    print(f'\n"{dict_sivf = }"\n')
+    # print(f'\n"{dict_sivf = }"\n')
 
     # def cbstbd (bool_sivf):
     #     return convert_bool_sivf_to_bool_data(bool_sivf)
@@ -62,7 +62,7 @@ def convert_dict_sivf_to_dict_data (dict_sivf: str, canvas_w: int, canvas_h: int
             dict_data[KW_BLENDING] = [alpha_blending_type, color_blending_type]
 
         elif key == KW_COLOR:
-            dict_data[KW_COLOR] = cctargb(remove_prefix(str(dict_sivf[KW_COLOR]), '#'))
+            dict_data[KW_COLOR] = cctargb(str(dict_sivf[KW_COLOR]))
 
         elif key == KW_INVERSE:
             dict_data[KW_INVERSE] = convert_bool_sivf_to_bool_data(dict_sivf[KW_INVERSE])
@@ -74,7 +74,11 @@ def convert_dict_sivf_to_dict_data (dict_sivf: str, canvas_w: int, canvas_h: int
             i = 0
             tmp = []
             for value in dict_sivf[KW_XY]:
-                tmp.append( (1.0 if (i % 2 == 0) else -1.0) * convert_expression_to_units(value, canvas_w, canvas_h, defined_vars) )
+                tmp.append(
+                    (1.0 if (i % 2 == 0) else -1.0) * convert_expression_to_units(
+                        value, canvas_w, canvas_h, defined_vars
+                    )
+                )
                 i += 1
 
             dict_data[KW_XY] = tmp
@@ -98,8 +102,8 @@ def convert_dict_sivf_to_dict_data (dict_sivf: str, canvas_w: int, canvas_h: int
         elif key.startswith(KW_GRADIENT):
             dict_data[key] = convert_dict_sivf_to_dict_data(dict_sivf[key], canvas_w, canvas_h, defined_vars)
 
-        elif key == KW_GRADIENT_FADING:
-            dict_data[KW_GRADIENT_FADING] = dict_sivf[KW_GRADIENT_FADING]
+        elif key == KW_GRADIENT_IS_FADING:
+            dict_data[KW_GRADIENT_IS_FADING] = dict_sivf[KW_GRADIENT_IS_FADING]
 
         elif key == KW_GRADIENT_POINTS:
             dict_data[KW_GRADIENT_POINTS] = {}
@@ -115,7 +119,7 @@ def convert_dict_sivf_to_dict_data (dict_sivf: str, canvas_w: int, canvas_h: int
         elif key == KW_LAYER_DELTA_XY:
             dict_data[KW_LAYER_DELTA_XY] = [
                 int(convert_expression_to_units(dict_sivf[KW_LAYER_DELTA_XY][0], canvas_w, canvas_h, defined_vars)),
-                int(convert_expression_to_units(dict_sivf[KW_LAYER_DELTA_XY][1], canvas_w, canvas_h, defined_vars))
+                -int(convert_expression_to_units(dict_sivf[KW_LAYER_DELTA_XY][1], canvas_w, canvas_h, defined_vars))
             ]
 
         elif key.startswith(KW_MESH) or key == KW_MESH_N_XLEFT_YDOWN_XRIGHT_YUP:
@@ -158,7 +162,7 @@ def cctargb (color: 'aarrggbb') -> '(a, r, g, b)':
 
 def convert_color_to_argb (color: 'aarrggbb') -> '(a, r, g, b)':
     '''
-    Converts 'ffaabbcc' -> (255, 170, 187, 204)
+    Converts 'ffaabbcc' or '#ffaabbcc' -> (255, 170, 187, 204)
     '''
     def random_color_rgb (alpha: str) -> 'AARRGGBB':
         symbols = '0123456789abcdef'
@@ -187,8 +191,7 @@ def convert_color_to_argb (color: 'aarrggbb') -> '(a, r, g, b)':
 
     elif len(color) < 8:
         # this needed for YAML :(
-        while len(color) < 8:
-            color = '0' + color
+        color = add_prefix(color, '0', 8)
         a, r, g, b = bytes.fromhex(color)
 
     elif len(color) > 8:
@@ -219,12 +222,11 @@ def convert_expression_to_units (expression: str, canvas_w: int, canvas_h: int, 
     expression = expression.strip()
     #print(f'{var = }')
     #print(f'{expression = }')
+    # TODO: sort by length, so firstly it replaces longest vars, and only then shorter
     for var_name in var:
         expression = expression.replace(var_name, str(var[var_name]))
     #print(f'{expression = }\n')
 
-    # def random_float (x_min: float, x_max: float) -> float:
-    #     return uniform(x_min, x_max)
     random_int = randint
     random_float = uniform
 
@@ -233,8 +235,6 @@ def convert_expression_to_units (expression: str, canvas_w: int, canvas_h: int, 
         return float(value)
     
     elif expression.endswith('%'):
-        # canvas_w = canvas_w, canvas_h[0]
-        # canvas_h = canvas_w, canvas_h[1]
         value = eval(expression[:-1])
         return canvas_h * float(value) / 100
 
