@@ -1,0 +1,13 @@
+examples_tmp/
+src_tmp/
+
+src/__pycache__
+src/build
+src/funcs_heavy_cython_old.pyx
+src/funcs_heavy_numba_old.py
+
+src/*.c
+src/*.html
+src/*.png
+src/*.sivf
+src/*.so

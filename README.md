@@ -1,3 +1,8 @@
+# :warning: DEPRECATED :warning:
+Look [here](https://github.com/dmyTRUEk/SIVF-renderer-rs) instead.
+
+
+
 # SIVF-renderer
 SIVF - SImple Vector Format
 
@@ -13,7 +18,7 @@ SIVF-renderer - open source program for rendering new open source file format: S
 
 - SIVF uses JSON, while all raster and vector formats uses XML.
   Why json? Because it is much more readable.
-  Look ![here](https://json.org/example.html) for more.
+  Look [here](https://json.org/example.html) for more.
 
 - Every coordinates (x and y) are **measuring from centre** of the plane,
   and this is very pleasurably for many scenarios,
@@ -90,7 +95,7 @@ SIVF file content:
 
 
 
-## Example 2: RGB logo
+## Example 2: Handmade recursion of circles and squares
 ![Image example 2](https://raw.githubusercontent.com/dmytruek/sivf-renderer/master/examples/image_example_2.png)
 
 SIVF file content:
@@ -130,7 +135,7 @@ SIVF file content:
 
 
 
-## Example 3: Handmade recursion of circles and squares
+## Example 3: RGB logo
 ![Image example 3](https://raw.githubusercontent.com/dmytruek/sivf-renderer/master/examples/image_example_3.png)
 
 SIVF file content:
