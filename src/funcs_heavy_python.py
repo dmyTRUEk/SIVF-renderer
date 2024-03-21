@@ -5,6 +5,7 @@ This file contains all heavy functions, that should be accelerated with Cython
 import numpy as np
 import random
 from math import exp, sqrt
+from functools import cache
 
 
 from funcs_errors import *
@@ -194,6 +195,7 @@ def parse_and_render_shape (shape: dict, shape_name: str, shape_number: int,
 
 
 
+@cache
 def render_mask_circle (canvas_w: int, canvas_h: int, radius: float,
         tx: float, ty: float, inverse: bool, tabs: int) -> Mask:
 
@@ -208,6 +210,7 @@ def render_mask_circle (canvas_w: int, canvas_h: int, radius: float,
 
     return mask_result
 
+@cache
 def render_canvas_circle (canvas_w: int, canvas_h: int, mask: Mask,
         color: '(a, r, g, b)', tabs: int) -> Canvas:
 
@@ -252,6 +255,7 @@ def parse_and_render_circle (shape: dict, canvas_w: int, canvas_h: int,
 
 
 
+@cache
 def render_mask_square (canvas_w: int, canvas_h: int, side: float,
         x0: float, y0: float, inverse: bool, tabs: int) -> Mask:
 
@@ -272,6 +276,7 @@ def render_mask_square (canvas_w: int, canvas_h: int, side: float,
 
     return mask_result
 
+@cache
 def render_canvas_square (canvas_w: int, canvas_h: int, mask: Mask,
         color: '(a, r, g, b)', tabs: int) -> Canvas:
 
@@ -312,6 +317,7 @@ def parse_and_render_square (shape: dict, canvas_w: int, canvas_h: int,
 
 
 
+@cache
 def render_mask_triangle (canvas_w: int, canvas_h: int,
         x1: float, y1: float, x2: float, y2: float, x3: float, y3: float,
         inverse: bool, tabs: int) -> Mask:
@@ -343,6 +349,7 @@ def render_mask_triangle (canvas_w: int, canvas_h: int,
 
     return mask_result
 
+@cache
 def render_canvas_triangle (canvas_w: int, canvas_h: int, mask: Mask,
         color: '(a, r, g, b)', tabs: int) -> Canvas:
 
@@ -430,9 +437,11 @@ def parse_and_render_gradient (shape: dict, canvas_w: int, canvas_h: int,
         def _dist (dx: float, dy: float) -> float:
             return sqrt(dx**2 + dy**2)
         
+        @cache
         def _dist2 (dx: float, dy: float) -> float:
             return dx**2 + dy**2
 
+        @cache
         def _gauss (dist2: float, sigma: float) -> float:
             # return exp(-(dist)**2 / (2 * sigma**2))
             return exp(-dist2 / (2 * sigma**2))
@@ -539,6 +548,7 @@ def parse_and_render_combine (shape: dict, canvas_w, canvas_h: '(canvas_w, canva
             )
         )
 
+    # @cache
     def _combine_value_1plus2 (v1: int, v2: int, used1: bool, used2: bool) -> int:
         if used1 and used2:
             return v1
@@ -548,9 +558,11 @@ def parse_and_render_combine (shape: dict, canvas_w, canvas_h: '(canvas_w, canva
             return v2
         else:   # not used1 and not used2
             return 0
+    # @cache
     def _combine_used_1plus2 (used1: bool, used2: bool) -> bool:
         return used1 or used2
 
+    # @cache
     def _combine_value_2plus1 (v1: int, v2: int, used1: bool, used2: bool) -> int:
         if used1 and used2:
             return v2
@@ -560,10 +572,12 @@ def parse_and_render_combine (shape: dict, canvas_w, canvas_h: '(canvas_w, canva
             return v2
         else:   # not used1 and not used2
             return 0
+    # @cache
     def _combine_used_2plus1 (used1: bool, used2: bool) -> bool:
         return used1 or used2
 
 
+    # @cache
     def _combine_value_1minus2 (v1: int, v2: int, used1: bool, used2: bool) -> int:
         if used1 and used2:
             return 0
@@ -573,9 +587,11 @@ def parse_and_render_combine (shape: dict, canvas_w, canvas_h: '(canvas_w, canva
             return 0
         else:   # not used1 and not used2
             return 0
+    # @cache
     def _combine_used_1minus2 (used1: bool, used2: bool) -> bool:
         return (used1) and (not used2)
 
+    # @cache
     def _combine_value_2minus1 (v1: int, v2: int, used1: bool, used2: bool) -> int:
         if used1 and used2:
             return 0
@@ -585,10 +601,12 @@ def parse_and_render_combine (shape: dict, canvas_w, canvas_h: '(canvas_w, canva
             return v2
         else:   # not used1 and not used2
             return 0
+    # @cache
     def _combine_used_2minus1 (used1: bool, used2: bool) -> bool:
         return (not used1) and (used2)
 
 
+    # @cache
     def _combine_value_1product2 (v1: int, v2: int, used1: bool, used2: bool) -> int:
         if used1 and used2:
             return v1
@@ -598,9 +616,11 @@ def parse_and_render_combine (shape: dict, canvas_w, canvas_h: '(canvas_w, canva
             return 0
         else:   # not used1 and not used2
             return 0
+    # @cache
     def _combine_used_1product2 (used1: bool, used2: bool) -> bool:
         return (used1) and (used2)
 
+    # @cache
     def _combine_value_2product1 (v1: int, v2: int, used1: bool, used2: bool) -> int:
         if used1 and used2:
             return v2
@@ -610,10 +630,12 @@ def parse_and_render_combine (shape: dict, canvas_w, canvas_h: '(canvas_w, canva
             return 0
         else:   # not used1 and not used2
             return 0
+    # @cache
     def _combine_used_2product1 (used1: bool, used2: bool) -> bool:
         return (used1) and (used2)
 
 
+    # @cache
     def _combine_value_1symdiff2 (v1: int, v2: int, used1: bool, used2: bool) -> int:
         if used1 and used2:
             return 0
@@ -623,9 +645,11 @@ def parse_and_render_combine (shape: dict, canvas_w, canvas_h: '(canvas_w, canva
             return v2
         else:   # not used1 and not used2
             return 0
+    # @cache
     def _combine_used_1symdiff2 (used1: bool, used2: bool) -> bool:
         return used1 ^ used2
 
+    # @cache
     def _combine_value_2symdiff1 (v1: int, v2: int, used1: bool, used2: bool) -> int:
         if used1 and used2:
             return 0
@@ -635,6 +659,7 @@ def parse_and_render_combine (shape: dict, canvas_w, canvas_h: '(canvas_w, canva
             return v2
         else:   # not used1 and not used2
             return 0
+    # @cache
     def _combine_used_2symdiff1 (used1: bool, used2: bool) -> bool:
         return used1 ^ used2
 
@@ -690,6 +715,7 @@ def parse_and_render_combine (shape: dict, canvas_w, canvas_h: '(canvas_w, canva
 
 
 
+# @cache
 def blend_canvases (canvas_bg: Canvas, canvas_fg: Canvas, shape_number: int,
         alpha_blending_type: AlphaBlendingType,
         color_blending_type: ColorBlendingType,
@@ -710,6 +736,22 @@ def blend_canvases (canvas_bg: Canvas, canvas_fg: Canvas, shape_number: int,
     # Log(f'{canvas_bg._pixels = }')
     # Log(f'{canvas_fg._pixels = }')
 
+    # @cache
+    def _blend_overlap (V, v, USED, used, shape_number):
+        if used:
+            return v
+        else:
+            return V
+
+    # @cache
+    def _blend_add (V, v, USED, used, shape_number):
+        return V + v
+
+    # @cache
+    def _blend_avg (V, v, USED, used, shape_number):
+        return (shape_number*V + v) // (shape_number+1)
+
+    # @cache
     def _blend_min (V, v, USED, used, shape_number):
         if USED and used:
             return min(V, v)
@@ -720,6 +762,7 @@ def blend_canvases (canvas_bg: Canvas, canvas_fg: Canvas, shape_number: int,
         else:
             return V
 
+    # @cache
     def _blend_max (V, v, USED, used, shape_number):
         if USED and used:
             return max(V, v)
@@ -732,13 +775,16 @@ def blend_canvases (canvas_bg: Canvas, canvas_fg: Canvas, shape_number: int,
 
     blending_funcs = (
         # overlap:
-        lambda V, v, USED, used, shape_number: v if used else V,
+        # lambda V, v, USED, used, shape_number: v if used else V,
+        _blend_overlap,
 
         # add:
-        lambda V, v, USED, used, shape_number: V + v,
+        # lambda V, v, USED, used, shape_number: V + v,
+        _blend_add,
 
         # avg:
-        lambda V, v, USED, used, shape_number: (shape_number*V + v) // (shape_number+1),
+        # lambda V, v, USED, used, shape_number: (shape_number*V + v) // (shape_number+1),
+        _blend_avg,
 
         # min:
         _blend_min,
